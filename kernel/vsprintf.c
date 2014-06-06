@@ -8,22 +8,31 @@
 /*
  * Wirzenius wrote this portably, Torvalds fucked it up :-)
  */
+// Lars Wirzenius 是Linus的好友，在Helsinki大学的时候曾同处一间办公室。在1991年夏季开发linux时，
+// Linus当时对C语言还不是很熟悉，还不会使用可变参数列表函数功能。因此Lars Wirzenius就为他编写了
+// 这段用于内核显示信息的代码。他后来（1998年）承认这段代码中有一个bug，直到1994年才有人发现，
+// 并予以纠正。这个bug是在使用*作为输出域宽度时，忘记递增指针跳过这个星号了。在本代码中这个bug
+// 还仍然存在（130行）。他的个人主页是http://liw.iki.fi/liw/
 
+// 标准参数头文件，以宏的形式定义变量参数列表。主要说明了一个类型（va_list）和
+// 三个宏（va_start,va_arg和va_end）,用于vsprintf,vprintf,vfprintf函数。
 #include <stdarg.h>
 #include <string.h> 
 
 /* we use this so that we can do without the ctype library */
 #define is_digit(c)	((c) >= '0' && (c) <= '9')
 
+// 将字符数字转换成整数。输入是数字串指针的指针，返回是结果的数值，另外指针将前移。
 static int skip_atoi(const char **s)
 {
 	int i=0;
 
 	while (is_digit(**s))
-		i = i*10 + *((*s)++) - '0';
+		i = i*10 + *((*s)++) - '0';     // 这里导致指针前移
 	return i;
 }
 
+// 定义常用符号常数
 #define ZEROPAD	1		/* pad with zero */
 #define SIGN	2		/* unsigned/signed long */
 #define PLUS	4		/* show plus */
@@ -32,22 +41,30 @@ static int skip_atoi(const char **s)
 #define SPECIAL	32		/* 0x */
 #define SMALL	64		/* use 'abcdef' instead of 'ABCDEF' */
 
+// 除法操作，输入：n为被除数，base为除数；结果：n为商，函数返回值为余数。
 #define do_div(n,base) ({ \
 int __res; \
 __asm__("divl %4":"=a" (n),"=d" (__res):"0" (n),"1" (0),"r" (base)); \
 __res; })
 
-static char * number(char * str, int num, int base, int size, int precision
-	,int type)
+// 将整数转换为指定进制的字符串。
+// 输入：num-整数；base-进制；size-字符串长度；precision-数字长度(精度)；type-类型选项。
+// 输出：str字符串指针
+static char * number(char * str, int num, int base, int size, int precision, int type)
 {
 	char c,sign,tmp[36];
 	const char *digits="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	int i;
 
+    // 根据类型定义字母集，默认是大写字母
 	if (type&SMALL) digits="0123456789abcdefghijklmnopqrstuvwxyz";
+    // 如果类型指出要左调整(靠左边界)，则屏蔽类型中的填零标志。
+    // TODO: 这句没看懂？？ 为什么要把最低位置为0
 	if (type&LEFT) type &= ~ZEROPAD;
+    // 本程序只能处理的进制范围：2-36
 	if (base<2 || base>36)
 		return 0;
+    // TODO: 这句跟LEFT相关？？
 	c = (type & ZEROPAD) ? '0' : ' ' ;
 	if (type&SIGN && num<0) {
 		sign='-';
