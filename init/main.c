@@ -4,9 +4,15 @@
  *  (C) 1991  Linus Torvalds
  */
 
+// 宏定义"__LIBRARY__" 是为了包括定义再unistd.h中的内嵌汇编代码等信息。
 #define __LIBRARY__
+// *.h头文件所在的默认目录是include/，则再代码中就不用明确指明其位置。
+// 如果不是unix的标准头文件，则需要指明所在的目录，并用双引号括住。
+// unistd.h是标准符号常数与类型头文件。其中定义了各种符号常数和类型，
+// 并声明了各种函数。如果还定义了符号__LIBRARY__,则还会包含系统调用和
+// 内嵌汇编代码syscall10()等。
 #include <unistd.h>
-#include <time.h>
+#include <time.h>       // 时间类型头文件。其中主要定义了tm结构和一些有关时间的函数原型
 
 /*
  * we need this inline - forking from kernel space will result
@@ -20,9 +26,24 @@
  * won't be any messing with the stack from main(), but we define
  * some others too.
  */
+// Linux在内核空间创建进程时不使用写时复制技术(Copy on write).main()在移动到用户
+// 模式（到任务0）后执行内嵌方式的fork()和pause(),因此可保证不适用任务0的用户栈。
+// 在执行moveto_user_mode()之后，本程序main()就以任务0的身份在运行了。而任务0是
+// 所有将将创建子进程的父进程。当它创建ygie子进程时(init进程)，由于任务1代码属于
+// 内核空间，因此没有使用写时复制功能。此时任务0的用户栈就是任务1的用户栈，即它们
+// 共同使用一个栈空间。因此希望在main.c运行在任务0的环境下不要有对堆栈的任何操作，
+// 以免弄乱堆栈。而在再次执行fork()并执行过execve()函数后，被加载程序已不属于内核空间
+// 因此可以使用写时复制技术了。
+//
+// 下面_syscall0()是unistd.h中的内嵌宏代码。以嵌入汇编的形式调用Linux的系统调用中断
+// 0x80.该中断是所有系统调用的入口。该条语句实际上是int fork()创建进程系统调用。可展
+// 开看之就会立刻明白。syscall0名称中最后的0表示无参数，1表示1个参数。
 static inline _syscall0(int,fork)
+// int pause() 系统调用，暂停进程的执行，直到收到一个信号
 static inline _syscall0(int,pause)
+// int setup(void * BIOS)系统调用，仅用于linux初始化(仅在这个程序中被调用)
 static inline _syscall1(int,setup,void *,BIOS)
+// int sync()系统调用：更新文件系统。
 static inline _syscall0(int,sync)
 
 #include <linux/tty.h>

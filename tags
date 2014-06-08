@@ -3,10 +3,10 @@
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-ABRT_ERR	include/linux/hdreg.h	47;"	d
-ACC_MODE	fs/namei.c	21;"	d	file:
-ALRMMASK	kernel/chr_drv/tty_io.c	17;"	d	file:
+!_TAG_PROGRAM_VERSION	5.8	//
+ABRT_ERR	include/linux/hdreg.h	/^#define ABRT_ERR	/;"	d
+ACC_MODE	fs/namei.c	/^#define ACC_MODE(/;"	d	file:
+ALRMMASK	kernel/chr_drv/tty_io.c	/^#define ALRMMASK /;"	d	file:
 AR	fs/Makefile	/^AR	=ar$/;"	m
 AR	kernel/Makefile	/^AR	=ar$/;"	m
 AR	kernel/blk_drv/Makefile	/^AR	=ar$/;"	m
@@ -24,35 +24,35 @@ AS	kernel/math/Makefile	/^AS	=as$/;"	m
 AS	lib/Makefile	/^AS	=as$/;"	m
 AS	mm/Makefile	/^AS	=as$/;"	m
 AS86	Makefile	/^AS86	=as86 -0 -a$/;"	m
-B0	include/termios.h	133;"	d
-B110	include/termios.h	136;"	d
-B1200	include/termios.h	142;"	d
-B134	include/termios.h	137;"	d
-B150	include/termios.h	138;"	d
-B1800	include/termios.h	143;"	d
-B19200	include/termios.h	147;"	d
-B200	include/termios.h	139;"	d
-B2400	include/termios.h	144;"	d
-B300	include/termios.h	140;"	d
-B38400	include/termios.h	148;"	d
-B4800	include/termios.h	145;"	d
-B50	include/termios.h	134;"	d
-B600	include/termios.h	141;"	d
-B75	include/termios.h	135;"	d
-B9600	include/termios.h	146;"	d
-BADNESS	fs/buffer.c	208;"	d	file:
-BBD_ERR	include/linux/hdreg.h	50;"	d
-BCD_TO_BIN	init/main.c	74;"	d	file:
-BLOCK_SIZE	include/linux/fs.h	49;"	d
-BLOCK_SIZE_BITS	include/linux/fs.h	50;"	d
+B0	include/termios.h	/^#define  B0	/;"	d
+B110	include/termios.h	/^#define  B110	/;"	d
+B1200	include/termios.h	/^#define  B1200	/;"	d
+B134	include/termios.h	/^#define  B134	/;"	d
+B150	include/termios.h	/^#define  B150	/;"	d
+B1800	include/termios.h	/^#define  B1800	/;"	d
+B19200	include/termios.h	/^#define  B19200	/;"	d
+B200	include/termios.h	/^#define  B200	/;"	d
+B2400	include/termios.h	/^#define  B2400	/;"	d
+B300	include/termios.h	/^#define  B300	/;"	d
+B38400	include/termios.h	/^#define  B38400	/;"	d
+B4800	include/termios.h	/^#define  B4800	/;"	d
+B50	include/termios.h	/^#define  B50	/;"	d
+B600	include/termios.h	/^#define  B600	/;"	d
+B75	include/termios.h	/^#define  B75	/;"	d
+B9600	include/termios.h	/^#define  B9600	/;"	d
+BADNESS	fs/buffer.c	/^#define BADNESS(/;"	d	file:
+BBD_ERR	include/linux/hdreg.h	/^#define	BBD_ERR	/;"	d
+BCD_TO_BIN	init/main.c	/^#define BCD_TO_BIN(/;"	d	file:
+BLOCK_SIZE	include/linux/fs.h	/^#define BLOCK_SIZE /;"	d
+BLOCK_SIZE_BITS	include/linux/fs.h	/^#define BLOCK_SIZE_BITS /;"	d
 BOOTSEG	boot/bootsect.s	/^BOOTSEG  = 0x07c0			! original address of boot-sector$/;"	d
-BRKINT	include/termios.h	84;"	d
-BS0	include/termios.h	122;"	d
-BS1	include/termios.h	123;"	d
-BSDLY	include/termios.h	121;"	d
-BUFFER_END	include/const.h	4;"	d
-BUSY_STAT	include/linux/hdreg.h	31;"	d
-CBAUD	include/termios.h	132;"	d
+BRKINT	include/termios.h	/^#define BRKINT	/;"	d
+BS0	include/termios.h	/^#define   BS0	/;"	d
+BS1	include/termios.h	/^#define   BS1	/;"	d
+BSDLY	include/termios.h	/^#define BSDLY	/;"	d
+BUFFER_END	include/const.h	/^#define BUFFER_END /;"	d
+BUSY_STAT	include/linux/hdreg.h	/^#define BUSY_STAT	/;"	d
+CBAUD	include/termios.h	/^#define CBAUD	/;"	d
 CC	Makefile	/^CC	=gcc -mcpu=i386 $(RAMDISK)$/;"	m
 CC	fs/Makefile	/^CC	=gcc -mcpu=i386$/;"	m
 CC	kernel/Makefile	/^CC	=gcc -mcpu=i386$/;"	m
@@ -69,16 +69,16 @@ CFLAGS	kernel/chr_drv/Makefile	/^CFLAGS	=-Wall -O -fstrength-reduce -fomit-frame
 CFLAGS	kernel/math/Makefile	/^CFLAGS	=-Wall -O -fstrength-reduce -fomit-frame-pointer \\$/;"	m
 CFLAGS	lib/Makefile	/^CFLAGS	=-Wall -O -fstrength-reduce -fomit-frame-pointer \\$/;"	m
 CFLAGS	mm/Makefile	/^CFLAGS	=-Wall -O -fstrength-reduce -fomit-frame-pointer \\$/;"	m
-CHARS	include/linux/tty.h	30;"	d
-CIBAUD	include/termios.h	162;"	d
-CLOCAL	include/termios.h	161;"	d
-CLOCKS_PER_SEC	include/time.h	14;"	d
-CMOS_READ	init/main.c	69;"	d	file:
-CMOS_READ	kernel/blk_drv/hd.c	28;"	d	file:
-CODE_SPACE	mm/memory.c	49;"	d	file:
-COPYBLK	fs/buffer.c	286;"	d	file:
-CPARENB	include/termios.h	158;"	d
-CPARODD	include/termios.h	159;"	d
+CHARS	include/linux/tty.h	/^#define CHARS(/;"	d
+CIBAUD	include/termios.h	/^#define CIBAUD	/;"	d
+CLOCAL	include/termios.h	/^#define CLOCAL	/;"	d
+CLOCKS_PER_SEC	include/time.h	/^#define CLOCKS_PER_SEC /;"	d
+CMOS_READ	init/main.c	/^#define CMOS_READ(/;"	d	file:
+CMOS_READ	kernel/blk_drv/hd.c	/^#define CMOS_READ(/;"	d	file:
+CODE_SPACE	mm/memory.c	/^#define CODE_SPACE(/;"	d	file:
+COPYBLK	fs/buffer.c	/^#define COPYBLK(/;"	d	file:
+CPARENB	include/termios.h	/^#define CPARENB	/;"	d
+CPARODD	include/termios.h	/^#define CPARODD	/;"	d
 CPP	Makefile	/^CPP	=cpp -nostdinc -Iinclude$/;"	m
 CPP	fs/Makefile	/^CPP	=gcc -E -nostdinc -I..\/include$/;"	m
 CPP	kernel/Makefile	/^CPP	=gcc -E -nostdinc -I..\/include$/;"	m
@@ -87,220 +87,209 @@ CPP	kernel/chr_drv/Makefile	/^CPP	=gcc -E -nostdinc -I..\/..\/include$/;"	m
 CPP	kernel/math/Makefile	/^CPP	=gcc -E -nostdinc -I..\/..\/include$/;"	m
 CPP	lib/Makefile	/^CPP	=gcc -E -nostdinc -I..\/include$/;"	m
 CPP	mm/Makefile	/^CPP	=gcc -E -nostdinc -I..\/include$/;"	m
-CR0	include/termios.h	111;"	d
-CR1	include/termios.h	112;"	d
-CR2	include/termios.h	113;"	d
-CR3	include/termios.h	114;"	d
-CRDLY	include/termios.h	110;"	d
-CREAD	include/termios.h	157;"	d
-CRTSCTS	include/termios.h	163;"	d
+CR0	include/termios.h	/^#define   CR0	/;"	d
+CR1	include/termios.h	/^#define   CR1	/;"	d
+CR2	include/termios.h	/^#define   CR2	/;"	d
+CR3	include/termios.h	/^#define   CR3	/;"	d
+CRDLY	include/termios.h	/^#define CRDLY	/;"	d
+CREAD	include/termios.h	/^#define CREAD	/;"	d
+CRTSCTS	include/termios.h	/^#define CRTSCTS	/;"	d
 CS	kernel/system_call.s	/^CS		= 0x20$/;"	d
-CS5	include/termios.h	152;"	d
-CS6	include/termios.h	153;"	d
-CS7	include/termios.h	154;"	d
-CS8	include/termios.h	155;"	d
-CSIZE	include/termios.h	151;"	d
-CSTOPB	include/termios.h	156;"	d
-CURRENT	kernel/blk_drv/blk.h	93;"	d
-CURRENT_DEV	kernel/blk_drv/blk.h	94;"	d
-CURRENT_TIME	include/linux/sched.h	144;"	d
-DAY	kernel/mktime.c	22;"	d	file:
-DEC	include/linux/tty.h	25;"	d
-DEFAULT_MAJOR_ROOT	tools/build.c	37;"	d	file:
-DEFAULT_MINOR_ROOT	tools/build.c	38;"	d	file:
+CS5	include/termios.h	/^#define   CS5	/;"	d
+CS6	include/termios.h	/^#define   CS6	/;"	d
+CS7	include/termios.h	/^#define   CS7	/;"	d
+CS8	include/termios.h	/^#define   CS8	/;"	d
+CSIZE	include/termios.h	/^#define CSIZE	/;"	d
+CSTOPB	include/termios.h	/^#define CSTOPB	/;"	d
+CURRENT	kernel/blk_drv/blk.h	/^#define CURRENT /;"	d
+CURRENT_DEV	kernel/blk_drv/blk.h	/^#define CURRENT_DEV /;"	d
+CURRENT_TIME	include/linux/sched.h	/^#define CURRENT_TIME /;"	d
+DAY	kernel/mktime.c	/^#define DAY /;"	d	file:
+DEC	include/linux/tty.h	/^#define DEC(/;"	d
+DEFAULT_MAJOR_ROOT	tools/build.c	/^#define DEFAULT_MAJOR_ROOT /;"	d	file:
+DEFAULT_MINOR_ROOT	tools/build.c	/^#define DEFAULT_MINOR_ROOT /;"	d	file:
+DEVICE_INTR	kernel/blk_drv/blk.h	/^#define DEVICE_INTR /;"	d
 DEVICE_INTR	kernel/blk_drv/blk.h	/^void (*DEVICE_INTR)(void) = NULL;$/;"	v
-DEVICE_INTR	kernel/blk_drv/blk.h	72;"	d
-DEVICE_INTR	kernel/blk_drv/blk.h	81;"	d
-DEVICE_NAME	kernel/blk_drv/blk.h	63;"	d
-DEVICE_NAME	kernel/blk_drv/blk.h	71;"	d
-DEVICE_NAME	kernel/blk_drv/blk.h	80;"	d
-DEVICE_NR	kernel/blk_drv/blk.h	65;"	d
-DEVICE_NR	kernel/blk_drv/blk.h	74;"	d
-DEVICE_NR	kernel/blk_drv/blk.h	83;"	d
-DEVICE_OFF	kernel/blk_drv/blk.h	67;"	d
-DEVICE_OFF	kernel/blk_drv/blk.h	76;"	d
-DEVICE_OFF	kernel/blk_drv/blk.h	85;"	d
-DEVICE_ON	kernel/blk_drv/blk.h	66;"	d
-DEVICE_ON	kernel/blk_drv/blk.h	75;"	d
-DEVICE_ON	kernel/blk_drv/blk.h	84;"	d
-DEVICE_REQUEST	kernel/blk_drv/blk.h	64;"	d
-DEVICE_REQUEST	kernel/blk_drv/blk.h	73;"	d
-DEVICE_REQUEST	kernel/blk_drv/blk.h	82;"	d
-DIR_ENTRIES_PER_BLOCK	include/linux/fs.h	56;"	d
-DMA_READ	include/linux/fdreg.h	68;"	d
-DMA_WRITE	include/linux/fdreg.h	69;"	d
-DRIVE	kernel/blk_drv/floppy.c	54;"	d	file:
+DEVICE_NAME	kernel/blk_drv/blk.h	/^#define DEVICE_NAME /;"	d
+DEVICE_NR	kernel/blk_drv/blk.h	/^#define DEVICE_NR(/;"	d
+DEVICE_OFF	kernel/blk_drv/blk.h	/^#define DEVICE_OFF(/;"	d
+DEVICE_ON	kernel/blk_drv/blk.h	/^#define DEVICE_ON(/;"	d
+DEVICE_REQUEST	kernel/blk_drv/blk.h	/^#define DEVICE_REQUEST /;"	d
+DIR_ENTRIES_PER_BLOCK	include/linux/fs.h	/^#define DIR_ENTRIES_PER_BLOCK /;"	d
+DMA_READ	include/linux/fdreg.h	/^#define DMA_READ	/;"	d
+DMA_WRITE	include/linux/fdreg.h	/^#define DMA_WRITE	/;"	d
+DRIVE	kernel/blk_drv/floppy.c	/^#define DRIVE(/;"	d	file:
 DRIVERS	Makefile	/^DRIVERS =kernel\/blk_drv\/blk_drv.a kernel\/chr_drv\/chr_drv.a$/;"	m
-DRIVE_INFO	init/main.c	59;"	d	file:
-DRQ_STAT	include/linux/hdreg.h	27;"	d
+DRIVE_INFO	init/main.c	/^#define DRIVE_INFO /;"	d	file:
+DRQ_STAT	include/linux/hdreg.h	/^#define DRQ_STAT	/;"	d
 DS	kernel/system_call.s	/^DS		= 0x18$/;"	d
-E2BIG	include/errno.h	26;"	d
-EACCES	include/errno.h	32;"	d
-EAGAIN	include/errno.h	30;"	d
+E2BIG	include/errno.h	/^#define E2BIG	/;"	d
+EACCES	include/errno.h	/^#define EACCES	/;"	d
+EAGAIN	include/errno.h	/^#define EAGAIN	/;"	d
 EAX	kernel/system_call.s	/^EAX		= 0x00$/;"	d
-EBADF	include/errno.h	28;"	d
-EBUSY	include/errno.h	35;"	d
+EBADF	include/errno.h	/^#define EBADF	/;"	d
+EBUSY	include/errno.h	/^#define EBUSY	/;"	d
 EBX	kernel/system_call.s	/^EBX		= 0x04$/;"	d
-ECC_ERR	include/linux/hdreg.h	49;"	d
-ECC_STAT	include/linux/hdreg.h	26;"	d
-ECHILD	include/errno.h	29;"	d
-ECHO	include/termios.h	172;"	d
-ECHOCTL	include/termios.h	178;"	d
-ECHOE	include/termios.h	173;"	d
-ECHOK	include/termios.h	174;"	d
-ECHOKE	include/termios.h	180;"	d
-ECHONL	include/termios.h	175;"	d
-ECHOPRT	include/termios.h	179;"	d
+ECC_ERR	include/linux/hdreg.h	/^#define ECC_ERR	/;"	d
+ECC_STAT	include/linux/hdreg.h	/^#define ECC_STAT	/;"	d
+ECHILD	include/errno.h	/^#define ECHILD	/;"	d
+ECHO	include/termios.h	/^#define ECHO	/;"	d
+ECHOCTL	include/termios.h	/^#define ECHOCTL	/;"	d
+ECHOE	include/termios.h	/^#define ECHOE	/;"	d
+ECHOK	include/termios.h	/^#define ECHOK	/;"	d
+ECHOKE	include/termios.h	/^#define ECHOKE	/;"	d
+ECHONL	include/termios.h	/^#define ECHONL	/;"	d
+ECHOPRT	include/termios.h	/^#define ECHOPRT	/;"	d
 ECX	kernel/system_call.s	/^ECX		= 0x08$/;"	d
-EDEADLK	include/errno.h	54;"	d
-EDOM	include/errno.h	52;"	d
+EDEADLK	include/errno.h	/^#define EDEADLK	/;"	d
+EDOM	include/errno.h	/^#define EDOM	/;"	d
 EDX	kernel/system_call.s	/^EDX		= 0x0C$/;"	d
-EEXIST	include/errno.h	36;"	d
-EFAULT	include/errno.h	33;"	d
-EFBIG	include/errno.h	46;"	d
+EEXIST	include/errno.h	/^#define EEXIST	/;"	d
+EFAULT	include/errno.h	/^#define EFAULT	/;"	d
+EFBIG	include/errno.h	/^#define EFBIG	/;"	d
 EFLAGS	kernel/system_call.s	/^EFLAGS		= 0x24$/;"	d
-EINTR	include/errno.h	23;"	d
-EINVAL	include/errno.h	41;"	d
-EIO	include/errno.h	24;"	d
+EINTR	include/errno.h	/^#define EINTR	/;"	d
+EINVAL	include/errno.h	/^#define EINVAL	/;"	d
+EIO	include/errno.h	/^#define EIO	/;"	d
 EIP	kernel/system_call.s	/^EIP		= 0x1C$/;"	d
-EISDIR	include/errno.h	40;"	d
-EMFILE	include/errno.h	43;"	d
-EMLINK	include/errno.h	50;"	d
-EMPTY	include/linux/tty.h	26;"	d
-ENAMETOOLONG	include/errno.h	55;"	d
+EISDIR	include/errno.h	/^#define EISDIR	/;"	d
+EMFILE	include/errno.h	/^#define EMFILE	/;"	d
+EMLINK	include/errno.h	/^#define EMLINK	/;"	d
+EMPTY	include/linux/tty.h	/^#define EMPTY(/;"	d
+ENAMETOOLONG	include/errno.h	/^#define ENAMETOOLONG	/;"	d
 ENDSEG	boot/bootsect.s	/^ENDSEG   = SYSSEG + SYSSIZE		! where to stop loading$/;"	d
-ENFILE	include/errno.h	42;"	d
-ENODEV	include/errno.h	38;"	d
-ENOENT	include/errno.h	21;"	d
-ENOEXEC	include/errno.h	27;"	d
-ENOLCK	include/errno.h	56;"	d
-ENOMEM	include/errno.h	31;"	d
-ENOSPC	include/errno.h	47;"	d
-ENOSYS	include/errno.h	57;"	d
-ENOTBLK	include/errno.h	34;"	d
-ENOTDIR	include/errno.h	39;"	d
-ENOTEMPTY	include/errno.h	58;"	d
-ENOTTY	include/errno.h	44;"	d
-ENXIO	include/errno.h	25;"	d
-EOF_CHAR	include/linux/tty.h	40;"	d
-EPERM	include/errno.h	20;"	d
-EPIPE	include/errno.h	51;"	d
-ERANGE	include/errno.h	53;"	d
-ERASE_CHAR	include/linux/tty.h	38;"	d
-EROFS	include/errno.h	49;"	d
-ERROR	include/errno.h	19;"	d
-ERR_STAT	include/linux/hdreg.h	24;"	d
+ENFILE	include/errno.h	/^#define ENFILE	/;"	d
+ENODEV	include/errno.h	/^#define ENODEV	/;"	d
+ENOENT	include/errno.h	/^#define ENOENT	/;"	d
+ENOEXEC	include/errno.h	/^#define ENOEXEC	/;"	d
+ENOLCK	include/errno.h	/^#define ENOLCK	/;"	d
+ENOMEM	include/errno.h	/^#define ENOMEM	/;"	d
+ENOSPC	include/errno.h	/^#define ENOSPC	/;"	d
+ENOSYS	include/errno.h	/^#define ENOSYS	/;"	d
+ENOTBLK	include/errno.h	/^#define ENOTBLK	/;"	d
+ENOTDIR	include/errno.h	/^#define ENOTDIR	/;"	d
+ENOTEMPTY	include/errno.h	/^#define ENOTEMPTY	/;"	d
+ENOTTY	include/errno.h	/^#define ENOTTY	/;"	d
+ENXIO	include/errno.h	/^#define ENXIO	/;"	d
+EOF_CHAR	include/linux/tty.h	/^#define EOF_CHAR(/;"	d
+EPERM	include/errno.h	/^#define EPERM	/;"	d
+EPIPE	include/errno.h	/^#define EPIPE	/;"	d
+ERANGE	include/errno.h	/^#define ERANGE	/;"	d
+ERASE_CHAR	include/linux/tty.h	/^#define ERASE_CHAR(/;"	d
+EROFS	include/errno.h	/^#define EROFS	/;"	d
+ERROR	include/errno.h	/^#define ERROR	/;"	d
+ERR_STAT	include/linux/hdreg.h	/^#define ERR_STAT	/;"	d
 ES	kernel/system_call.s	/^ES		= 0x14$/;"	d
-ESPIPE	include/errno.h	48;"	d
-ESRCH	include/errno.h	22;"	d
-ETXTBSY	include/errno.h	45;"	d
-EXDEV	include/errno.h	37;"	d
-EXTA	include/termios.h	149;"	d
-EXTB	include/termios.h	150;"	d
-EXT_MEM_K	init/main.c	58;"	d	file:
-FD_CLOEXEC	include/fcntl.h	33;"	d
-FD_DATA	include/linux/fdreg.h	17;"	d
-FD_DCR	include/linux/fdreg.h	20;"	d
-FD_DIR	include/linux/fdreg.h	19;"	d
-FD_DOR	include/linux/fdreg.h	18;"	d
-FD_READ	include/linux/fdreg.h	62;"	d
-FD_RECALIBRATE	include/linux/fdreg.h	60;"	d
-FD_SEEK	include/linux/fdreg.h	61;"	d
-FD_SENSEI	include/linux/fdreg.h	64;"	d
-FD_SPECIFY	include/linux/fdreg.h	65;"	d
-FD_STATUS	include/linux/fdreg.h	16;"	d
-FD_WRITE	include/linux/fdreg.h	63;"	d
-FF0	include/termios.h	128;"	d
-FF1	include/termios.h	129;"	d
-FFDLY	include/termios.h	127;"	d
-FIRST_LDT_ENTRY	include/linux/sched.h	156;"	d
-FIRST_TASK	include/linux/sched.h	7;"	d
-FIRST_TSS_ENTRY	include/linux/sched.h	155;"	d
-FLUSHO	include/termios.h	181;"	d
+ESPIPE	include/errno.h	/^#define ESPIPE	/;"	d
+ESRCH	include/errno.h	/^#define ESRCH	/;"	d
+ETXTBSY	include/errno.h	/^#define ETXTBSY	/;"	d
+EXDEV	include/errno.h	/^#define EXDEV	/;"	d
+EXTA	include/termios.h	/^#define EXTA /;"	d
+EXTB	include/termios.h	/^#define EXTB /;"	d
+EXT_MEM_K	init/main.c	/^#define EXT_MEM_K /;"	d	file:
+FD_CLOEXEC	include/fcntl.h	/^#define FD_CLOEXEC	/;"	d
+FD_DATA	include/linux/fdreg.h	/^#define FD_DATA	/;"	d
+FD_DCR	include/linux/fdreg.h	/^#define FD_DCR	/;"	d
+FD_DIR	include/linux/fdreg.h	/^#define FD_DIR	/;"	d
+FD_DOR	include/linux/fdreg.h	/^#define FD_DOR	/;"	d
+FD_READ	include/linux/fdreg.h	/^#define FD_READ	/;"	d
+FD_RECALIBRATE	include/linux/fdreg.h	/^#define FD_RECALIBRATE	/;"	d
+FD_SEEK	include/linux/fdreg.h	/^#define FD_SEEK	/;"	d
+FD_SENSEI	include/linux/fdreg.h	/^#define FD_SENSEI	/;"	d
+FD_SPECIFY	include/linux/fdreg.h	/^#define FD_SPECIFY	/;"	d
+FD_STATUS	include/linux/fdreg.h	/^#define FD_STATUS	/;"	d
+FD_WRITE	include/linux/fdreg.h	/^#define FD_WRITE	/;"	d
+FF0	include/termios.h	/^#define   FF0	/;"	d
+FF1	include/termios.h	/^#define   FF1	/;"	d
+FFDLY	include/termios.h	/^#define FFDLY	/;"	d
+FIRST_LDT_ENTRY	include/linux/sched.h	/^#define FIRST_LDT_ENTRY /;"	d
+FIRST_TASK	include/linux/sched.h	/^#define FIRST_TASK /;"	d
+FIRST_TSS_ENTRY	include/linux/sched.h	/^#define FIRST_TSS_ENTRY /;"	d
+FLUSHO	include/termios.h	/^#define FLUSHO	/;"	d
 FS	kernel/system_call.s	/^FS		= 0x10$/;"	d
-FULL	include/linux/tty.h	29;"	d
-F_DUPFD	include/fcntl.h	23;"	d
-F_GETFD	include/fcntl.h	24;"	d
-F_GETFL	include/fcntl.h	26;"	d
-F_GETLK	include/fcntl.h	28;"	d
-F_OK	include/unistd.h	22;"	d
-F_RDLCK	include/fcntl.h	38;"	d
-F_SETFD	include/fcntl.h	25;"	d
-F_SETFL	include/fcntl.h	27;"	d
-F_SETLK	include/fcntl.h	29;"	d
-F_SETLKW	include/fcntl.h	30;"	d
-F_UNLCK	include/fcntl.h	40;"	d
-F_WRLCK	include/fcntl.h	39;"	d
-GCC_HEADER	tools/build.c	33;"	d	file:
-GDT_CODE	include/linux/head.h	12;"	d
-GDT_DATA	include/linux/head.h	13;"	d
-GDT_NUL	include/linux/head.h	11;"	d
-GDT_TMP	include/linux/head.h	14;"	d
-GETCH	include/linux/tty.h	31;"	d
-HD_CMD	include/linux/hdreg.h	21;"	d
-HD_COMMAND	include/linux/hdreg.h	19;"	d
-HD_CURRENT	include/linux/hdreg.h	16;"	d
-HD_DATA	include/linux/hdreg.h	10;"	d
-HD_ERROR	include/linux/hdreg.h	11;"	d
-HD_HCYL	include/linux/hdreg.h	15;"	d
-HD_LCYL	include/linux/hdreg.h	14;"	d
-HD_NSECTOR	include/linux/hdreg.h	12;"	d
-HD_PRECOMP	include/linux/hdreg.h	18;"	d
-HD_SECTOR	include/linux/hdreg.h	13;"	d
-HD_STATUS	include/linux/hdreg.h	17;"	d
+FULL	include/linux/tty.h	/^#define FULL(/;"	d
+F_DUPFD	include/fcntl.h	/^#define F_DUPFD	/;"	d
+F_GETFD	include/fcntl.h	/^#define F_GETFD	/;"	d
+F_GETFL	include/fcntl.h	/^#define F_GETFL	/;"	d
+F_GETLK	include/fcntl.h	/^#define F_GETLK	/;"	d
+F_OK	include/unistd.h	/^#define F_OK	/;"	d
+F_RDLCK	include/fcntl.h	/^#define F_RDLCK	/;"	d
+F_SETFD	include/fcntl.h	/^#define F_SETFD	/;"	d
+F_SETFL	include/fcntl.h	/^#define F_SETFL	/;"	d
+F_SETLK	include/fcntl.h	/^#define F_SETLK	/;"	d
+F_SETLKW	include/fcntl.h	/^#define F_SETLKW	/;"	d
+F_UNLCK	include/fcntl.h	/^#define F_UNLCK	/;"	d
+F_WRLCK	include/fcntl.h	/^#define F_WRLCK	/;"	d
+GCC_HEADER	tools/build.c	/^#define GCC_HEADER /;"	d	file:
+GDT_CODE	include/linux/head.h	/^#define GDT_CODE /;"	d
+GDT_DATA	include/linux/head.h	/^#define GDT_DATA /;"	d
+GDT_NUL	include/linux/head.h	/^#define GDT_NUL /;"	d
+GDT_TMP	include/linux/head.h	/^#define GDT_TMP /;"	d
+GETCH	include/linux/tty.h	/^#define GETCH(/;"	d
+HD_CMD	include/linux/hdreg.h	/^#define HD_CMD	/;"	d
+HD_COMMAND	include/linux/hdreg.h	/^#define HD_COMMAND /;"	d
+HD_CURRENT	include/linux/hdreg.h	/^#define HD_CURRENT	/;"	d
+HD_DATA	include/linux/hdreg.h	/^#define HD_DATA	/;"	d
+HD_ERROR	include/linux/hdreg.h	/^#define HD_ERROR	/;"	d
+HD_HCYL	include/linux/hdreg.h	/^#define HD_HCYL	/;"	d
+HD_LCYL	include/linux/hdreg.h	/^#define HD_LCYL	/;"	d
+HD_NSECTOR	include/linux/hdreg.h	/^#define HD_NSECTOR	/;"	d
+HD_PRECOMP	include/linux/hdreg.h	/^#define HD_PRECOMP /;"	d
+HD_SECTOR	include/linux/hdreg.h	/^#define HD_SECTOR	/;"	d
+HD_STATUS	include/linux/hdreg.h	/^#define HD_STATUS	/;"	d
 HIGH_MEMORY	mm/memory.c	/^static long HIGH_MEMORY = 0;$/;"	v	file:
-HOUR	kernel/mktime.c	21;"	d	file:
-HUPCL	include/termios.h	160;"	d
-HZ	include/linux/sched.h	5;"	d
-ICANON	include/termios.h	170;"	d
-ICRNL	include/termios.h	91;"	d
-ID_ERR	include/linux/hdreg.h	48;"	d
-IEXTEN	include/termios.h	183;"	d
-IGNBRK	include/termios.h	83;"	d
-IGNCR	include/termios.h	90;"	d
-IGNPAR	include/termios.h	85;"	d
-IMAXBEL	include/termios.h	96;"	d
-INC	include/linux/tty.h	24;"	d
-INC_PIPE	include/linux/fs.h	63;"	d
-INDEX_STAT	include/linux/hdreg.h	25;"	d
+HOUR	kernel/mktime.c	/^#define HOUR /;"	d	file:
+HUPCL	include/termios.h	/^#define HUPCL	/;"	d
+HZ	include/linux/sched.h	/^#define HZ /;"	d
+ICANON	include/termios.h	/^#define ICANON	/;"	d
+ICRNL	include/termios.h	/^#define ICRNL	/;"	d
+ID_ERR	include/linux/hdreg.h	/^#define ID_ERR	/;"	d
+IEXTEN	include/termios.h	/^#define IEXTEN	/;"	d
+IGNBRK	include/termios.h	/^#define IGNBRK	/;"	d
+IGNCR	include/termios.h	/^#define IGNCR	/;"	d
+IGNPAR	include/termios.h	/^#define IGNPAR	/;"	d
+IMAXBEL	include/termios.h	/^#define IMAXBEL	/;"	d
+INC	include/linux/tty.h	/^#define INC(/;"	d
+INC_PIPE	include/linux/fs.h	/^#define INC_PIPE(/;"	d
+INDEX_STAT	include/linux/hdreg.h	/^#define INDEX_STAT	/;"	d
 INITSEG	boot/bootsect.s	/^INITSEG  = 0x9000			! we move boot here - out of the way$/;"	d
 INITSEG	boot/setup.s	/^INITSEG  = 0x9000	! we move boot here - out of the way$/;"	d
-INIT_C_CC	include/linux/tty.h	63;"	d
-INIT_REQUEST	kernel/blk_drv/blk.h	127;"	d
-INIT_TASK	include/linux/sched.h	115;"	d
-INLCR	include/termios.h	89;"	d
-INODES_PER_BLOCK	include/linux/fs.h	55;"	d
-INPCK	include/termios.h	87;"	d
-INTMASK	kernel/chr_drv/tty_io.c	19;"	d	file:
-INTR_CHAR	include/linux/tty.h	36;"	d
-IN_ORDER	kernel/blk_drv/blk.h	40;"	d
-ISIG	include/termios.h	169;"	d
-ISTRIP	include/termios.h	88;"	d
-IS_SEEKABLE	include/linux/fs.h	24;"	d
-IUCLC	include/termios.h	92;"	d
-IXANY	include/termios.h	94;"	d
-IXOFF	include/termios.h	95;"	d
-IXON	include/termios.h	93;"	d
-I_BLOCK_SPECIAL	include/const.h	9;"	d
-I_CHAR_SPECIAL	include/const.h	10;"	d
-I_CRNL	kernel/chr_drv/tty_io.c	42;"	d	file:
-I_DIRECTORY	include/const.h	7;"	d
-I_MAP_SLOTS	include/linux/fs.h	39;"	d
-I_NAMED_PIPE	include/const.h	11;"	d
-I_NLCR	kernel/chr_drv/tty_io.c	41;"	d	file:
-I_NOCR	kernel/chr_drv/tty_io.c	43;"	d	file:
-I_REGULAR	include/const.h	8;"	d
-I_SET_GID_BIT	include/const.h	13;"	d
-I_SET_UID_BIT	include/const.h	12;"	d
-I_TYPE	include/const.h	6;"	d
-I_UCLC	kernel/chr_drv/tty_io.c	40;"	d	file:
-KBD_US	include/linux/config.h	16;"	d
-KILLMASK	kernel/chr_drv/tty_io.c	18;"	d	file:
-KILL_CHAR	include/linux/tty.h	39;"	d
+INIT_C_CC	include/linux/tty.h	/^#define INIT_C_CC /;"	d
+INIT_REQUEST	kernel/blk_drv/blk.h	/^#define INIT_REQUEST /;"	d
+INIT_TASK	include/linux/sched.h	/^#define INIT_TASK /;"	d
+INLCR	include/termios.h	/^#define INLCR	/;"	d
+INODES_PER_BLOCK	include/linux/fs.h	/^#define INODES_PER_BLOCK /;"	d
+INPCK	include/termios.h	/^#define INPCK	/;"	d
+INTMASK	kernel/chr_drv/tty_io.c	/^#define INTMASK /;"	d	file:
+INTR_CHAR	include/linux/tty.h	/^#define INTR_CHAR(/;"	d
+IN_ORDER	kernel/blk_drv/blk.h	/^#define IN_ORDER(/;"	d
+ISIG	include/termios.h	/^#define ISIG	/;"	d
+ISTRIP	include/termios.h	/^#define ISTRIP	/;"	d
+IS_SEEKABLE	include/linux/fs.h	/^#define IS_SEEKABLE(/;"	d
+IUCLC	include/termios.h	/^#define IUCLC	/;"	d
+IXANY	include/termios.h	/^#define IXANY	/;"	d
+IXOFF	include/termios.h	/^#define IXOFF	/;"	d
+IXON	include/termios.h	/^#define IXON	/;"	d
+I_BLOCK_SPECIAL	include/const.h	/^#define I_BLOCK_SPECIAL /;"	d
+I_CHAR_SPECIAL	include/const.h	/^#define I_CHAR_SPECIAL /;"	d
+I_CRNL	kernel/chr_drv/tty_io.c	/^#define I_CRNL(/;"	d	file:
+I_DIRECTORY	include/const.h	/^#define I_DIRECTORY	/;"	d
+I_MAP_SLOTS	include/linux/fs.h	/^#define I_MAP_SLOTS /;"	d
+I_NAMED_PIPE	include/const.h	/^#define I_NAMED_PIPE	/;"	d
+I_NLCR	kernel/chr_drv/tty_io.c	/^#define I_NLCR(/;"	d	file:
+I_NOCR	kernel/chr_drv/tty_io.c	/^#define I_NOCR(/;"	d	file:
+I_REGULAR	include/const.h	/^#define I_REGULAR /;"	d
+I_SET_GID_BIT	include/const.h	/^#define I_SET_GID_BIT /;"	d
+I_SET_UID_BIT	include/const.h	/^#define I_SET_UID_BIT /;"	d
+I_TYPE	include/const.h	/^#define I_TYPE /;"	d
+I_UCLC	kernel/chr_drv/tty_io.c	/^#define I_UCLC(/;"	d	file:
+KBD_US	include/linux/config.h	/^#define KBD_US$/;"	d
+KILLMASK	kernel/chr_drv/tty_io.c	/^#define KILLMASK /;"	d	file:
+KILL_CHAR	include/linux/tty.h	/^#define KILL_CHAR(/;"	d
 L6	boot/head.s	/^L6:$/;"	l
-LAST	include/linux/tty.h	28;"	d
-LAST_TASK	include/linux/sched.h	8;"	d
-LATCH	kernel/sched.c	46;"	d	file:
+LAST	include/linux/tty.h	/^#define LAST(/;"	d
+LAST_TASK	include/linux/sched.h	/^#define LAST_TASK /;"	d
+LATCH	kernel/sched.c	/^#define LATCH /;"	d	file:
 LD	Makefile	/^LD	=ld$/;"	m
 LD	fs/Makefile	/^LD	=ld$/;"	m
 LD	kernel/Makefile	/^LD	=ld$/;"	m
@@ -316,98 +305,98 @@ LDFLAGS	kernel/blk_drv/Makefile	/^LDFLAGS	=-s -x$/;"	m
 LDFLAGS	kernel/chr_drv/Makefile	/^LDFLAGS	=-s -x$/;"	m
 LDFLAGS	kernel/math/Makefile	/^LDFLAGS	=-s -x$/;"	m
 LDFLAGS	lib/Makefile	/^LDFLAGS	=-s -x$/;"	m
-LDT_CODE	include/linux/head.h	17;"	d
-LDT_DATA	include/linux/head.h	18;"	d
-LDT_NUL	include/linux/head.h	16;"	d
-LEFT	include/linux/tty.h	27;"	d
-LEFT	kernel/vsprintf.c	31;"	d	file:
+LDT_CODE	include/linux/head.h	/^#define LDT_CODE /;"	d
+LDT_DATA	include/linux/head.h	/^#define LDT_DATA /;"	d
+LDT_NUL	include/linux/head.h	/^#define LDT_NUL /;"	d
+LEFT	include/linux/tty.h	/^#define LEFT(/;"	d
+LEFT	kernel/vsprintf.c	/^#define LEFT	/;"	d	file:
 LIBS	Makefile	/^LIBS	=lib\/lib.a$/;"	m
-LOW_MEM	mm/memory.c	43;"	d	file:
-L_CANON	kernel/chr_drv/tty_io.c	32;"	d	file:
-L_ECHO	kernel/chr_drv/tty_io.c	34;"	d	file:
-L_ECHOCTL	kernel/chr_drv/tty_io.c	37;"	d	file:
-L_ECHOE	kernel/chr_drv/tty_io.c	35;"	d	file:
-L_ECHOK	kernel/chr_drv/tty_io.c	36;"	d	file:
-L_ECHOKE	kernel/chr_drv/tty_io.c	38;"	d	file:
-L_ISIG	kernel/chr_drv/tty_io.c	33;"	d	file:
-MAJOR	include/linux/fs.h	33;"	d
-MAJOR_NR	kernel/blk_drv/floppy.c	41;"	d	file:
-MAJOR_NR	kernel/blk_drv/hd.c	25;"	d	file:
-MAJOR_NR	kernel/blk_drv/ramdisk.c	17;"	d	file:
-MAP_NR	mm/memory.c	46;"	d	file:
-MARK_ERR	include/linux/hdreg.h	45;"	d
+LOW_MEM	mm/memory.c	/^#define LOW_MEM /;"	d	file:
+L_CANON	kernel/chr_drv/tty_io.c	/^#define L_CANON(/;"	d	file:
+L_ECHO	kernel/chr_drv/tty_io.c	/^#define L_ECHO(/;"	d	file:
+L_ECHOCTL	kernel/chr_drv/tty_io.c	/^#define L_ECHOCTL(/;"	d	file:
+L_ECHOE	kernel/chr_drv/tty_io.c	/^#define L_ECHOE(/;"	d	file:
+L_ECHOK	kernel/chr_drv/tty_io.c	/^#define L_ECHOK(/;"	d	file:
+L_ECHOKE	kernel/chr_drv/tty_io.c	/^#define L_ECHOKE(/;"	d	file:
+L_ISIG	kernel/chr_drv/tty_io.c	/^#define L_ISIG(/;"	d	file:
+MAJOR	include/linux/fs.h	/^#define MAJOR(/;"	d
+MAJOR_NR	kernel/blk_drv/floppy.c	/^#define MAJOR_NR /;"	d	file:
+MAJOR_NR	kernel/blk_drv/hd.c	/^#define MAJOR_NR /;"	d	file:
+MAJOR_NR	kernel/blk_drv/ramdisk.c	/^#define MAJOR_NR /;"	d	file:
+MAP_NR	mm/memory.c	/^#define MAP_NR(/;"	d	file:
+MARK_ERR	include/linux/hdreg.h	/^#define MARK_ERR	/;"	d
 MATH	Makefile	/^MATH	=kernel\/math\/math.a$/;"	m
-MAX	fs/file_dev.c	15;"	d	file:
-MAX_ARG_PAGES	fs/exec.c	39;"	d	file:
-MAX_ERRORS	kernel/blk_drv/floppy.c	60;"	d	file:
-MAX_ERRORS	kernel/blk_drv/hd.c	34;"	d	file:
-MAX_HD	kernel/blk_drv/hd.c	35;"	d	file:
-MAX_REPLIES	kernel/blk_drv/floppy.c	65;"	d	file:
-MAY_EXEC	fs/namei.c	29;"	d	file:
-MAY_READ	fs/namei.c	31;"	d	file:
-MAY_WRITE	fs/namei.c	30;"	d	file:
-MIN	fs/file_dev.c	14;"	d	file:
-MINIX_HEADER	tools/build.c	32;"	d	file:
-MINOR	include/linux/fs.h	34;"	d
-MINUTE	kernel/mktime.c	20;"	d	file:
-NAME_LEN	include/linux/fs.h	36;"	d
-NCC	include/termios.h	43;"	d
-NCCS	include/termios.h	53;"	d
-NL0	include/termios.h	108;"	d
-NL1	include/termios.h	109;"	d
-NLDLY	include/termios.h	107;"	d
-NMAGIC	include/a.out.h	25;"	d
-NOFLSH	include/termios.h	176;"	d
-NPAR	kernel/chr_drv/console.c	54;"	d	file:
-NRDEVS	fs/char_dev.c	83;"	d	file:
-NRDEVS	fs/ioctl.c	17;"	d	file:
-NR_BLK_DEV	kernel/blk_drv/blk.h	4;"	d
+MAX	fs/file_dev.c	/^#define MAX(/;"	d	file:
+MAX_ARG_PAGES	fs/exec.c	/^#define MAX_ARG_PAGES /;"	d	file:
+MAX_ERRORS	kernel/blk_drv/floppy.c	/^#define MAX_ERRORS /;"	d	file:
+MAX_ERRORS	kernel/blk_drv/hd.c	/^#define MAX_ERRORS	/;"	d	file:
+MAX_HD	kernel/blk_drv/hd.c	/^#define MAX_HD	/;"	d	file:
+MAX_REPLIES	kernel/blk_drv/floppy.c	/^#define MAX_REPLIES /;"	d	file:
+MAY_EXEC	fs/namei.c	/^#define MAY_EXEC /;"	d	file:
+MAY_READ	fs/namei.c	/^#define MAY_READ /;"	d	file:
+MAY_WRITE	fs/namei.c	/^#define MAY_WRITE /;"	d	file:
+MIN	fs/file_dev.c	/^#define MIN(/;"	d	file:
+MINIX_HEADER	tools/build.c	/^#define MINIX_HEADER /;"	d	file:
+MINOR	include/linux/fs.h	/^#define MINOR(/;"	d
+MINUTE	kernel/mktime.c	/^#define MINUTE /;"	d	file:
+NAME_LEN	include/linux/fs.h	/^#define NAME_LEN /;"	d
+NCC	include/termios.h	/^#define NCC /;"	d
+NCCS	include/termios.h	/^#define NCCS /;"	d
+NL0	include/termios.h	/^#define   NL0	/;"	d
+NL1	include/termios.h	/^#define   NL1	/;"	d
+NLDLY	include/termios.h	/^#define NLDLY	/;"	d
+NMAGIC	include/a.out.h	/^#define NMAGIC /;"	d
+NOFLSH	include/termios.h	/^#define NOFLSH	/;"	d
+NPAR	kernel/chr_drv/console.c	/^#define NPAR /;"	d	file:
+NRDEVS	fs/char_dev.c	/^#define NRDEVS /;"	d	file:
+NRDEVS	fs/ioctl.c	/^#define NRDEVS /;"	d	file:
+NR_BLK_DEV	kernel/blk_drv/blk.h	/^#define NR_BLK_DEV	/;"	d
 NR_BUFFERS	fs/buffer.c	/^int NR_BUFFERS = 0;$/;"	v
-NR_BUFFERS	include/linux/fs.h	48;"	d
-NR_FILE	include/linux/fs.h	45;"	d
-NR_HASH	include/linux/fs.h	47;"	d
+NR_BUFFERS	include/linux/fs.h	/^#define NR_BUFFERS /;"	d
+NR_FILE	include/linux/fs.h	/^#define NR_FILE /;"	d
+NR_HASH	include/linux/fs.h	/^#define NR_HASH /;"	d
+NR_HD	kernel/blk_drv/hd.c	/^#define NR_HD /;"	d	file:
 NR_HD	kernel/blk_drv/hd.c	/^static int NR_HD = 0;$/;"	v	file:
-NR_HD	kernel/blk_drv/hd.c	50;"	d	file:
-NR_INODE	include/linux/fs.h	44;"	d
-NR_OPEN	include/linux/fs.h	43;"	d
-NR_REQUEST	kernel/blk_drv/blk.h	15;"	d
-NR_SUPER	include/linux/fs.h	46;"	d
-NR_TASKS	include/linux/sched.h	4;"	d
-NSIG	include/signal.h	10;"	d
-NULL	include/linux/fs.h	52;"	d
-NULL	include/linux/sched.h	26;"	d
-NULL	include/stddef.h	14;"	d
-NULL	include/stddef.h	15;"	d
-NULL	include/string.h	5;"	d
-NULL	include/sys/types.h	20;"	d
-NULL	include/unistd.h	18;"	d
-N_ABS	include/a.out.h	128;"	d
-N_BADMAG	include/a.out.h	31;"	d
-N_BSS	include/a.out.h	137;"	d
-N_BSSADDR	include/a.out.h	107;"	d
-N_COMM	include/a.out.h	140;"	d
-N_DATA	include/a.out.h	134;"	d
-N_DATADDR	include/a.out.h	100;"	d
-N_DATOFF	include/a.out.h	48;"	d
-N_DRELOFF	include/a.out.h	56;"	d
-N_EXT	include/a.out.h	147;"	d
-N_FN	include/a.out.h	143;"	d
-N_INDR	include/a.out.h	164;"	d
-N_MAGIC	include/a.out.h	18;"	d
-N_SETA	include/a.out.h	178;"	d
-N_SETB	include/a.out.h	181;"	d
-N_SETD	include/a.out.h	180;"	d
-N_SETT	include/a.out.h	179;"	d
-N_SETV	include/a.out.h	184;"	d
-N_STAB	include/a.out.h	153;"	d
-N_STROFF	include/a.out.h	64;"	d
-N_SYMOFF	include/a.out.h	60;"	d
-N_TEXT	include/a.out.h	131;"	d
-N_TRELOFF	include/a.out.h	52;"	d
-N_TXTADDR	include/a.out.h	69;"	d
-N_TXTOFF	include/a.out.h	43;"	d
-N_TYPE	include/a.out.h	150;"	d
-N_UNDF	include/a.out.h	125;"	d
+NR_INODE	include/linux/fs.h	/^#define NR_INODE /;"	d
+NR_OPEN	include/linux/fs.h	/^#define NR_OPEN /;"	d
+NR_REQUEST	kernel/blk_drv/blk.h	/^#define NR_REQUEST	/;"	d
+NR_SUPER	include/linux/fs.h	/^#define NR_SUPER /;"	d
+NR_TASKS	include/linux/sched.h	/^#define NR_TASKS /;"	d
+NSIG	include/signal.h	/^#define NSIG	/;"	d
+NULL	include/linux/fs.h	/^#define NULL /;"	d
+NULL	include/linux/sched.h	/^#define NULL /;"	d
+NULL	include/stddef.h	/^#define NULL /;"	d
+NULL	include/stddef.h	/^#undef NULL$/;"	d
+NULL	include/string.h	/^#define NULL /;"	d
+NULL	include/sys/types.h	/^#define NULL /;"	d
+NULL	include/unistd.h	/^#define NULL /;"	d
+N_ABS	include/a.out.h	/^#define N_ABS /;"	d
+N_BADMAG	include/a.out.h	/^#define N_BADMAG(/;"	d
+N_BSS	include/a.out.h	/^#define N_BSS /;"	d
+N_BSSADDR	include/a.out.h	/^#define N_BSSADDR(/;"	d
+N_COMM	include/a.out.h	/^#define N_COMM /;"	d
+N_DATA	include/a.out.h	/^#define N_DATA /;"	d
+N_DATADDR	include/a.out.h	/^#define N_DATADDR(/;"	d
+N_DATOFF	include/a.out.h	/^#define N_DATOFF(/;"	d
+N_DRELOFF	include/a.out.h	/^#define N_DRELOFF(/;"	d
+N_EXT	include/a.out.h	/^#define N_EXT /;"	d
+N_FN	include/a.out.h	/^#define N_FN /;"	d
+N_INDR	include/a.out.h	/^#define N_INDR /;"	d
+N_MAGIC	include/a.out.h	/^#define N_MAGIC(/;"	d
+N_SETA	include/a.out.h	/^#define	N_SETA	/;"	d
+N_SETB	include/a.out.h	/^#define	N_SETB	/;"	d
+N_SETD	include/a.out.h	/^#define	N_SETD	/;"	d
+N_SETT	include/a.out.h	/^#define	N_SETT	/;"	d
+N_SETV	include/a.out.h	/^#define N_SETV	/;"	d
+N_STAB	include/a.out.h	/^#define N_STAB /;"	d
+N_STROFF	include/a.out.h	/^#define N_STROFF(/;"	d
+N_SYMOFF	include/a.out.h	/^#define N_SYMOFF(/;"	d
+N_TEXT	include/a.out.h	/^#define N_TEXT /;"	d
+N_TRELOFF	include/a.out.h	/^#define N_TRELOFF(/;"	d
+N_TXTADDR	include/a.out.h	/^#define N_TXTADDR(/;"	d
+N_TXTOFF	include/a.out.h	/^#define N_TXTOFF(/;"	d
+N_TYPE	include/a.out.h	/^#define N_TYPE /;"	d
+N_UNDF	include/a.out.h	/^#define N_UNDF /;"	d
 OBJS	fs/Makefile	/^OBJS=	open.o read_write.o inode.o file_table.o buffer.o super.o \\$/;"	m
 OBJS	kernel/Makefile	/^OBJS  = sched.o system_call.o traps.o asm.o fork.o \\$/;"	m
 OBJS	kernel/blk_drv/Makefile	/^OBJS  = ll_rw_blk.o floppy.o hd.o ramdisk.o$/;"	m
@@ -415,493 +404,489 @@ OBJS	kernel/chr_drv/Makefile	/^OBJS  = tty_io.o console.o keyboard.o serial.o rs
 OBJS	kernel/math/Makefile	/^OBJS  = math_emulate.o$/;"	m
 OBJS	lib/Makefile	/^OBJS  = ctype.o _exit.o open.o close.o errno.o write.o dup.o setsid.o \\$/;"	m
 OBJS	mm/Makefile	/^OBJS	= memory.o page.o$/;"	m
-OCRNL	include/termios.h	102;"	d
-OFDEL	include/termios.h	106;"	d
-OFILL	include/termios.h	105;"	d
-OLCUC	include/termios.h	100;"	d
+OCRNL	include/termios.h	/^#define OCRNL	/;"	d
+OFDEL	include/termios.h	/^#define OFDEL	/;"	d
+OFILL	include/termios.h	/^#define OFILL	/;"	d
+OLCUC	include/termios.h	/^#define OLCUC	/;"	d
 OLDESP	kernel/system_call.s	/^OLDESP		= 0x28$/;"	d
 OLDSS	kernel/system_call.s	/^OLDSS		= 0x2C$/;"	d
-OMAGIC	include/a.out.h	23;"	d
-ONLCR	include/termios.h	101;"	d
-ONLRET	include/termios.h	104;"	d
-ONOCR	include/termios.h	103;"	d
-OPOST	include/termios.h	99;"	d
-ORIG_ROOT_DEV	init/main.c	60;"	d	file:
-ORIG_VIDEO_COLS	kernel/chr_drv/console.c	43;"	d	file:
-ORIG_VIDEO_EGA_AX	kernel/chr_drv/console.c	45;"	d	file:
-ORIG_VIDEO_EGA_BX	kernel/chr_drv/console.c	46;"	d	file:
-ORIG_VIDEO_EGA_CX	kernel/chr_drv/console.c	47;"	d	file:
-ORIG_VIDEO_LINES	kernel/chr_drv/console.c	44;"	d	file:
-ORIG_VIDEO_MODE	kernel/chr_drv/console.c	42;"	d	file:
-ORIG_VIDEO_PAGE	kernel/chr_drv/console.c	41;"	d	file:
-ORIG_X	kernel/chr_drv/console.c	39;"	d	file:
-ORIG_Y	kernel/chr_drv/console.c	40;"	d	file:
-O_ACCMODE	include/fcntl.h	7;"	d
-O_APPEND	include/fcntl.h	15;"	d
-O_CREAT	include/fcntl.h	11;"	d
-O_CRNL	kernel/chr_drv/tty_io.c	47;"	d	file:
-O_EXCL	include/fcntl.h	12;"	d
-O_LCUC	kernel/chr_drv/tty_io.c	49;"	d	file:
-O_NDELAY	include/fcntl.h	17;"	d
-O_NLCR	kernel/chr_drv/tty_io.c	46;"	d	file:
-O_NLRET	kernel/chr_drv/tty_io.c	48;"	d	file:
-O_NOCTTY	include/fcntl.h	13;"	d
-O_NONBLOCK	include/fcntl.h	16;"	d
-O_POST	kernel/chr_drv/tty_io.c	45;"	d	file:
-O_RDONLY	include/fcntl.h	8;"	d
-O_RDWR	include/fcntl.h	10;"	d
-O_TRUNC	include/fcntl.h	14;"	d
-O_WRONLY	include/fcntl.h	9;"	d
-PAGE_ALIGN	include/linux/sched.h	188;"	d
-PAGE_SIZE	include/a.out.h	79;"	d
-PAGE_SIZE	include/a.out.h	88;"	d
-PAGE_SIZE	include/a.out.h	92;"	d
-PAGE_SIZE	include/linux/mm.h	4;"	d
-PAGING_MEMORY	mm/memory.c	44;"	d	file:
-PAGING_PAGES	mm/memory.c	45;"	d	file:
-PANIC	kernel/panic.c	11;"	d	file:
-PARENB	include/termios.h	165;"	d
-PARMRK	include/termios.h	86;"	d
-PARODD	include/termios.h	166;"	d
-PENDIN	include/termios.h	182;"	d
-PIPE_EMPTY	include/linux/fs.h	61;"	d
-PIPE_FULL	include/linux/fs.h	62;"	d
-PIPE_HEAD	include/linux/fs.h	58;"	d
-PIPE_SIZE	include/linux/fs.h	60;"	d
-PIPE_TAIL	include/linux/fs.h	59;"	d
-PLUS	kernel/vsprintf.c	29;"	d	file:
-PUTCH	include/linux/tty.h	33;"	d
-QUITMASK	kernel/chr_drv/tty_io.c	20;"	d	file:
-QUIT_CHAR	include/linux/tty.h	37;"	d
+OMAGIC	include/a.out.h	/^#define OMAGIC /;"	d
+ONLCR	include/termios.h	/^#define ONLCR	/;"	d
+ONLRET	include/termios.h	/^#define ONLRET	/;"	d
+ONOCR	include/termios.h	/^#define ONOCR	/;"	d
+OPOST	include/termios.h	/^#define OPOST	/;"	d
+ORIG_ROOT_DEV	init/main.c	/^#define ORIG_ROOT_DEV /;"	d	file:
+ORIG_VIDEO_COLS	kernel/chr_drv/console.c	/^#define ORIG_VIDEO_COLS /;"	d	file:
+ORIG_VIDEO_EGA_AX	kernel/chr_drv/console.c	/^#define ORIG_VIDEO_EGA_AX	/;"	d	file:
+ORIG_VIDEO_EGA_BX	kernel/chr_drv/console.c	/^#define ORIG_VIDEO_EGA_BX	/;"	d	file:
+ORIG_VIDEO_EGA_CX	kernel/chr_drv/console.c	/^#define ORIG_VIDEO_EGA_CX	/;"	d	file:
+ORIG_VIDEO_LINES	kernel/chr_drv/console.c	/^#define ORIG_VIDEO_LINES	/;"	d	file:
+ORIG_VIDEO_MODE	kernel/chr_drv/console.c	/^#define ORIG_VIDEO_MODE	/;"	d	file:
+ORIG_VIDEO_PAGE	kernel/chr_drv/console.c	/^#define ORIG_VIDEO_PAGE	/;"	d	file:
+ORIG_X	kernel/chr_drv/console.c	/^#define ORIG_X	/;"	d	file:
+ORIG_Y	kernel/chr_drv/console.c	/^#define ORIG_Y	/;"	d	file:
+O_ACCMODE	include/fcntl.h	/^#define O_ACCMODE	/;"	d
+O_APPEND	include/fcntl.h	/^#define O_APPEND	/;"	d
+O_CREAT	include/fcntl.h	/^#define O_CREAT	/;"	d
+O_CRNL	kernel/chr_drv/tty_io.c	/^#define O_CRNL(/;"	d	file:
+O_EXCL	include/fcntl.h	/^#define O_EXCL	/;"	d
+O_LCUC	kernel/chr_drv/tty_io.c	/^#define O_LCUC(/;"	d	file:
+O_NDELAY	include/fcntl.h	/^#define O_NDELAY	/;"	d
+O_NLCR	kernel/chr_drv/tty_io.c	/^#define O_NLCR(/;"	d	file:
+O_NLRET	kernel/chr_drv/tty_io.c	/^#define O_NLRET(/;"	d	file:
+O_NOCTTY	include/fcntl.h	/^#define O_NOCTTY	/;"	d
+O_NONBLOCK	include/fcntl.h	/^#define O_NONBLOCK	/;"	d
+O_POST	kernel/chr_drv/tty_io.c	/^#define O_POST(/;"	d	file:
+O_RDONLY	include/fcntl.h	/^#define O_RDONLY	/;"	d
+O_RDWR	include/fcntl.h	/^#define O_RDWR	/;"	d
+O_TRUNC	include/fcntl.h	/^#define O_TRUNC	/;"	d
+O_WRONLY	include/fcntl.h	/^#define O_WRONLY	/;"	d
+PAGE_ALIGN	include/linux/sched.h	/^#define PAGE_ALIGN(/;"	d
+PAGE_SIZE	include/a.out.h	/^#define	PAGE_SIZE	/;"	d
+PAGE_SIZE	include/a.out.h	/^#define PAGE_SIZE /;"	d
+PAGE_SIZE	include/linux/mm.h	/^#define PAGE_SIZE /;"	d
+PAGING_MEMORY	mm/memory.c	/^#define PAGING_MEMORY /;"	d	file:
+PAGING_PAGES	mm/memory.c	/^#define PAGING_PAGES /;"	d	file:
+PANIC	kernel/panic.c	/^#define PANIC$/;"	d	file:
+PARENB	include/termios.h	/^#define PARENB /;"	d
+PARMRK	include/termios.h	/^#define PARMRK	/;"	d
+PARODD	include/termios.h	/^#define PARODD /;"	d
+PENDIN	include/termios.h	/^#define PENDIN	/;"	d
+PIPE_EMPTY	include/linux/fs.h	/^#define PIPE_EMPTY(/;"	d
+PIPE_FULL	include/linux/fs.h	/^#define PIPE_FULL(/;"	d
+PIPE_HEAD	include/linux/fs.h	/^#define PIPE_HEAD(/;"	d
+PIPE_SIZE	include/linux/fs.h	/^#define PIPE_SIZE(/;"	d
+PIPE_TAIL	include/linux/fs.h	/^#define PIPE_TAIL(/;"	d
+PLUS	kernel/vsprintf.c	/^#define PLUS	/;"	d	file:
+PUTCH	include/linux/tty.h	/^#define PUTCH(/;"	d
+QUITMASK	kernel/chr_drv/tty_io.c	/^#define QUITMASK /;"	d	file:
+QUIT_CHAR	include/linux/tty.h	/^#define QUIT_CHAR(/;"	d
 RAMDISK	Makefile	/^RAMDISK =  #-DRAMDISK=512$/;"	m
-READ	include/linux/fs.h	26;"	d
-READA	include/linux/fs.h	28;"	d
-READY_STAT	include/linux/hdreg.h	30;"	d
-RESPONSE	kernel/chr_drv/console.c	85;"	d	file:
+READ	include/linux/fs.h	/^#define READ /;"	d
+READA	include/linux/fs.h	/^#define READA /;"	d
+READY_STAT	include/linux/hdreg.h	/^#define READY_STAT	/;"	d
+RESPONSE	kernel/chr_drv/console.c	/^#define RESPONSE /;"	d	file:
 ROOT_DEV	Makefile	/^ROOT_DEV= #FLOPPY $/;"	m
 ROOT_DEV	boot/bootsect.s	/^ROOT_DEV = 0x306$/;"	d
 ROOT_DEV	fs/super.c	/^int ROOT_DEV = 0;$/;"	v
-ROOT_INO	include/linux/fs.h	37;"	d
-R_OK	include/unistd.h	25;"	d
-SA_NOCLDSTOP	include/signal.h	37;"	d
-SA_NOMASK	include/signal.h	38;"	d
-SA_ONESHOT	include/signal.h	39;"	d
-SEEK_CUR	include/unistd.h	29;"	d
-SEEK_END	include/unistd.h	30;"	d
-SEEK_SET	include/unistd.h	28;"	d
-SEEK_STAT	include/linux/hdreg.h	28;"	d
-SEGMENT_SIZE	include/a.out.h	76;"	d
-SEGMENT_SIZE	include/a.out.h	82;"	d
-SEGMENT_SIZE	include/a.out.h	85;"	d
-SEGMENT_SIZE	include/a.out.h	89;"	d
-SEGMENT_SIZE	include/a.out.h	93;"	d
+ROOT_INO	include/linux/fs.h	/^#define ROOT_INO /;"	d
+R_OK	include/unistd.h	/^#define R_OK	/;"	d
+SA_NOCLDSTOP	include/signal.h	/^#define SA_NOCLDSTOP	/;"	d
+SA_NOMASK	include/signal.h	/^#define SA_NOMASK	/;"	d
+SA_ONESHOT	include/signal.h	/^#define SA_ONESHOT	/;"	d
+SEEK_CUR	include/unistd.h	/^#define SEEK_CUR	/;"	d
+SEEK_END	include/unistd.h	/^#define SEEK_END	/;"	d
+SEEK_SET	include/unistd.h	/^#define SEEK_SET	/;"	d
+SEEK_STAT	include/linux/hdreg.h	/^#define SEEK_STAT	/;"	d
+SEGMENT_SIZE	include/a.out.h	/^#define	SEGMENT_SIZE	/;"	d
+SEGMENT_SIZE	include/a.out.h	/^#define SEGMENT_SIZE /;"	d
 SETUPLEN	boot/bootsect.s	/^SETUPLEN = 4				! nr of setup-sectors$/;"	d
 SETUPSEG	boot/bootsect.s	/^SETUPSEG = 0x9020			! setup starts here$/;"	d
 SETUPSEG	boot/setup.s	/^SETUPSEG = 0x9020	! this is the current segment$/;"	d
-SETUP_SECTS	tools/build.c	42;"	d	file:
-SIGABRT	include/signal.h	17;"	d
-SIGALRM	include/signal.h	26;"	d
-SIGCHLD	include/signal.h	29;"	d
-SIGCONT	include/signal.h	30;"	d
-SIGFPE	include/signal.h	20;"	d
-SIGHUP	include/signal.h	12;"	d
-SIGILL	include/signal.h	15;"	d
-SIGINT	include/signal.h	13;"	d
-SIGIOT	include/signal.h	18;"	d
-SIGKILL	include/signal.h	21;"	d
-SIGN	kernel/vsprintf.c	28;"	d	file:
-SIGPIPE	include/signal.h	25;"	d
-SIGQUIT	include/signal.h	14;"	d
-SIGSEGV	include/signal.h	23;"	d
-SIGSTKFLT	include/signal.h	28;"	d
-SIGSTOP	include/signal.h	31;"	d
-SIGTERM	include/signal.h	27;"	d
-SIGTRAP	include/signal.h	16;"	d
-SIGTSTP	include/signal.h	32;"	d
-SIGTTIN	include/signal.h	33;"	d
-SIGTTOU	include/signal.h	34;"	d
-SIGUNUSED	include/signal.h	19;"	d
-SIGUSR1	include/signal.h	22;"	d
-SIGUSR2	include/signal.h	24;"	d
-SIG_BLOCK	include/signal.h	41;"	d
+SETUP_SECTS	tools/build.c	/^#define SETUP_SECTS /;"	d	file:
+SIGABRT	include/signal.h	/^#define SIGABRT	/;"	d
+SIGALRM	include/signal.h	/^#define SIGALRM	/;"	d
+SIGCHLD	include/signal.h	/^#define SIGCHLD	/;"	d
+SIGCONT	include/signal.h	/^#define SIGCONT	/;"	d
+SIGFPE	include/signal.h	/^#define SIGFPE	/;"	d
+SIGHUP	include/signal.h	/^#define SIGHUP	/;"	d
+SIGILL	include/signal.h	/^#define SIGILL	/;"	d
+SIGINT	include/signal.h	/^#define SIGINT	/;"	d
+SIGIOT	include/signal.h	/^#define SIGIOT	/;"	d
+SIGKILL	include/signal.h	/^#define SIGKILL	/;"	d
+SIGN	kernel/vsprintf.c	/^#define SIGN	/;"	d	file:
+SIGPIPE	include/signal.h	/^#define SIGPIPE	/;"	d
+SIGQUIT	include/signal.h	/^#define SIGQUIT	/;"	d
+SIGSEGV	include/signal.h	/^#define SIGSEGV	/;"	d
+SIGSTKFLT	include/signal.h	/^#define SIGSTKFLT	/;"	d
+SIGSTOP	include/signal.h	/^#define SIGSTOP	/;"	d
+SIGTERM	include/signal.h	/^#define SIGTERM	/;"	d
+SIGTRAP	include/signal.h	/^#define SIGTRAP	/;"	d
+SIGTSTP	include/signal.h	/^#define SIGTSTP	/;"	d
+SIGTTIN	include/signal.h	/^#define SIGTTIN	/;"	d
+SIGTTOU	include/signal.h	/^#define SIGTTOU	/;"	d
+SIGUNUSED	include/signal.h	/^#define SIGUNUSED	/;"	d
+SIGUSR1	include/signal.h	/^#define SIGUSR1	/;"	d
+SIGUSR2	include/signal.h	/^#define SIGUSR2	/;"	d
+SIG_BLOCK	include/signal.h	/^#define SIG_BLOCK /;"	d
 SIG_CHLD	kernel/system_call.s	/^SIG_CHLD	= 17$/;"	d
-SIG_DFL	include/signal.h	45;"	d
-SIG_IGN	include/signal.h	46;"	d
-SIG_SETMASK	include/signal.h	43;"	d
-SIG_UNBLOCK	include/signal.h	42;"	d
-SMALL	kernel/vsprintf.c	33;"	d	file:
-SPACE	kernel/vsprintf.c	30;"	d	file:
-SPECIAL	kernel/vsprintf.c	32;"	d	file:
-ST0	kernel/blk_drv/floppy.c	67;"	d	file:
-ST0_DS	include/linux/fdreg.h	30;"	d
-ST0_ECE	include/linux/fdreg.h	33;"	d
-ST0_HA	include/linux/fdreg.h	31;"	d
-ST0_INTR	include/linux/fdreg.h	35;"	d
-ST0_NR	include/linux/fdreg.h	32;"	d
-ST0_SE	include/linux/fdreg.h	34;"	d
-ST1	kernel/blk_drv/floppy.c	68;"	d	file:
-ST1_CRC	include/linux/fdreg.h	42;"	d
-ST1_EOC	include/linux/fdreg.h	43;"	d
-ST1_MAM	include/linux/fdreg.h	38;"	d
-ST1_ND	include/linux/fdreg.h	40;"	d
-ST1_OR	include/linux/fdreg.h	41;"	d
-ST1_WP	include/linux/fdreg.h	39;"	d
-ST2	kernel/blk_drv/floppy.c	69;"	d	file:
-ST2_BC	include/linux/fdreg.h	47;"	d
-ST2_CM	include/linux/fdreg.h	52;"	d
-ST2_CRC	include/linux/fdreg.h	51;"	d
-ST2_MAM	include/linux/fdreg.h	46;"	d
-ST2_SEH	include/linux/fdreg.h	49;"	d
-ST2_SNS	include/linux/fdreg.h	48;"	d
-ST2_WC	include/linux/fdreg.h	50;"	d
-ST3	kernel/blk_drv/floppy.c	70;"	d	file:
-ST3_HA	include/linux/fdreg.h	55;"	d
-ST3_TZ	include/linux/fdreg.h	56;"	d
-ST3_WP	include/linux/fdreg.h	57;"	d
-START_CHAR	include/linux/tty.h	41;"	d
-STATUS_BUSY	include/linux/fdreg.h	24;"	d
-STATUS_BUSYMASK	include/linux/fdreg.h	23;"	d
-STATUS_DIR	include/linux/fdreg.h	26;"	d
-STATUS_DMA	include/linux/fdreg.h	25;"	d
-STATUS_READY	include/linux/fdreg.h	27;"	d
-STDERR_FILENO	include/unistd.h	15;"	d
-STDIN_FILENO	include/unistd.h	13;"	d
-STDOUT_FILENO	include/unistd.h	14;"	d
-STOP_CHAR	include/linux/tty.h	42;"	d
-STRINGIFY	tools/build.c	44;"	d	file:
-SUPER_MAGIC	include/linux/fs.h	41;"	d
-SUSPEND_CHAR	include/linux/tty.h	43;"	d
+SIG_DFL	include/signal.h	/^#define SIG_DFL	/;"	d
+SIG_IGN	include/signal.h	/^#define SIG_IGN	/;"	d
+SIG_SETMASK	include/signal.h	/^#define SIG_SETMASK /;"	d
+SIG_UNBLOCK	include/signal.h	/^#define SIG_UNBLOCK /;"	d
+SMALL	kernel/vsprintf.c	/^#define SMALL	/;"	d	file:
+SPACE	kernel/vsprintf.c	/^#define SPACE	/;"	d	file:
+SPECIAL	kernel/vsprintf.c	/^#define SPECIAL	/;"	d	file:
+ST0	kernel/blk_drv/floppy.c	/^#define ST0 /;"	d	file:
+ST0_DS	include/linux/fdreg.h	/^#define ST0_DS	/;"	d
+ST0_ECE	include/linux/fdreg.h	/^#define ST0_ECE	/;"	d
+ST0_HA	include/linux/fdreg.h	/^#define ST0_HA	/;"	d
+ST0_INTR	include/linux/fdreg.h	/^#define ST0_INTR	/;"	d
+ST0_NR	include/linux/fdreg.h	/^#define ST0_NR	/;"	d
+ST0_SE	include/linux/fdreg.h	/^#define ST0_SE	/;"	d
+ST1	kernel/blk_drv/floppy.c	/^#define ST1 /;"	d	file:
+ST1_CRC	include/linux/fdreg.h	/^#define ST1_CRC	/;"	d
+ST1_EOC	include/linux/fdreg.h	/^#define ST1_EOC	/;"	d
+ST1_MAM	include/linux/fdreg.h	/^#define ST1_MAM	/;"	d
+ST1_ND	include/linux/fdreg.h	/^#define ST1_ND	/;"	d
+ST1_OR	include/linux/fdreg.h	/^#define ST1_OR	/;"	d
+ST1_WP	include/linux/fdreg.h	/^#define ST1_WP	/;"	d
+ST2	kernel/blk_drv/floppy.c	/^#define ST2 /;"	d	file:
+ST2_BC	include/linux/fdreg.h	/^#define ST2_BC	/;"	d
+ST2_CM	include/linux/fdreg.h	/^#define ST2_CM	/;"	d
+ST2_CRC	include/linux/fdreg.h	/^#define ST2_CRC	/;"	d
+ST2_MAM	include/linux/fdreg.h	/^#define ST2_MAM	/;"	d
+ST2_SEH	include/linux/fdreg.h	/^#define ST2_SEH	/;"	d
+ST2_SNS	include/linux/fdreg.h	/^#define ST2_SNS	/;"	d
+ST2_WC	include/linux/fdreg.h	/^#define ST2_WC	/;"	d
+ST3	kernel/blk_drv/floppy.c	/^#define ST3 /;"	d	file:
+ST3_HA	include/linux/fdreg.h	/^#define ST3_HA	/;"	d
+ST3_TZ	include/linux/fdreg.h	/^#define ST3_TZ	/;"	d
+ST3_WP	include/linux/fdreg.h	/^#define ST3_WP	/;"	d
+START_CHAR	include/linux/tty.h	/^#define START_CHAR(/;"	d
+STATUS_BUSY	include/linux/fdreg.h	/^#define STATUS_BUSY	/;"	d
+STATUS_BUSYMASK	include/linux/fdreg.h	/^#define STATUS_BUSYMASK	/;"	d
+STATUS_DIR	include/linux/fdreg.h	/^#define STATUS_DIR	/;"	d
+STATUS_DMA	include/linux/fdreg.h	/^#define STATUS_DMA	/;"	d
+STATUS_READY	include/linux/fdreg.h	/^#define STATUS_READY	/;"	d
+STDERR_FILENO	include/unistd.h	/^#define STDERR_FILENO	/;"	d
+STDIN_FILENO	include/unistd.h	/^#define STDIN_FILENO	/;"	d
+STDOUT_FILENO	include/unistd.h	/^#define STDOUT_FILENO	/;"	d
+STOP_CHAR	include/linux/tty.h	/^#define STOP_CHAR(/;"	d
+STRINGIFY	tools/build.c	/^#define STRINGIFY(/;"	d	file:
+SUPER_MAGIC	include/linux/fs.h	/^#define SUPER_MAGIC /;"	d
+SUSPEND_CHAR	include/linux/tty.h	/^#define SUSPEND_CHAR(/;"	d
 SYSSEG	boot/bootsect.s	/^SYSSEG   = 0x1000			! system loaded at 0x10000 (65536).$/;"	d
 SYSSEG	boot/setup.s	/^SYSSEG   = 0x1000	! system loaded at 0x10000 (65536).$/;"	d
 SYSSIZE	boot/bootsect.s	/^SYSSIZE = 0x3000$/;"	d
-SYS_SIZE	tools/build.c	35;"	d	file:
-S_IFBLK	include/sys/stat.h	22;"	d
-S_IFCHR	include/sys/stat.h	24;"	d
-S_IFDIR	include/sys/stat.h	23;"	d
-S_IFIFO	include/sys/stat.h	25;"	d
-S_IFMT	include/sys/stat.h	20;"	d
-S_IFREG	include/sys/stat.h	21;"	d
-S_IRGRP	include/sys/stat.h	42;"	d
-S_IROTH	include/sys/stat.h	47;"	d
-S_IRUSR	include/sys/stat.h	37;"	d
-S_IRWXG	include/sys/stat.h	41;"	d
-S_IRWXO	include/sys/stat.h	46;"	d
-S_IRWXU	include/sys/stat.h	36;"	d
-S_ISBLK	include/sys/stat.h	33;"	d
-S_ISCHR	include/sys/stat.h	32;"	d
-S_ISDIR	include/sys/stat.h	31;"	d
-S_ISFIFO	include/sys/stat.h	34;"	d
-S_ISGID	include/sys/stat.h	27;"	d
-S_ISREG	include/sys/stat.h	30;"	d
-S_ISUID	include/sys/stat.h	26;"	d
-S_ISVTX	include/sys/stat.h	28;"	d
-S_IWGRP	include/sys/stat.h	43;"	d
-S_IWOTH	include/sys/stat.h	48;"	d
-S_IWUSR	include/sys/stat.h	38;"	d
-S_IXGRP	include/sys/stat.h	44;"	d
-S_IXOTH	include/sys/stat.h	49;"	d
-S_IXUSR	include/sys/stat.h	39;"	d
-TAB0	include/termios.h	116;"	d
-TAB1	include/termios.h	117;"	d
-TAB2	include/termios.h	118;"	d
-TAB3	include/termios.h	119;"	d
-TABDLY	include/termios.h	115;"	d
-TASK_INTERRUPTIBLE	include/linux/sched.h	20;"	d
-TASK_RUNNING	include/linux/sched.h	19;"	d
-TASK_STOPPED	include/linux/sched.h	23;"	d
-TASK_UNINTERRUPTIBLE	include/linux/sched.h	21;"	d
-TASK_ZOMBIE	include/linux/sched.h	22;"	d
-TCFLSH	include/termios.h	18;"	d
-TCGETA	include/termios.h	12;"	d
-TCGETS	include/termios.h	8;"	d
-TCIFLUSH	include/termios.h	205;"	d
-TCIOFF	include/termios.h	201;"	d
-TCIOFLUSH	include/termios.h	207;"	d
-TCION	include/termios.h	202;"	d
-TCOFLUSH	include/termios.h	206;"	d
-TCOOFF	include/termios.h	199;"	d
-TCOON	include/termios.h	200;"	d
-TCSADRAIN	include/termios.h	211;"	d
-TCSAFLUSH	include/termios.h	212;"	d
-TCSANOW	include/termios.h	210;"	d
-TCSBRK	include/termios.h	16;"	d
-TCSETA	include/termios.h	13;"	d
-TCSETAF	include/termios.h	15;"	d
-TCSETAW	include/termios.h	14;"	d
-TCSETS	include/termios.h	9;"	d
-TCSETSF	include/termios.h	11;"	d
-TCSETSW	include/termios.h	10;"	d
-TCXONC	include/termios.h	17;"	d
-TIME_REQUESTS	kernel/sched.c	264;"	d	file:
-TIOCEXCL	include/termios.h	19;"	d
-TIOCGPGRP	include/termios.h	22;"	d
-TIOCGSOFTCAR	include/termios.h	32;"	d
-TIOCGWINSZ	include/termios.h	26;"	d
-TIOCINQ	include/termios.h	34;"	d
-TIOCMBIC	include/termios.h	30;"	d
-TIOCMBIS	include/termios.h	29;"	d
-TIOCMGET	include/termios.h	28;"	d
-TIOCMSET	include/termios.h	31;"	d
-TIOCM_CAR	include/termios.h	192;"	d
-TIOCM_CD	include/termios.h	195;"	d
-TIOCM_CTS	include/termios.h	191;"	d
-TIOCM_DSR	include/termios.h	194;"	d
-TIOCM_DTR	include/termios.h	187;"	d
-TIOCM_LE	include/termios.h	186;"	d
-TIOCM_RI	include/termios.h	196;"	d
-TIOCM_RNG	include/termios.h	193;"	d
-TIOCM_RTS	include/termios.h	188;"	d
-TIOCM_SR	include/termios.h	190;"	d
-TIOCM_ST	include/termios.h	189;"	d
-TIOCNXCL	include/termios.h	20;"	d
-TIOCOUTQ	include/termios.h	24;"	d
-TIOCSCTTY	include/termios.h	21;"	d
-TIOCSPGRP	include/termios.h	23;"	d
-TIOCSSOFTCAR	include/termios.h	33;"	d
-TIOCSTI	include/termios.h	25;"	d
-TIOCSWINSZ	include/termios.h	27;"	d
-TOSTOP	include/termios.h	177;"	d
-TRK0_ERR	include/linux/hdreg.h	46;"	d
-TSTPMASK	kernel/chr_drv/tty_io.c	21;"	d	file:
-TTY_BUF_SIZE	include/linux/tty.h	14;"	d
-TTY_BUF_SIZE	include/termios.h	4;"	d
-TYPE	kernel/blk_drv/floppy.c	53;"	d	file:
-USED	mm/memory.c	47;"	d	file:
-VDISCARD	include/termios.h	77;"	d
-VEOF	include/termios.h	68;"	d
-VEOL	include/termios.h	75;"	d
-VEOL2	include/termios.h	80;"	d
-VERASE	include/termios.h	66;"	d
-VIDEO_TYPE_CGA	kernel/chr_drv/console.c	50;"	d	file:
-VIDEO_TYPE_EGAC	kernel/chr_drv/console.c	52;"	d	file:
-VIDEO_TYPE_EGAM	kernel/chr_drv/console.c	51;"	d	file:
-VIDEO_TYPE_MDA	kernel/chr_drv/console.c	49;"	d	file:
-VINTR	include/termios.h	64;"	d
-VKILL	include/termios.h	67;"	d
-VLNEXT	include/termios.h	79;"	d
-VMIN	include/termios.h	70;"	d
-VQUIT	include/termios.h	65;"	d
-VREPRINT	include/termios.h	76;"	d
-VSTART	include/termios.h	72;"	d
-VSTOP	include/termios.h	73;"	d
-VSUSP	include/termios.h	74;"	d
-VSWTC	include/termios.h	71;"	d
-VT0	include/termios.h	125;"	d
-VT1	include/termios.h	126;"	d
-VTDLY	include/termios.h	124;"	d
-VTIME	include/termios.h	69;"	d
-VWERASE	include/termios.h	78;"	d
-WAKEUP_CHARS	kernel/chr_drv/serial.c	21;"	d	file:
-WEXITSTATUS	include/sys/wait.h	15;"	d
-WIFEXITED	include/sys/wait.h	13;"	d
-WIFSIGNALED	include/sys/wait.h	18;"	d
-WIFSTOPPED	include/sys/wait.h	14;"	d
-WIN_DIAGNOSE	include/linux/hdreg.h	41;"	d
-WIN_FORMAT	include/linux/hdreg.h	38;"	d
-WIN_INIT	include/linux/hdreg.h	39;"	d
-WIN_READ	include/linux/hdreg.h	35;"	d
-WIN_RESTORE	include/linux/hdreg.h	34;"	d
-WIN_SEEK	include/linux/hdreg.h	40;"	d
-WIN_SPECIFY	include/linux/hdreg.h	42;"	d
-WIN_VERIFY	include/linux/hdreg.h	37;"	d
-WIN_WRITE	include/linux/hdreg.h	36;"	d
-WNOHANG	include/sys/wait.h	10;"	d
-WRERR_STAT	include/linux/hdreg.h	29;"	d
-WRITE	include/linux/fs.h	27;"	d
-WRITEA	include/linux/fs.h	29;"	d
-WSTOPSIG	include/sys/wait.h	17;"	d
-WTERMSIG	include/sys/wait.h	16;"	d
-WUNTRACED	include/sys/wait.h	11;"	d
-W_OK	include/unistd.h	24;"	d
-XCASE	include/termios.h	171;"	d
-XTABS	include/termios.h	120;"	d
-X_OK	include/unistd.h	23;"	d
-YEAR	kernel/mktime.c	23;"	d	file:
-ZEROPAD	kernel/vsprintf.c	27;"	d	file:
-ZMAGIC	include/a.out.h	27;"	d
-Z_MAP_SLOTS	include/linux/fs.h	40;"	d
-_A_OUT_H	include/a.out.h	2;"	d
-_BLK_H	kernel/blk_drv/blk.h	2;"	d
-_BLOCKABLE	kernel/sched.c	24;"	d	file:
-_C	include/ctype.h	7;"	d
-_CONFIG_H	include/linux/config.h	2;"	d
-_CONST_H	include/const.h	2;"	d
-_CTYPE_H	include/ctype.h	2;"	d
-_D	include/ctype.h	6;"	d
-_ERRNO_H	include/errno.h	2;"	d
-_FCNTL_H	include/fcntl.h	2;"	d
-_FDREG_H	include/linux/fdreg.h	7;"	d
-_FS_H	include/linux/fs.h	7;"	d
-_HDREG_H	include/linux/hdreg.h	7;"	d
-_HEAD_H	include/linux/head.h	2;"	d
-_HIGH	include/sys/wait.h	7;"	d
-_I_FLAG	kernel/chr_drv/tty_io.c	29;"	d	file:
-_L	include/ctype.h	5;"	d
-_LDT	include/linux/sched.h	158;"	d
-_LOW	include/sys/wait.h	6;"	d
-_L_FLAG	kernel/chr_drv/tty_io.c	28;"	d	file:
-_MM_H	include/linux/mm.h	2;"	d
-_NSIG	include/signal.h	9;"	d
-_N_BADMAG	include/a.out.h	36;"	d
-_N_HDROFF	include/a.out.h	40;"	d
-_N_SEGMENT_ROUND	include/a.out.h	95;"	d
-_N_TXTENDADDR	include/a.out.h	97;"	d
-_O_FLAG	kernel/chr_drv/tty_io.c	30;"	d	file:
-_P	include/ctype.h	8;"	d
-_PC_CHOWN_RESTRICTED	include/unistd.h	51;"	d
-_PC_LINK_MAX	include/unistd.h	43;"	d
-_PC_MAX_CANON	include/unistd.h	44;"	d
-_PC_MAX_INPUT	include/unistd.h	45;"	d
-_PC_NAME_MAX	include/unistd.h	46;"	d
-_PC_NO_TRUNC	include/unistd.h	49;"	d
-_PC_PATH_MAX	include/unistd.h	47;"	d
-_PC_PIPE_BUF	include/unistd.h	48;"	d
-_PC_VDISABLE	include/unistd.h	50;"	d
-_POSIX_CHOWN_RESTRICTED	include/unistd.h	7;"	d
-_POSIX_NO_TRUNC	include/unistd.h	8;"	d
-_POSIX_VDISABLE	include/unistd.h	9;"	d
-_POSIX_VERSION	include/unistd.h	5;"	d
-_PTRDIFF_T	include/stddef.h	5;"	d
-_PTRDIFF_T	include/sys/types.h	15;"	d
-_S	include/ctype.h	9;"	d
-_S	kernel/sched.c	23;"	d	file:
-_SCHED_H	include/linux/sched.h	2;"	d
-_SC_ARG_MAX	include/unistd.h	33;"	d
-_SC_CHILD_MAX	include/unistd.h	34;"	d
-_SC_CLOCKS_PER_SEC	include/unistd.h	35;"	d
-_SC_JOB_CONTROL	include/unistd.h	38;"	d
-_SC_NGROUPS_MAX	include/unistd.h	36;"	d
-_SC_OPEN_MAX	include/unistd.h	37;"	d
-_SC_SAVED_IDS	include/unistd.h	39;"	d
-_SC_VERSION	include/unistd.h	40;"	d
-_SIGNAL_H	include/signal.h	2;"	d
-_SIZE_T	include/stddef.h	10;"	d
-_SIZE_T	include/string.h	9;"	d
-_SIZE_T	include/sys/types.h	5;"	d
-_SIZE_T	include/time.h	10;"	d
-_SP	include/ctype.h	11;"	d
-_STDARG_H	include/stdarg.h	2;"	d
-_STDDEF_H	include/stddef.h	2;"	d
-_STRING_H_	include/string.h	2;"	d
-_SYS_STAT_H	include/sys/stat.h	2;"	d
-_SYS_TYPES_H	include/sys/types.h	2;"	d
-_SYS_UTSNAME_H	include/sys/utsname.h	2;"	d
-_SYS_WAIT_H	include/sys/wait.h	2;"	d
-_TERMIOS_H	include/termios.h	2;"	d
-_TIMES_H	include/sys/times.h	2;"	d
-_TIME_H	include/time.h	2;"	d
-_TIME_T	include/sys/types.h	10;"	d
-_TIME_T	include/time.h	5;"	d
-_TSS	include/linux/sched.h	157;"	d
-_TTY_H	include/linux/tty.h	10;"	d
-_U	include/ctype.h	4;"	d
-_UNISTD_H	include/unistd.h	2;"	d
-_UTIME_H	include/utime.h	2;"	d
-_X	include/ctype.h	10;"	d
-__GNU_EXEC_MACROS__	include/a.out.h	4;"	d
-__LIBRARY__	init/main.c	7;"	d	file:
-__LIBRARY__	lib/_exit.c	7;"	d	file:
-__LIBRARY__	lib/close.c	7;"	d	file:
-__LIBRARY__	lib/dup.c	7;"	d	file:
-__LIBRARY__	lib/execve.c	7;"	d	file:
-__LIBRARY__	lib/open.c	7;"	d	file:
-__LIBRARY__	lib/setsid.c	7;"	d	file:
-__LIBRARY__	lib/string.c	13;"	d	file:
-__LIBRARY__	lib/wait.c	7;"	d	file:
-__LIBRARY__	lib/write.c	7;"	d	file:
-__NR_access	include/unistd.h	93;"	d
-__NR_acct	include/unistd.h	111;"	d
-__NR_alarm	include/unistd.h	87;"	d
-__NR_break	include/unistd.h	77;"	d
-__NR_brk	include/unistd.h	105;"	d
-__NR_chdir	include/unistd.h	72;"	d
-__NR_chmod	include/unistd.h	75;"	d
-__NR_chown	include/unistd.h	76;"	d
-__NR_chroot	include/unistd.h	121;"	d
-__NR_close	include/unistd.h	66;"	d
-__NR_creat	include/unistd.h	68;"	d
-__NR_dup	include/unistd.h	101;"	d
-__NR_dup2	include/unistd.h	123;"	d
-__NR_execve	include/unistd.h	71;"	d
-__NR_exit	include/unistd.h	61;"	d
-__NR_fcntl	include/unistd.h	115;"	d
-__NR_fork	include/unistd.h	62;"	d
-__NR_fstat	include/unistd.h	88;"	d
-__NR_ftime	include/unistd.h	95;"	d
-__NR_getegid	include/unistd.h	110;"	d
-__NR_geteuid	include/unistd.h	109;"	d
-__NR_getgid	include/unistd.h	107;"	d
-__NR_getpgrp	include/unistd.h	125;"	d
-__NR_getpid	include/unistd.h	80;"	d
-__NR_getppid	include/unistd.h	124;"	d
-__NR_getuid	include/unistd.h	84;"	d
-__NR_gtty	include/unistd.h	92;"	d
-__NR_ioctl	include/unistd.h	114;"	d
-__NR_kill	include/unistd.h	97;"	d
-__NR_link	include/unistd.h	69;"	d
-__NR_lock	include/unistd.h	113;"	d
-__NR_lseek	include/unistd.h	79;"	d
-__NR_mkdir	include/unistd.h	99;"	d
-__NR_mknod	include/unistd.h	74;"	d
-__NR_mount	include/unistd.h	81;"	d
-__NR_mpx	include/unistd.h	116;"	d
-__NR_nice	include/unistd.h	94;"	d
-__NR_open	include/unistd.h	65;"	d
-__NR_pause	include/unistd.h	89;"	d
-__NR_phys	include/unistd.h	112;"	d
-__NR_pipe	include/unistd.h	102;"	d
-__NR_prof	include/unistd.h	104;"	d
-__NR_ptrace	include/unistd.h	86;"	d
-__NR_read	include/unistd.h	63;"	d
-__NR_rename	include/unistd.h	98;"	d
-__NR_rmdir	include/unistd.h	100;"	d
-__NR_setgid	include/unistd.h	106;"	d
-__NR_setpgid	include/unistd.h	117;"	d
-__NR_setregid	include/unistd.h	131;"	d
-__NR_setreuid	include/unistd.h	130;"	d
-__NR_setsid	include/unistd.h	126;"	d
-__NR_setuid	include/unistd.h	83;"	d
-__NR_setup	include/unistd.h	60;"	d
-__NR_sgetmask	include/unistd.h	128;"	d
-__NR_sigaction	include/unistd.h	127;"	d
-__NR_signal	include/unistd.h	108;"	d
-__NR_ssetmask	include/unistd.h	129;"	d
-__NR_stat	include/unistd.h	78;"	d
-__NR_stime	include/unistd.h	85;"	d
-__NR_stty	include/unistd.h	91;"	d
-__NR_sync	include/unistd.h	96;"	d
-__NR_time	include/unistd.h	73;"	d
-__NR_times	include/unistd.h	103;"	d
-__NR_ulimit	include/unistd.h	118;"	d
-__NR_umask	include/unistd.h	120;"	d
-__NR_umount	include/unistd.h	82;"	d
-__NR_uname	include/unistd.h	119;"	d
-__NR_unlink	include/unistd.h	70;"	d
-__NR_ustat	include/unistd.h	122;"	d
-__NR_utime	include/unistd.h	90;"	d
-__NR_waitpid	include/unistd.h	67;"	d
-__NR_write	include/unistd.h	64;"	d
-__va_rounded_size	include/stdarg.h	9;"	d
+SYS_SIZE	tools/build.c	/^#define SYS_SIZE /;"	d	file:
+S_IFBLK	include/sys/stat.h	/^#define S_IFBLK /;"	d
+S_IFCHR	include/sys/stat.h	/^#define S_IFCHR /;"	d
+S_IFDIR	include/sys/stat.h	/^#define S_IFDIR /;"	d
+S_IFIFO	include/sys/stat.h	/^#define S_IFIFO /;"	d
+S_IFMT	include/sys/stat.h	/^#define S_IFMT /;"	d
+S_IFREG	include/sys/stat.h	/^#define S_IFREG /;"	d
+S_IRGRP	include/sys/stat.h	/^#define S_IRGRP /;"	d
+S_IROTH	include/sys/stat.h	/^#define S_IROTH /;"	d
+S_IRUSR	include/sys/stat.h	/^#define S_IRUSR /;"	d
+S_IRWXG	include/sys/stat.h	/^#define S_IRWXG /;"	d
+S_IRWXO	include/sys/stat.h	/^#define S_IRWXO /;"	d
+S_IRWXU	include/sys/stat.h	/^#define S_IRWXU /;"	d
+S_ISBLK	include/sys/stat.h	/^#define S_ISBLK(/;"	d
+S_ISCHR	include/sys/stat.h	/^#define S_ISCHR(/;"	d
+S_ISDIR	include/sys/stat.h	/^#define S_ISDIR(/;"	d
+S_ISFIFO	include/sys/stat.h	/^#define S_ISFIFO(/;"	d
+S_ISGID	include/sys/stat.h	/^#define S_ISGID /;"	d
+S_ISREG	include/sys/stat.h	/^#define S_ISREG(/;"	d
+S_ISUID	include/sys/stat.h	/^#define S_ISUID /;"	d
+S_ISVTX	include/sys/stat.h	/^#define S_ISVTX /;"	d
+S_IWGRP	include/sys/stat.h	/^#define S_IWGRP /;"	d
+S_IWOTH	include/sys/stat.h	/^#define S_IWOTH /;"	d
+S_IWUSR	include/sys/stat.h	/^#define S_IWUSR /;"	d
+S_IXGRP	include/sys/stat.h	/^#define S_IXGRP /;"	d
+S_IXOTH	include/sys/stat.h	/^#define S_IXOTH /;"	d
+S_IXUSR	include/sys/stat.h	/^#define S_IXUSR /;"	d
+TAB0	include/termios.h	/^#define   TAB0	/;"	d
+TAB1	include/termios.h	/^#define   TAB1	/;"	d
+TAB2	include/termios.h	/^#define   TAB2	/;"	d
+TAB3	include/termios.h	/^#define   TAB3	/;"	d
+TABDLY	include/termios.h	/^#define TABDLY	/;"	d
+TASK_INTERRUPTIBLE	include/linux/sched.h	/^#define TASK_INTERRUPTIBLE	/;"	d
+TASK_RUNNING	include/linux/sched.h	/^#define TASK_RUNNING	/;"	d
+TASK_STOPPED	include/linux/sched.h	/^#define TASK_STOPPED	/;"	d
+TASK_UNINTERRUPTIBLE	include/linux/sched.h	/^#define TASK_UNINTERRUPTIBLE	/;"	d
+TASK_ZOMBIE	include/linux/sched.h	/^#define TASK_ZOMBIE	/;"	d
+TCFLSH	include/termios.h	/^#define TCFLSH	/;"	d
+TCGETA	include/termios.h	/^#define TCGETA	/;"	d
+TCGETS	include/termios.h	/^#define TCGETS	/;"	d
+TCIFLUSH	include/termios.h	/^#define	TCIFLUSH	/;"	d
+TCIOFF	include/termios.h	/^#define	TCIOFF	/;"	d
+TCIOFLUSH	include/termios.h	/^#define	TCIOFLUSH	/;"	d
+TCION	include/termios.h	/^#define	TCION	/;"	d
+TCOFLUSH	include/termios.h	/^#define	TCOFLUSH	/;"	d
+TCOOFF	include/termios.h	/^#define	TCOOFF	/;"	d
+TCOON	include/termios.h	/^#define	TCOON	/;"	d
+TCSADRAIN	include/termios.h	/^#define	TCSADRAIN	/;"	d
+TCSAFLUSH	include/termios.h	/^#define	TCSAFLUSH	/;"	d
+TCSANOW	include/termios.h	/^#define	TCSANOW	/;"	d
+TCSBRK	include/termios.h	/^#define TCSBRK	/;"	d
+TCSETA	include/termios.h	/^#define TCSETA	/;"	d
+TCSETAF	include/termios.h	/^#define TCSETAF	/;"	d
+TCSETAW	include/termios.h	/^#define TCSETAW	/;"	d
+TCSETS	include/termios.h	/^#define TCSETS	/;"	d
+TCSETSF	include/termios.h	/^#define TCSETSF	/;"	d
+TCSETSW	include/termios.h	/^#define TCSETSW	/;"	d
+TCXONC	include/termios.h	/^#define TCXONC	/;"	d
+TIME_REQUESTS	kernel/sched.c	/^#define TIME_REQUESTS /;"	d	file:
+TIOCEXCL	include/termios.h	/^#define TIOCEXCL	/;"	d
+TIOCGPGRP	include/termios.h	/^#define TIOCGPGRP	/;"	d
+TIOCGSOFTCAR	include/termios.h	/^#define TIOCGSOFTCAR	/;"	d
+TIOCGWINSZ	include/termios.h	/^#define TIOCGWINSZ	/;"	d
+TIOCINQ	include/termios.h	/^#define TIOCINQ	/;"	d
+TIOCMBIC	include/termios.h	/^#define TIOCMBIC	/;"	d
+TIOCMBIS	include/termios.h	/^#define TIOCMBIS	/;"	d
+TIOCMGET	include/termios.h	/^#define TIOCMGET	/;"	d
+TIOCMSET	include/termios.h	/^#define TIOCMSET	/;"	d
+TIOCM_CAR	include/termios.h	/^#define TIOCM_CAR	/;"	d
+TIOCM_CD	include/termios.h	/^#define TIOCM_CD	/;"	d
+TIOCM_CTS	include/termios.h	/^#define TIOCM_CTS	/;"	d
+TIOCM_DSR	include/termios.h	/^#define TIOCM_DSR	/;"	d
+TIOCM_DTR	include/termios.h	/^#define TIOCM_DTR	/;"	d
+TIOCM_LE	include/termios.h	/^#define TIOCM_LE	/;"	d
+TIOCM_RI	include/termios.h	/^#define TIOCM_RI	/;"	d
+TIOCM_RNG	include/termios.h	/^#define TIOCM_RNG	/;"	d
+TIOCM_RTS	include/termios.h	/^#define TIOCM_RTS	/;"	d
+TIOCM_SR	include/termios.h	/^#define TIOCM_SR	/;"	d
+TIOCM_ST	include/termios.h	/^#define TIOCM_ST	/;"	d
+TIOCNXCL	include/termios.h	/^#define TIOCNXCL	/;"	d
+TIOCOUTQ	include/termios.h	/^#define TIOCOUTQ	/;"	d
+TIOCSCTTY	include/termios.h	/^#define TIOCSCTTY	/;"	d
+TIOCSPGRP	include/termios.h	/^#define TIOCSPGRP	/;"	d
+TIOCSSOFTCAR	include/termios.h	/^#define TIOCSSOFTCAR	/;"	d
+TIOCSTI	include/termios.h	/^#define TIOCSTI	/;"	d
+TIOCSWINSZ	include/termios.h	/^#define TIOCSWINSZ	/;"	d
+TOSTOP	include/termios.h	/^#define TOSTOP	/;"	d
+TRK0_ERR	include/linux/hdreg.h	/^#define TRK0_ERR	/;"	d
+TSTPMASK	kernel/chr_drv/tty_io.c	/^#define TSTPMASK /;"	d	file:
+TTY_BUF_SIZE	include/linux/tty.h	/^#define TTY_BUF_SIZE /;"	d
+TTY_BUF_SIZE	include/termios.h	/^#define TTY_BUF_SIZE /;"	d
+TYPE	kernel/blk_drv/floppy.c	/^#define TYPE(/;"	d	file:
+USED	mm/memory.c	/^#define USED /;"	d	file:
+VDISCARD	include/termios.h	/^#define VDISCARD /;"	d
+VEOF	include/termios.h	/^#define VEOF /;"	d
+VEOL	include/termios.h	/^#define VEOL /;"	d
+VEOL2	include/termios.h	/^#define VEOL2 /;"	d
+VERASE	include/termios.h	/^#define VERASE /;"	d
+VIDEO_TYPE_CGA	kernel/chr_drv/console.c	/^#define VIDEO_TYPE_CGA	/;"	d	file:
+VIDEO_TYPE_EGAC	kernel/chr_drv/console.c	/^#define VIDEO_TYPE_EGAC	/;"	d	file:
+VIDEO_TYPE_EGAM	kernel/chr_drv/console.c	/^#define VIDEO_TYPE_EGAM	/;"	d	file:
+VIDEO_TYPE_MDA	kernel/chr_drv/console.c	/^#define VIDEO_TYPE_MDA	/;"	d	file:
+VINTR	include/termios.h	/^#define VINTR /;"	d
+VKILL	include/termios.h	/^#define VKILL /;"	d
+VLNEXT	include/termios.h	/^#define VLNEXT /;"	d
+VMIN	include/termios.h	/^#define VMIN /;"	d
+VQUIT	include/termios.h	/^#define VQUIT /;"	d
+VREPRINT	include/termios.h	/^#define VREPRINT /;"	d
+VSTART	include/termios.h	/^#define VSTART /;"	d
+VSTOP	include/termios.h	/^#define VSTOP /;"	d
+VSUSP	include/termios.h	/^#define VSUSP /;"	d
+VSWTC	include/termios.h	/^#define VSWTC /;"	d
+VT0	include/termios.h	/^#define   VT0	/;"	d
+VT1	include/termios.h	/^#define   VT1	/;"	d
+VTDLY	include/termios.h	/^#define VTDLY	/;"	d
+VTIME	include/termios.h	/^#define VTIME /;"	d
+VWERASE	include/termios.h	/^#define VWERASE /;"	d
+WAKEUP_CHARS	kernel/chr_drv/serial.c	/^#define WAKEUP_CHARS /;"	d	file:
+WEXITSTATUS	include/sys/wait.h	/^#define WEXITSTATUS(/;"	d
+WIFEXITED	include/sys/wait.h	/^#define WIFEXITED(/;"	d
+WIFSIGNALED	include/sys/wait.h	/^#define WIFSIGNALED(/;"	d
+WIFSTOPPED	include/sys/wait.h	/^#define WIFSTOPPED(/;"	d
+WIN_DIAGNOSE	include/linux/hdreg.h	/^#define WIN_DIAGNOSE	/;"	d
+WIN_FORMAT	include/linux/hdreg.h	/^#define WIN_FORMAT	/;"	d
+WIN_INIT	include/linux/hdreg.h	/^#define WIN_INIT	/;"	d
+WIN_READ	include/linux/hdreg.h	/^#define WIN_READ	/;"	d
+WIN_RESTORE	include/linux/hdreg.h	/^#define WIN_RESTORE	/;"	d
+WIN_SEEK	include/linux/hdreg.h	/^#define WIN_SEEK /;"	d
+WIN_SPECIFY	include/linux/hdreg.h	/^#define WIN_SPECIFY	/;"	d
+WIN_VERIFY	include/linux/hdreg.h	/^#define WIN_VERIFY	/;"	d
+WIN_WRITE	include/linux/hdreg.h	/^#define WIN_WRITE	/;"	d
+WNOHANG	include/sys/wait.h	/^#define WNOHANG	/;"	d
+WRERR_STAT	include/linux/hdreg.h	/^#define WRERR_STAT	/;"	d
+WRITE	include/linux/fs.h	/^#define WRITE /;"	d
+WRITEA	include/linux/fs.h	/^#define WRITEA /;"	d
+WSTOPSIG	include/sys/wait.h	/^#define WSTOPSIG(/;"	d
+WTERMSIG	include/sys/wait.h	/^#define WTERMSIG(/;"	d
+WUNTRACED	include/sys/wait.h	/^#define WUNTRACED	/;"	d
+W_OK	include/unistd.h	/^#define W_OK	/;"	d
+XCASE	include/termios.h	/^#define XCASE	/;"	d
+XTABS	include/termios.h	/^#define   XTABS	/;"	d
+X_OK	include/unistd.h	/^#define X_OK	/;"	d
+YEAR	kernel/mktime.c	/^#define YEAR /;"	d	file:
+ZEROPAD	kernel/vsprintf.c	/^#define ZEROPAD	/;"	d	file:
+ZMAGIC	include/a.out.h	/^#define ZMAGIC /;"	d
+Z_MAP_SLOTS	include/linux/fs.h	/^#define Z_MAP_SLOTS /;"	d
+_A_OUT_H	include/a.out.h	/^#define _A_OUT_H$/;"	d
+_BLK_H	kernel/blk_drv/blk.h	/^#define _BLK_H$/;"	d
+_BLOCKABLE	kernel/sched.c	/^#define _BLOCKABLE /;"	d	file:
+_C	include/ctype.h	/^#define _C	/;"	d
+_CONFIG_H	include/linux/config.h	/^#define _CONFIG_H$/;"	d
+_CONST_H	include/const.h	/^#define _CONST_H$/;"	d
+_CTYPE_H	include/ctype.h	/^#define _CTYPE_H$/;"	d
+_D	include/ctype.h	/^#define _D	/;"	d
+_ERRNO_H	include/errno.h	/^#define _ERRNO_H$/;"	d
+_FCNTL_H	include/fcntl.h	/^#define _FCNTL_H$/;"	d
+_FDREG_H	include/linux/fdreg.h	/^#define _FDREG_H$/;"	d
+_FS_H	include/linux/fs.h	/^#define _FS_H$/;"	d
+_HDREG_H	include/linux/hdreg.h	/^#define _HDREG_H$/;"	d
+_HEAD_H	include/linux/head.h	/^#define _HEAD_H$/;"	d
+_HIGH	include/sys/wait.h	/^#define _HIGH(/;"	d
+_I_FLAG	kernel/chr_drv/tty_io.c	/^#define _I_FLAG(/;"	d	file:
+_L	include/ctype.h	/^#define _L	/;"	d
+_LDT	include/linux/sched.h	/^#define _LDT(/;"	d
+_LOW	include/sys/wait.h	/^#define _LOW(/;"	d
+_L_FLAG	kernel/chr_drv/tty_io.c	/^#define _L_FLAG(/;"	d	file:
+_MM_H	include/linux/mm.h	/^#define _MM_H$/;"	d
+_NSIG	include/signal.h	/^#define _NSIG /;"	d
+_N_BADMAG	include/a.out.h	/^#define _N_BADMAG(/;"	d
+_N_HDROFF	include/a.out.h	/^#define _N_HDROFF(/;"	d
+_N_SEGMENT_ROUND	include/a.out.h	/^#define _N_SEGMENT_ROUND(/;"	d
+_N_TXTENDADDR	include/a.out.h	/^#define _N_TXTENDADDR(/;"	d
+_O_FLAG	kernel/chr_drv/tty_io.c	/^#define _O_FLAG(/;"	d	file:
+_P	include/ctype.h	/^#define _P	/;"	d
+_PC_CHOWN_RESTRICTED	include/unistd.h	/^#define _PC_CHOWN_RESTRICTED	/;"	d
+_PC_LINK_MAX	include/unistd.h	/^#define _PC_LINK_MAX	/;"	d
+_PC_MAX_CANON	include/unistd.h	/^#define _PC_MAX_CANON	/;"	d
+_PC_MAX_INPUT	include/unistd.h	/^#define _PC_MAX_INPUT	/;"	d
+_PC_NAME_MAX	include/unistd.h	/^#define _PC_NAME_MAX	/;"	d
+_PC_NO_TRUNC	include/unistd.h	/^#define _PC_NO_TRUNC	/;"	d
+_PC_PATH_MAX	include/unistd.h	/^#define _PC_PATH_MAX	/;"	d
+_PC_PIPE_BUF	include/unistd.h	/^#define _PC_PIPE_BUF	/;"	d
+_PC_VDISABLE	include/unistd.h	/^#define _PC_VDISABLE	/;"	d
+_POSIX_CHOWN_RESTRICTED	include/unistd.h	/^#define _POSIX_CHOWN_RESTRICTED	/;"	d
+_POSIX_NO_TRUNC	include/unistd.h	/^#define _POSIX_NO_TRUNC	/;"	d
+_POSIX_VDISABLE	include/unistd.h	/^#define _POSIX_VDISABLE /;"	d
+_POSIX_VERSION	include/unistd.h	/^#define _POSIX_VERSION /;"	d
+_PTRDIFF_T	include/stddef.h	/^#define _PTRDIFF_T$/;"	d
+_PTRDIFF_T	include/sys/types.h	/^#define _PTRDIFF_T$/;"	d
+_S	include/ctype.h	/^#define _S	/;"	d
+_S	kernel/sched.c	/^#define _S(/;"	d	file:
+_SCHED_H	include/linux/sched.h	/^#define _SCHED_H$/;"	d
+_SC_ARG_MAX	include/unistd.h	/^#define _SC_ARG_MAX	/;"	d
+_SC_CHILD_MAX	include/unistd.h	/^#define _SC_CHILD_MAX	/;"	d
+_SC_CLOCKS_PER_SEC	include/unistd.h	/^#define _SC_CLOCKS_PER_SEC	/;"	d
+_SC_JOB_CONTROL	include/unistd.h	/^#define _SC_JOB_CONTROL	/;"	d
+_SC_NGROUPS_MAX	include/unistd.h	/^#define _SC_NGROUPS_MAX	/;"	d
+_SC_OPEN_MAX	include/unistd.h	/^#define _SC_OPEN_MAX	/;"	d
+_SC_SAVED_IDS	include/unistd.h	/^#define _SC_SAVED_IDS	/;"	d
+_SC_VERSION	include/unistd.h	/^#define _SC_VERSION	/;"	d
+_SIGNAL_H	include/signal.h	/^#define _SIGNAL_H$/;"	d
+_SIZE_T	include/stddef.h	/^#define _SIZE_T$/;"	d
+_SIZE_T	include/string.h	/^#define _SIZE_T$/;"	d
+_SIZE_T	include/sys/types.h	/^#define _SIZE_T$/;"	d
+_SIZE_T	include/time.h	/^#define _SIZE_T$/;"	d
+_SP	include/ctype.h	/^#define _SP	/;"	d
+_STDARG_H	include/stdarg.h	/^#define _STDARG_H$/;"	d
+_STDDEF_H	include/stddef.h	/^#define _STDDEF_H$/;"	d
+_STRING_H_	include/string.h	/^#define _STRING_H_$/;"	d
+_SYS_STAT_H	include/sys/stat.h	/^#define _SYS_STAT_H$/;"	d
+_SYS_TYPES_H	include/sys/types.h	/^#define _SYS_TYPES_H$/;"	d
+_SYS_UTSNAME_H	include/sys/utsname.h	/^#define _SYS_UTSNAME_H$/;"	d
+_SYS_WAIT_H	include/sys/wait.h	/^#define _SYS_WAIT_H$/;"	d
+_TERMIOS_H	include/termios.h	/^#define _TERMIOS_H$/;"	d
+_TIMES_H	include/sys/times.h	/^#define _TIMES_H$/;"	d
+_TIME_H	include/time.h	/^#define _TIME_H$/;"	d
+_TIME_T	include/sys/types.h	/^#define _TIME_T$/;"	d
+_TIME_T	include/time.h	/^#define _TIME_T$/;"	d
+_TSS	include/linux/sched.h	/^#define _TSS(/;"	d
+_TTY_H	include/linux/tty.h	/^#define _TTY_H$/;"	d
+_U	include/ctype.h	/^#define _U	/;"	d
+_UNISTD_H	include/unistd.h	/^#define _UNISTD_H$/;"	d
+_UTIME_H	include/utime.h	/^#define _UTIME_H$/;"	d
+_X	include/ctype.h	/^#define _X	/;"	d
+__GNU_EXEC_MACROS__	include/a.out.h	/^#define __GNU_EXEC_MACROS__$/;"	d
+__LIBRARY__	init/main.c	/^#define __LIBRARY__$/;"	d	file:
+__LIBRARY__	lib/_exit.c	/^#define __LIBRARY__$/;"	d	file:
+__LIBRARY__	lib/close.c	/^#define __LIBRARY__$/;"	d	file:
+__LIBRARY__	lib/dup.c	/^#define __LIBRARY__$/;"	d	file:
+__LIBRARY__	lib/execve.c	/^#define __LIBRARY__$/;"	d	file:
+__LIBRARY__	lib/open.c	/^#define __LIBRARY__$/;"	d	file:
+__LIBRARY__	lib/setsid.c	/^#define __LIBRARY__$/;"	d	file:
+__LIBRARY__	lib/string.c	/^#define __LIBRARY__$/;"	d	file:
+__LIBRARY__	lib/wait.c	/^#define __LIBRARY__$/;"	d	file:
+__LIBRARY__	lib/write.c	/^#define __LIBRARY__$/;"	d	file:
+__NR_access	include/unistd.h	/^#define __NR_access	/;"	d
+__NR_acct	include/unistd.h	/^#define __NR_acct	/;"	d
+__NR_alarm	include/unistd.h	/^#define __NR_alarm	/;"	d
+__NR_break	include/unistd.h	/^#define __NR_break	/;"	d
+__NR_brk	include/unistd.h	/^#define __NR_brk	/;"	d
+__NR_chdir	include/unistd.h	/^#define __NR_chdir	/;"	d
+__NR_chmod	include/unistd.h	/^#define __NR_chmod	/;"	d
+__NR_chown	include/unistd.h	/^#define __NR_chown	/;"	d
+__NR_chroot	include/unistd.h	/^#define __NR_chroot	/;"	d
+__NR_close	include/unistd.h	/^#define __NR_close	/;"	d
+__NR_creat	include/unistd.h	/^#define __NR_creat	/;"	d
+__NR_dup	include/unistd.h	/^#define __NR_dup	/;"	d
+__NR_dup2	include/unistd.h	/^#define __NR_dup2	/;"	d
+__NR_execve	include/unistd.h	/^#define __NR_execve	/;"	d
+__NR_exit	include/unistd.h	/^#define __NR_exit	/;"	d
+__NR_fcntl	include/unistd.h	/^#define __NR_fcntl	/;"	d
+__NR_fork	include/unistd.h	/^#define __NR_fork	/;"	d
+__NR_fstat	include/unistd.h	/^#define __NR_fstat	/;"	d
+__NR_ftime	include/unistd.h	/^#define __NR_ftime	/;"	d
+__NR_getegid	include/unistd.h	/^#define __NR_getegid	/;"	d
+__NR_geteuid	include/unistd.h	/^#define __NR_geteuid	/;"	d
+__NR_getgid	include/unistd.h	/^#define __NR_getgid	/;"	d
+__NR_getpgrp	include/unistd.h	/^#define __NR_getpgrp	/;"	d
+__NR_getpid	include/unistd.h	/^#define __NR_getpid	/;"	d
+__NR_getppid	include/unistd.h	/^#define __NR_getppid	/;"	d
+__NR_getuid	include/unistd.h	/^#define __NR_getuid	/;"	d
+__NR_gtty	include/unistd.h	/^#define __NR_gtty	/;"	d
+__NR_ioctl	include/unistd.h	/^#define __NR_ioctl	/;"	d
+__NR_kill	include/unistd.h	/^#define __NR_kill	/;"	d
+__NR_link	include/unistd.h	/^#define __NR_link	/;"	d
+__NR_lock	include/unistd.h	/^#define __NR_lock	/;"	d
+__NR_lseek	include/unistd.h	/^#define __NR_lseek	/;"	d
+__NR_mkdir	include/unistd.h	/^#define __NR_mkdir	/;"	d
+__NR_mknod	include/unistd.h	/^#define __NR_mknod	/;"	d
+__NR_mount	include/unistd.h	/^#define __NR_mount	/;"	d
+__NR_mpx	include/unistd.h	/^#define __NR_mpx	/;"	d
+__NR_nice	include/unistd.h	/^#define __NR_nice	/;"	d
+__NR_open	include/unistd.h	/^#define __NR_open	/;"	d
+__NR_pause	include/unistd.h	/^#define __NR_pause	/;"	d
+__NR_phys	include/unistd.h	/^#define __NR_phys	/;"	d
+__NR_pipe	include/unistd.h	/^#define __NR_pipe	/;"	d
+__NR_prof	include/unistd.h	/^#define __NR_prof	/;"	d
+__NR_ptrace	include/unistd.h	/^#define __NR_ptrace	/;"	d
+__NR_read	include/unistd.h	/^#define __NR_read	/;"	d
+__NR_rename	include/unistd.h	/^#define __NR_rename	/;"	d
+__NR_rmdir	include/unistd.h	/^#define __NR_rmdir	/;"	d
+__NR_setgid	include/unistd.h	/^#define __NR_setgid	/;"	d
+__NR_setpgid	include/unistd.h	/^#define __NR_setpgid	/;"	d
+__NR_setregid	include/unistd.h	/^#define __NR_setregid	/;"	d
+__NR_setreuid	include/unistd.h	/^#define __NR_setreuid	/;"	d
+__NR_setsid	include/unistd.h	/^#define __NR_setsid	/;"	d
+__NR_setuid	include/unistd.h	/^#define __NR_setuid	/;"	d
+__NR_setup	include/unistd.h	/^#define __NR_setup	/;"	d
+__NR_sgetmask	include/unistd.h	/^#define __NR_sgetmask	/;"	d
+__NR_sigaction	include/unistd.h	/^#define __NR_sigaction	/;"	d
+__NR_signal	include/unistd.h	/^#define __NR_signal	/;"	d
+__NR_ssetmask	include/unistd.h	/^#define __NR_ssetmask	/;"	d
+__NR_stat	include/unistd.h	/^#define __NR_stat	/;"	d
+__NR_stime	include/unistd.h	/^#define __NR_stime	/;"	d
+__NR_stty	include/unistd.h	/^#define __NR_stty	/;"	d
+__NR_sync	include/unistd.h	/^#define __NR_sync	/;"	d
+__NR_time	include/unistd.h	/^#define __NR_time	/;"	d
+__NR_times	include/unistd.h	/^#define __NR_times	/;"	d
+__NR_ulimit	include/unistd.h	/^#define __NR_ulimit	/;"	d
+__NR_umask	include/unistd.h	/^#define __NR_umask	/;"	d
+__NR_umount	include/unistd.h	/^#define __NR_umount	/;"	d
+__NR_uname	include/unistd.h	/^#define __NR_uname	/;"	d
+__NR_unlink	include/unistd.h	/^#define __NR_unlink	/;"	d
+__NR_ustat	include/unistd.h	/^#define __NR_ustat	/;"	d
+__NR_utime	include/unistd.h	/^#define __NR_utime	/;"	d
+__NR_waitpid	include/unistd.h	/^#define __NR_waitpid	/;"	d
+__NR_write	include/unistd.h	/^#define __NR_write	/;"	d
+__va_rounded_size	include/stdarg.h	/^#define __va_rounded_size(/;"	d
 _bmap	fs/inode.c	/^static int _bmap(struct m_inode * inode,int block,int create)$/;"	f	file:
 _bucket_dir	lib/malloc.c	/^struct _bucket_dir {	\/* 8 bytes *\/$/;"	s	file:
 _ctmp	lib/ctype.c	/^char _ctmp;$/;"	v
 _ctype	lib/ctype.c	/^unsigned char _ctype[] = {0x00,			\/* EOF *\/$/;"	v
 _exit	lib/_exit.c	/^volatile void _exit(int exit_code)$/;"	f
-_fs	kernel/traps.c	34;"	d	file:
+_fs	kernel/traps.c	/^#define _fs(/;"	d	file:
 _get_base	include/linux/sched.h	/^static inline unsigned long _get_base(char * addr)$/;"	f
-_hashfn	fs/buffer.c	131;"	d	file:
-_set_base	include/linux/sched.h	190;"	d
-_set_gate	include/asm/system.h	22;"	d
-_set_limit	include/linux/sched.h	203;"	d
-_set_seg_desc	include/asm/system.h	42;"	d
-_set_tssldt_desc	include/asm/system.h	52;"	d
+_hashfn	fs/buffer.c	/^#define _hashfn(/;"	d	file:
+_set_base	include/linux/sched.h	/^#define _set_base(/;"	d
+_set_gate	include/asm/system.h	/^#define _set_gate(/;"	d
+_set_limit	include/linux/sched.h	/^#define _set_limit(/;"	d
+_set_seg_desc	include/asm/system.h	/^#define _set_seg_desc(/;"	d
+_set_tssldt_desc	include/asm/system.h	/^#define _set_tssldt_desc(/;"	d
 _start	boot/bootsect.s	/^_start:$/;"	l
-_syscall0	include/unistd.h	133;"	d
-_syscall1	include/unistd.h	146;"	d
-_syscall2	include/unistd.h	159;"	d
-_syscall3	include/unistd.h	172;"	d
+_syscall0	include/unistd.h	/^#define _syscall0(/;"	d
+_syscall1	include/unistd.h	/^#define _syscall1(/;"	d
+_syscall2	include/unistd.h	/^#define _syscall2(/;"	d
+_syscall3	include/unistd.h	/^#define _syscall3(/;"	d
 a	include/linux/head.h	/^	unsigned long a,b;$/;"	m	struct:desc_struct
-a	kernel/sched.c	/^	long * a;$/;"	m	struct:__anon1	file:
+a	kernel/sched.c	/^	long * a;$/;"	m	struct:__anon4	file:
 a_bss	include/a.out.h	/^  unsigned a_bss;		\/* length of uninitialized data area for file, in bytes *\/$/;"	m	struct:exec
 a_data	include/a.out.h	/^  unsigned a_data;		\/* length of data, in bytes *\/$/;"	m	struct:exec
 a_drsize	include/a.out.h	/^  unsigned a_drsize;		\/* length of relocation info for data, in bytes *\/$/;"	m	struct:exec
@@ -922,7 +907,7 @@ argv	init/main.c	/^static char * argv[] = { "-\/bin\/sh",NULL };$/;"	v	file:
 argv_rc	init/main.c	/^static char * argv_rc[] = { "\/bin\/sh", NULL };$/;"	v	file:
 attr	kernel/chr_drv/console.c	/^static unsigned char	attr=0x07;$/;"	v	file:
 b	include/linux/head.h	/^	unsigned long a,b;$/;"	m	struct:desc_struct
-b	kernel/sched.c	/^	short b;$/;"	m	struct:__anon1	file:
+b	kernel/sched.c	/^	short b;$/;"	m	struct:__anon4	file:
 b_blocknr	include/linux/fs.h	/^	unsigned long b_blocknr;	\/* block number *\/$/;"	m	struct:buffer_head
 b_count	include/linux/fs.h	/^	unsigned char b_count;		\/* users using this block *\/$/;"	m	struct:buffer_head
 b_data	include/linux/fs.h	/^	char * b_data;			\/* pointer to data block (1024 bytes) *\/$/;"	m	struct:buffer_head
@@ -971,7 +956,7 @@ bucket_size	lib/malloc.c	/^	unsigned short		bucket_size;$/;"	m	struct:bucket_des
 buf	include/linux/tty.h	/^	char buf[TTY_BUF_SIZE];$/;"	m	struct:tty_queue
 buf	kernel/chr_drv/keyboard.S	/^buf = 16$/;"	d
 buf	kernel/chr_drv/rs_io.s	/^buf = 16$/;"	d
-buf	kernel/printk.c	/^static char buf[1024];$/;"	v	file:
+buf	kernel/printk.c	/^static char buf[1024];      \/\/ 显示用临时缓冲区$/;"	v	file:
 buffer	kernel/blk_drv/blk.h	/^	char * buffer;$/;"	m	struct:request
 buffer_block	include/linux/fs.h	/^typedef char buffer_block[BLOCK_SIZE];$/;"	t
 buffer_head	include/linux/fs.h	/^struct buffer_head {$/;"	s
@@ -998,9 +983,9 @@ change_speed	kernel/chr_drv/tty_ioctl.c	/^static void change_speed(struct tty_st
 check_disk_change	fs/buffer.c	/^void check_disk_change(int dev)$/;"	f
 check_x87	boot/head.s	/^check_x87:$/;"	l
 chr_dev_init	kernel/chr_drv/tty_io.c	/^void chr_dev_init(void)$/;"	f
-clear_bit	fs/bitmap.c	25;"	d	file:
-clear_block	fs/bitmap.c	13;"	d	file:
-cli	include/asm/system.h	17;"	d
+clear_bit	fs/bitmap.c	/^#define clear_bit(/;"	d	file:
+clear_block	fs/bitmap.c	/^#define clear_block(/;"	d	file:
+cli	include/asm/system.h	/^#define cli(/;"	d
 clock_t	include/time.h	/^typedef long clock_t;$/;"	t
 close_on_exec	include/linux/sched.h	/^	unsigned long close_on_exec;$/;"	m	struct:task_struct
 cmd	kernel/blk_drv/blk.h	/^	int cmd;		\/* READ or WRITE *\/$/;"	m	struct:request
@@ -1010,9 +995,9 @@ con_write	kernel/chr_drv/console.c	/^void con_write(struct tty_struct * tty)$/;"
 controller_ready	kernel/blk_drv/hd.c	/^static int controller_ready(void)$/;"	f	file:
 coprocessor_error	kernel/system_call.s	/^coprocessor_error:$/;"	l
 coprocessor_segment_overrun	kernel/asm.s	/^coprocessor_segment_overrun:$/;"	l
-copy_buffer	kernel/blk_drv/floppy.c	155;"	d	file:
+copy_buffer	kernel/blk_drv/floppy.c	/^#define copy_buffer(/;"	d	file:
 copy_mem	kernel/fork.c	/^int copy_mem(int nr,struct task_struct * p)$/;"	f
-copy_page	mm/memory.c	54;"	d	file:
+copy_page	mm/memory.c	/^#define copy_page(/;"	d	file:
 copy_page_tables	mm/memory.c	/^int copy_page_tables(unsigned long from,unsigned long to,long size)$/;"	f
 copy_process	kernel/fork.c	/^int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,$/;"	f
 copy_strings	fs/exec.c	/^static unsigned long copy_strings(int argc,char ** argv,unsigned long *page,$/;"	f	file:
@@ -1072,14 +1057,14 @@ die	kernel/traps.c	/^static void die(char * str,long esp_ptr,long nr)$/;"	f	file
 die	tools/build.c	/^void die(char * str)$/;"	f
 dir_entry	include/linux/fs.h	/^struct dir_entry {$/;"	s
 dir_namei	fs/namei.c	/^static struct m_inode * dir_namei(const char * pathname,$/;"	f	file:
-div_t	include/sys/types.h	/^typedef struct { int quot,rem; } div_t;$/;"	t	typeref:struct:__anon3
+div_t	include/sys/types.h	/^typedef struct { int quot,rem; } div_t;$/;"	t	typeref:struct:__anon2
 divide_error	kernel/asm.s	/^divide_error:$/;"	l
 do_bounds	kernel/traps.c	/^void do_bounds(long esp, long error_code)$/;"	f
 do_coprocessor_error	kernel/traps.c	/^void do_coprocessor_error(long esp, long error_code)$/;"	f
 do_coprocessor_segment_overrun	kernel/traps.c	/^void do_coprocessor_segment_overrun(long esp, long error_code)$/;"	f
 do_debug	kernel/traps.c	/^void do_debug(long esp, long error_code)$/;"	f
 do_device_not_available	kernel/traps.c	/^void do_device_not_available(long esp, long error_code)$/;"	f
-do_div	kernel/vsprintf.c	35;"	d	file:
+do_div	kernel/vsprintf.c	/^#define do_div(/;"	d	file:
 do_divide_error	kernel/traps.c	/^void do_divide_error(long esp, long error_code)$/;"	f
 do_double_fault	kernel/traps.c	/^void do_double_fault(long esp, long error_code)$/;"	f
 do_execve	fs/exec.c	/^int do_execve(unsigned long * eip,long tmp,char * filename,$/;"	f
@@ -1155,7 +1140,7 @@ euid	include/linux/sched.h	/^	unsigned short uid,euid,suid;$/;"	m	struct:task_st
 exec	include/a.out.h	/^struct exec {$/;"	s
 executable	include/linux/sched.h	/^	struct m_inode * executable;$/;"	m	struct:task_struct	typeref:struct:task_struct::m_inode
 exit_code	include/linux/sched.h	/^	int exit_code;$/;"	m	struct:task_struct
-extern	lib/string.c	11;"	d	file:
+extern	lib/string.c	/^#define extern$/;"	d	file:
 f_count	include/linux/fs.h	/^	unsigned short f_count;$/;"	m	struct:file
 f_flags	include/linux/fs.h	/^	unsigned short f_flags;$/;"	m	struct:file
 f_fname	include/sys/types.h	/^	char f_fname[6];$/;"	m	struct:ustat
@@ -1175,7 +1160,7 @@ filp	include/linux/sched.h	/^	struct file * filp[NR_OPEN];$/;"	m	struct:task_str
 find_buffer	fs/buffer.c	/^static struct buffer_head * find_buffer(int dev, int block)$/;"	f	file:
 find_empty_process	kernel/fork.c	/^int find_empty_process(void)$/;"	f
 find_entry	fs/namei.c	/^static struct buffer_head * find_entry(struct m_inode ** dir,$/;"	f	file:
-find_first_zero	fs/bitmap.c	31;"	d	file:
+find_first_zero	fs/bitmap.c	/^#define find_first_zero(/;"	d	file:
 fip	include/linux/sched.h	/^	long	fip;$/;"	m	struct:i387_struct
 flock	include/fcntl.h	/^struct flock {$/;"	s
 floppy	kernel/blk_drv/floppy.c	/^static struct floppy_struct * floppy = floppy_type;$/;"	v	typeref:struct:floppy_struct	file:
@@ -1193,7 +1178,7 @@ fn	kernel/sched.c	/^	void (*fn)();$/;"	m	struct:timer_list	file:
 fn_ptr	include/linux/sched.h	/^typedef int (*fn_ptr)();$/;"	t
 foo	include/linux/sched.h	/^	long	foo;$/;"	m	struct:i387_struct
 fos	include/linux/sched.h	/^	long	fos;$/;"	m	struct:i387_struct
-free	include/linux/kernel.h	12;"	d
+free	include/linux/kernel.h	/^#define free(/;"	d
 free_block	fs/bitmap.c	/^void free_block(int dev, int block)$/;"	f
 free_bucket_desc	lib/malloc.c	/^struct bucket_desc *free_bucket_desc = (struct bucket_desc *) 0;$/;"	v	typeref:struct:bucket_desc
 free_dind	fs/truncate.c	/^static void free_dind(int dev,int block)$/;"	f	file:
@@ -1214,7 +1199,7 @@ gdt	boot/setup.s	/^gdt:$/;"	l
 gdt_48	boot/setup.s	/^gdt_48:$/;"	l
 gdt_descr	boot/head.s	/^gdt_descr:$/;"	l
 general_protection	kernel/asm.s	/^general_protection:$/;"	l
-get_base	include/linux/sched.h	249;"	d
+get_base	include/linux/sched.h	/^#define get_base(/;"	d
 get_dir	fs/namei.c	/^static struct m_inode * get_dir(const char * pathname)$/;"	f	file:
 get_ds	include/asm/segment.h	/^static inline unsigned long get_ds() $/;"	f
 get_empty_inode	fs/inode.c	/^struct m_inode * get_empty_inode(void)$/;"	f
@@ -1225,11 +1210,11 @@ get_fs_byte	include/asm/segment.h	/^static inline unsigned char get_fs_byte(cons
 get_fs_long	include/asm/segment.h	/^static inline unsigned long get_fs_long(const unsigned long *addr)$/;"	f
 get_fs_word	include/asm/segment.h	/^static inline unsigned short get_fs_word(const unsigned short *addr)$/;"	f
 get_hash_table	fs/buffer.c	/^struct buffer_head * get_hash_table(int dev, int block)$/;"	f
-get_limit	include/linux/sched.h	251;"	d
+get_limit	include/linux/sched.h	/^#define get_limit(/;"	d
 get_new	kernel/signal.c	/^static inline void get_new(char * from,char * to)$/;"	f	file:
 get_pipe_inode	fs/inode.c	/^struct m_inode * get_pipe_inode(void)$/;"	f
-get_seg_byte	kernel/traps.c	22;"	d	file:
-get_seg_long	kernel/traps.c	28;"	d	file:
+get_seg_byte	kernel/traps.c	/^#define get_seg_byte(/;"	d	file:
+get_seg_long	kernel/traps.c	/^#define get_seg_long(/;"	d	file:
 get_super	fs/super.c	/^struct super_block * get_super(int dev)$/;"	f
 get_termio	kernel/chr_drv/tty_ioctl.c	/^static int get_termio(struct tty_struct * tty, struct termio * termio)$/;"	f	file:
 get_termios	kernel/chr_drv/tty_ioctl.c	/^static int get_termios(struct tty_struct * tty, struct termios * termios)$/;"	f	file:
@@ -1239,7 +1224,7 @@ gid_t	include/sys/types.h	/^typedef unsigned char gid_t;$/;"	t
 go	boot/bootsect.s	/^go:	mov	ax,cs$/;"	l
 gotoxy	kernel/chr_drv/console.c	/^static inline void gotoxy(unsigned int new_x,unsigned int new_y)$/;"	f	file:
 gs	include/linux/sched.h	/^	long	gs;		\/* 16 high bits zero *\/$/;"	m	struct:tss_struct
-hash	fs/buffer.c	132;"	d	file:
+hash	fs/buffer.c	/^#define hash(/;"	d	file:
 hash_table	fs/buffer.c	/^struct buffer_head * hash_table[NR_HASH];$/;"	v	typeref:struct:buffer_head
 hd	kernel/blk_drv/hd.c	/^} hd[5*MAX_HD]={{0,0},};$/;"	v	typeref:struct:hd_struct	file:
 hd_i_struct	kernel/blk_drv/hd.c	/^struct hd_i_struct {$/;"	s	file:
@@ -1290,14 +1275,14 @@ idt_48	boot/setup.s	/^idt_48:$/;"	l
 idt_descr	boot/head.s	/^idt_descr:$/;"	l
 iget	fs/inode.c	/^struct m_inode * iget(int dev,int nr)$/;"	f
 ignore_int	boot/head.s	/^ignore_int:$/;"	l
-immoutb_p	kernel/blk_drv/floppy.c	50;"	d	file:
-inb	include/asm/io.h	5;"	d
-inb_p	include/asm/io.h	17;"	d
+immoutb_p	kernel/blk_drv/floppy.c	/^#define immoutb_p(/;"	d	file:
+inb	include/asm/io.h	/^#define inb(/;"	d
+inb_p	include/asm/io.h	/^#define inb_p(/;"	d
 init	init/main.c	/^void init(void)$/;"	f
 init	kernel/chr_drv/serial.c	/^static void init(int port)$/;"	f	file:
 init_bucket_desc	lib/malloc.c	/^static inline void init_bucket_desc()$/;"	f	file:
 init_task	kernel/sched.c	/^static union task_union init_task = {INIT_TASK,};$/;"	v	typeref:union:task_union	file:
-inline	lib/string.c	12;"	d	file:
+inline	lib/string.c	/^#define inline$/;"	d	file:
 ino_t	include/sys/types.h	/^typedef unsigned short ino_t;$/;"	t
 inode	include/linux/fs.h	/^	unsigned short inode;$/;"	m	struct:dir_entry
 inode_table	fs/inode.c	/^struct m_inode inode_table[NR_INODE]={{0,},};$/;"	v	typeref:struct:m_inode
@@ -1309,28 +1294,28 @@ int_msg	boot/head.s	/^int_msg:$/;"	l
 interruptible_sleep_on	kernel/sched.c	/^void interruptible_sleep_on(struct task_struct **p)$/;"	f
 invalid_TSS	kernel/asm.s	/^invalid_TSS:$/;"	l
 invalid_op	kernel/asm.s	/^invalid_op:$/;"	l
-invalidate	mm/memory.c	39;"	d	file:
+invalidate	mm/memory.c	/^#define invalidate(/;"	d	file:
 invalidate_buffers	fs/buffer.c	/^void inline invalidate_buffers(int dev)$/;"	f
 invalidate_inodes	fs/inode.c	/^void invalidate_inodes(int dev)$/;"	f
 ioctl_ptr	fs/ioctl.c	/^typedef int (*ioctl_ptr)(int dev,int cmd,int arg);$/;"	t	file:
 ioctl_table	fs/ioctl.c	/^static ioctl_ptr ioctl_table[]={$/;"	v	file:
 iput	fs/inode.c	/^void iput(struct m_inode * inode)$/;"	f
-iret	include/asm/system.h	20;"	d
+iret	include/asm/system.h	/^#define iret(/;"	d
 irq13	kernel/asm.s	/^irq13:$/;"	l
-is_digit	kernel/vsprintf.c	16;"	d	file:
+is_digit	kernel/vsprintf.c	/^#define is_digit(/;"	d	file:
 is_disk1	boot/setup.s	/^is_disk1:$/;"	l
-isalnum	include/ctype.h	16;"	d
-isalpha	include/ctype.h	17;"	d
-isascii	include/ctype.h	28;"	d
-iscntrl	include/ctype.h	18;"	d
-isdigit	include/ctype.h	19;"	d
-isgraph	include/ctype.h	20;"	d
-islower	include/ctype.h	21;"	d
-isprint	include/ctype.h	22;"	d
-ispunct	include/ctype.h	23;"	d
-isspace	include/ctype.h	24;"	d
-isupper	include/ctype.h	25;"	d
-isxdigit	include/ctype.h	26;"	d
+isalnum	include/ctype.h	/^#define isalnum(/;"	d
+isalpha	include/ctype.h	/^#define isalpha(/;"	d
+isascii	include/ctype.h	/^#define isascii(/;"	d
+iscntrl	include/ctype.h	/^#define iscntrl(/;"	d
+isdigit	include/ctype.h	/^#define isdigit(/;"	d
+isgraph	include/ctype.h	/^#define isgraph(/;"	d
+islower	include/ctype.h	/^#define islower(/;"	d
+isprint	include/ctype.h	/^#define isprint(/;"	d
+ispunct	include/ctype.h	/^#define ispunct(/;"	d
+isspace	include/ctype.h	/^#define isspace(/;"	d
+isupper	include/ctype.h	/^#define isupper(/;"	d
+isxdigit	include/ctype.h	/^#define isxdigit(/;"	d
 jiffies	kernel/sched.c	/^	long jiffies;$/;"	m	struct:timer_list	file:
 jiffies	kernel/sched.c	/^long volatile jiffies=0;$/;"	v
 jmp_table	kernel/chr_drv/rs_io.s	/^jmp_table:$/;"	l
@@ -1348,7 +1333,7 @@ l_type	include/fcntl.h	/^	short l_type;$/;"	m	struct:flock
 l_whence	include/fcntl.h	/^	short l_whence;$/;"	m	struct:flock
 last_pid	kernel/fork.c	/^long last_pid=0;$/;"	v
 last_task_used_math	kernel/sched.c	/^struct task_struct *last_task_used_math = NULL;$/;"	v	typeref:struct:task_struct
-ldiv_t	include/sys/types.h	/^typedef struct { long quot,rem; } ldiv_t;$/;"	t	typeref:struct:__anon4
+ldiv_t	include/sys/types.h	/^typedef struct { long quot,rem; } ldiv_t;$/;"	t	typeref:struct:__anon3
 ldt	include/linux/sched.h	/^	long	ldt;		\/* 16 high bits zero *\/$/;"	m	struct:tss_struct
 ldt	include/linux/sched.h	/^	struct desc_struct ldt[3];$/;"	m	struct:task_struct	typeref:struct:task_struct::desc_struct
 leader	include/linux/sched.h	/^	long pid,father,pgrp,session,leader;$/;"	m	struct:task_struct
@@ -1356,13 +1341,13 @@ leds	kernel/chr_drv/keyboard.S	/^leds:	.byte 2		\/* num-lock, caps, scroll-lock 
 lf	kernel/chr_drv/console.c	/^static void lf(void)$/;"	f	file:
 line_status	kernel/chr_drv/rs_io.s	/^line_status:$/;"	l
 ll_rw_block	kernel/blk_drv/ll_rw_blk.c	/^void ll_rw_block(int rw, struct buffer_head * bh)$/;"	f
-lldt	include/linux/sched.h	160;"	d
+lldt	include/linux/sched.h	/^#define lldt(/;"	d
 load_setup	boot/bootsect.s	/^load_setup:$/;"	l
 lock_buffer	kernel/blk_drv/ll_rw_blk.c	/^static inline void lock_buffer(struct buffer_head * bh)$/;"	f	file:
 lock_inode	fs/inode.c	/^static inline void lock_inode(struct m_inode * inode)$/;"	f	file:
 lock_super	fs/super.c	/^static void lock_super(struct super_block * sb)$/;"	f	file:
 lshift	kernel/chr_drv/keyboard.S	/^lshift:$/;"	l
-ltr	include/linux/sched.h	159;"	d
+ltr	include/linux/sched.h	/^#define ltr(/;"	d
 lzone	kernel/blk_drv/hd.c	/^	int head,sect,cyl,wpcom,lzone,ctl;$/;"	m	struct:hd_i_struct	file:
 m_inode	include/linux/fs.h	/^struct m_inode {$/;"	s
 machine	include/sys/utsname.h	/^	char machine[9];$/;"	m	struct:utsname
@@ -1379,7 +1364,7 @@ mem_init	mm/memory.c	/^void mem_init(long start_mem, long end_mem)$/;"	f
 mem_map	mm/memory.c	/^static unsigned char mem_map [ PAGING_PAGES ] = {0,};$/;"	v	file:
 memchr	include/string.h	/^extern inline void * memchr(const void * cs,char c,int count)$/;"	f
 memcmp	include/string.h	/^static inline int memcmp(const void * cs,const void * ct,int count)$/;"	f
-memcpy	include/asm/memory.h	8;"	d
+memcpy	include/asm/memory.h	/^#define memcpy(/;"	d
 memcpy	include/string.h	/^static inline void * memcpy(void * dest,const void * src, int n)$/;"	f
 memmove	include/string.h	/^extern inline void * memmove(void * dest,const void * src, int n)$/;"	f
 memory_end	init/main.c	/^static long memory_end = 0;$/;"	v	file:
@@ -1393,15 +1378,15 @@ moff_timer	kernel/sched.c	/^static int moff_timer[4]={0,0,0,0};$/;"	v	file:
 mon_timer	kernel/sched.c	/^static int  mon_timer[4]={0,0,0,0};$/;"	v	file:
 month	kernel/mktime.c	/^static int month[12] = {$/;"	v	file:
 mount_root	fs/super.c	/^void mount_root(void)$/;"	f
-move_to_user_mode	include/asm/system.h	1;"	d
+move_to_user_mode	include/asm/system.h	/^#define move_to_user_mode(/;"	d
 msg1	boot/bootsect.s	/^msg1:$/;"	l
 n_desc	include/a.out.h	/^  short n_desc;$/;"	m	struct:nlist
-n_name	include/a.out.h	/^    char *n_name;$/;"	m	union:nlist::__anon2
-n_next	include/a.out.h	/^    struct nlist *n_next;$/;"	m	union:nlist::__anon2	typeref:struct:nlist::__anon2::nlist
+n_name	include/a.out.h	/^    char *n_name;$/;"	m	union:nlist::__anon1
+n_next	include/a.out.h	/^    struct nlist *n_next;$/;"	m	union:nlist::__anon1	typeref:struct:nlist::__anon1::nlist
 n_other	include/a.out.h	/^  char n_other;$/;"	m	struct:nlist
-n_strx	include/a.out.h	/^    long n_strx;$/;"	m	union:nlist::__anon2
+n_strx	include/a.out.h	/^    long n_strx;$/;"	m	union:nlist::__anon1
 n_type	include/a.out.h	/^  unsigned char n_type;$/;"	m	struct:nlist
-n_un	include/a.out.h	/^  } n_un;$/;"	m	struct:nlist	typeref:union:nlist::__anon2
+n_un	include/a.out.h	/^  } n_un;$/;"	m	struct:nlist	typeref:union:nlist::__anon1
 n_value	include/a.out.h	/^  unsigned long n_value;$/;"	m	struct:nlist
 name	include/linux/fs.h	/^	char name[NAME_LEN];$/;"	m	struct:dir_entry
 namei	fs/namei.c	/^struct m_inode * namei(const char * pathname)$/;"	f
@@ -1418,7 +1403,7 @@ no_disk1	boot/setup.s	/^no_disk1:$/;"	l
 no_error_code	kernel/asm.s	/^no_error_code:$/;"	l
 nodename	include/sys/utsname.h	/^	char nodename[9];$/;"	m	struct:utsname
 none	kernel/chr_drv/keyboard.S	/^none:	ret$/;"	l
-nop	include/asm/system.h	18;"	d
+nop	include/asm/system.h	/^#define nop(/;"	d
 npar	kernel/chr_drv/console.c	/^static unsigned long	npar,par[NPAR];$/;"	v	file:
 nr_sectors	kernel/blk_drv/blk.h	/^	unsigned long nr_sectors;$/;"	m	struct:request
 nr_sects	include/linux/hdreg.h	/^	unsigned int nr_sects;		\/* nr of sectors in partition *\/$/;"	m	struct:partition
@@ -1426,9 +1411,9 @@ nr_sects	kernel/blk_drv/hd.c	/^	long nr_sects;$/;"	m	struct:hd_struct	file:
 nr_system_calls	kernel/system_call.s	/^nr_system_calls = 72$/;"	d
 num	kernel/chr_drv/keyboard.S	/^num:	xorb $2,leds$/;"	l
 num_table	kernel/chr_drv/keyboard.S	/^num_table:$/;"	l
-number	kernel/vsprintf.c	/^static char * number(char * str, int num, int base, int size, int precision$/;"	f	file:
+number	kernel/vsprintf.c	/^static char * number(char * str, int num, int base, int size, int precision, int type)$/;"	f	file:
 off_t	include/sys/types.h	/^typedef long off_t;$/;"	t
-offsetof	include/stddef.h	17;"	d
+offsetof	include/stddef.h	/^#define offsetof(/;"	d
 ok1_read	boot/bootsect.s	/^ok1_read:$/;"	l
 ok2_read	boot/bootsect.s	/^ok2_read:$/;"	l
 ok3_read	boot/bootsect.s	/^ok3_read:$/;"	l
@@ -1440,8 +1425,8 @@ oom	mm/memory.c	/^static inline volatile void oom(void)$/;"	f	file:
 open	lib/open.c	/^int open(const char * filename, int flag, ...)$/;"	f
 open_namei	fs/namei.c	/^int open_namei(const char * pathname, int flag, int mode,$/;"	f
 origin	kernel/chr_drv/console.c	/^static unsigned long	origin;		\/* Used for EGA\/VGA fast scroll	*\/$/;"	v	file:
-outb	include/asm/io.h	1;"	d
-outb_p	include/asm/io.h	11;"	d
+outb	include/asm/io.h	/^#define outb(/;"	d
+outb_p	include/asm/io.h	/^#define outb_p(/;"	d
 output_byte	kernel/blk_drv/floppy.c	/^static void output_byte(char byte)$/;"	f	file:
 overflow	kernel/asm.s	/^overflow:$/;"	l
 page	lib/malloc.c	/^	void			*page;$/;"	m	struct:bucket_desc	file:
@@ -1461,8 +1446,8 @@ pgrp	include/linux/tty.h	/^	int pgrp;$/;"	m	struct:tty_struct
 pid	include/linux/sched.h	/^	long pid,father,pgrp,session,leader;$/;"	m	struct:task_struct
 pid_t	include/sys/types.h	/^typedef int pid_t;$/;"	t
 pop	boot/bootsect.s	/^	pop dx$/;"	d
-port_read	kernel/blk_drv/hd.c	61;"	d	file:
-port_write	kernel/blk_drv/hd.c	64;"	d	file:
+port_read	kernel/blk_drv/hd.c	/^#define port_read(/;"	d	file:
+port_write	kernel/blk_drv/hd.c	/^#define port_write(/;"	d	file:
 pos	kernel/chr_drv/console.c	/^static unsigned long	pos;$/;"	v	file:
 printbuf	init/main.c	/^static char printbuf[1024];$/;"	v	file:
 printf	init/main.c	/^static int printf(const char *fmt, ...)$/;"	f	file:
@@ -1483,8 +1468,8 @@ put_queue	kernel/chr_drv/keyboard.S	/^put_queue:$/;"	l
 put_super	fs/super.c	/^void put_super(int dev)$/;"	f
 pwd	include/linux/sched.h	/^	struct m_inode * pwd;$/;"	m	struct:task_struct	typeref:struct:task_struct::m_inode
 ques	kernel/chr_drv/console.c	/^static unsigned long	ques=0;$/;"	v	file:
-quot	include/sys/types.h	/^typedef struct { int quot,rem; } div_t;$/;"	m	struct:__anon3
-quot	include/sys/types.h	/^typedef struct { long quot,rem; } ldiv_t;$/;"	m	struct:__anon4
+quot	include/sys/types.h	/^typedef struct { int quot,rem; } div_t;$/;"	m	struct:__anon2
+quot	include/sys/types.h	/^typedef struct { long quot,rem; } ldiv_t;$/;"	m	struct:__anon3
 quotient	kernel/chr_drv/tty_ioctl.c	/^static unsigned short quotient[] = {$/;"	v	file:
 r_address	include/a.out.h	/^  int r_address;$/;"	m	struct:relocation_info
 r_extern	include/a.out.h	/^  unsigned int r_extern:1;$/;"	m	struct:relocation_info
@@ -1515,8 +1500,8 @@ refcnt	lib/malloc.c	/^	unsigned short		refcnt;$/;"	m	struct:bucket_desc	file:
 release	include/sys/utsname.h	/^	char release[9];$/;"	m	struct:utsname
 release	kernel/exit.c	/^void release(struct task_struct * p)$/;"	f
 relocation_info	include/a.out.h	/^struct relocation_info$/;"	s
-rem	include/sys/types.h	/^typedef struct { int quot,rem; } div_t;$/;"	m	struct:__anon3
-rem	include/sys/types.h	/^typedef struct { long quot,rem; } ldiv_t;$/;"	m	struct:__anon4
+rem	include/sys/types.h	/^typedef struct { int quot,rem; } div_t;$/;"	m	struct:__anon2
+rem	include/sys/types.h	/^typedef struct { long quot,rem; } ldiv_t;$/;"	m	struct:__anon3
 remove_from_queues	fs/buffer.c	/^static inline void remove_from_queues(struct buffer_head * bh)$/;"	f	file:
 rep_int	kernel/chr_drv/rs_io.s	/^rep_int:$/;"	l
 reply_buffer	kernel/blk_drv/floppy.c	/^static unsigned char reply_buffer[MAX_REPLIES];$/;"	v	file:
@@ -1617,23 +1602,23 @@ selected	kernel/blk_drv/floppy.c	/^unsigned char selected = 0;$/;"	v
 send_break	kernel/chr_drv/tty_ioctl.c	/^static void send_break(struct tty_struct * tty)$/;"	f	file:
 send_sig	kernel/exit.c	/^static inline int send_sig(long sig,struct task_struct * p,int priv)$/;"	f	file:
 session	include/linux/sched.h	/^	long pid,father,pgrp,session,leader;$/;"	m	struct:task_struct
-set_base	include/linux/sched.h	217;"	d
-set_bit	fs/bitmap.c	19;"	d	file:
-set_bit	fs/super.c	22;"	d	file:
+set_base	include/linux/sched.h	/^#define set_base(/;"	d
+set_bit	fs/bitmap.c	/^#define set_bit(/;"	d	file:
+set_bit	fs/super.c	/^#define set_bit(/;"	d	file:
 set_cursor	kernel/chr_drv/console.c	/^static inline void set_cursor(void)$/;"	f	file:
 set_e0	kernel/chr_drv/keyboard.S	/^set_e0:	movb $1,e0$/;"	l
 set_e1	kernel/chr_drv/keyboard.S	/^set_e1:	movb $2,e0$/;"	l
 set_fs	include/asm/segment.h	/^static inline void set_fs(unsigned long val)$/;"	f
-set_intr_gate	include/asm/system.h	33;"	d
-set_ldt_desc	include/asm/system.h	66;"	d
+set_intr_gate	include/asm/system.h	/^#define set_intr_gate(/;"	d
+set_ldt_desc	include/asm/system.h	/^#define set_ldt_desc(/;"	d
 set_leds	kernel/chr_drv/keyboard.S	/^set_leds:$/;"	l
-set_limit	include/linux/sched.h	218;"	d
+set_limit	include/linux/sched.h	/^#define set_limit(/;"	d
 set_origin	kernel/chr_drv/console.c	/^static inline void set_origin(void)$/;"	f	file:
-set_system_gate	include/asm/system.h	39;"	d
+set_system_gate	include/asm/system.h	/^#define set_system_gate(/;"	d
 set_termio	kernel/chr_drv/tty_ioctl.c	/^static int set_termio(struct tty_struct * tty, struct termio * termio)$/;"	f	file:
 set_termios	kernel/chr_drv/tty_ioctl.c	/^static int set_termios(struct tty_struct * tty, struct termios * termios)$/;"	f	file:
-set_trap_gate	include/asm/system.h	36;"	d
-set_tss_desc	include/asm/system.h	65;"	d
+set_trap_gate	include/asm/system.h	/^#define set_trap_gate(/;"	d
+set_tss_desc	include/asm/system.h	/^#define set_tss_desc(/;"	d
 setup_DMA	kernel/blk_drv/floppy.c	/^static void setup_DMA(void)$/;"	f	file:
 setup_gdt	boot/head.s	/^setup_gdt:$/;"	l
 setup_idt	boot/head.s	/^setup_idt:$/;"	l
@@ -1684,7 +1669,7 @@ st_space	include/linux/sched.h	/^	long	st_space[20];	\/* 8*10 bytes for each FP-
 st_uid	include/sys/stat.h	/^	uid_t	st_uid;$/;"	m	struct:stat
 stack	kernel/sched.c	/^	char stack[PAGE_SIZE];$/;"	m	union:task_union	file:
 stack_segment	kernel/asm.s	/^stack_segment:$/;"	l
-stack_start	kernel/sched.c	/^	} stack_start = { & user_stack [PAGE_SIZE>>2] , 0x10 };$/;"	v	typeref:struct:__anon1
+stack_start	kernel/sched.c	/^	} stack_start = { & user_stack [PAGE_SIZE>>2] , 0x10 };$/;"	v	typeref:struct:__anon4
 start	boot/setup.s	/^start:$/;"	l
 start_buffer	fs/buffer.c	/^struct buffer_head * start_buffer = (struct buffer_head *) &end;$/;"	v	typeref:struct:buffer_head
 start_code	include/linux/sched.h	/^	unsigned long start_code,end_code,end_data,brk,start_stack;$/;"	m	struct:task_struct
@@ -1699,10 +1684,10 @@ stat	include/sys/stat.h	/^struct stat {$/;"	s
 state	include/linux/sched.h	/^	long state;	\/* -1 unrunnable, 0 runnable, >0 stopped *\/$/;"	m	struct:task_struct
 state	kernel/chr_drv/console.c	/^static unsigned long	state=0;$/;"	v	file:
 state	kernel/system_call.s	/^state	= 0		# these are offsets into the task-struct.$/;"	d
-sti	include/asm/system.h	16;"	d
+sti	include/asm/system.h	/^#define sti(/;"	d
 stime	include/linux/sched.h	/^	long utime,stime,cutime,cstime,start_time;$/;"	m	struct:task_struct
 stopped	include/linux/tty.h	/^	int stopped;$/;"	m	struct:tty_struct
-str	include/linux/sched.h	161;"	d
+str	include/linux/sched.h	/^#define str(/;"	d
 strcat	include/string.h	/^extern inline char * strcat(char * dest,const char * src)$/;"	f
 strchr	include/string.h	/^static inline char * strchr(const char * s,char c)$/;"	f
 strcmp	include/string.h	/^extern inline int strcmp(const char * cs,const char * ct)$/;"	f
@@ -1721,9 +1706,9 @@ strtok	include/string.h	/^extern inline char * strtok(char * s,const char * ct)$
 suid	include/linux/sched.h	/^	unsigned short uid,euid,suid;$/;"	m	struct:task_struct
 super_block	fs/super.c	/^struct super_block super_block[NR_SUPER];$/;"	v	typeref:struct:super_block
 super_block	include/linux/fs.h	/^struct super_block {$/;"	s
-suser	include/linux/kernel.h	21;"	d
+suser	include/linux/kernel.h	/^#define suser(/;"	d
 swd	include/linux/sched.h	/^	long	swd;$/;"	m	struct:i387_struct
-switch_to	include/linux/sched.h	173;"	d
+switch_to	include/linux/sched.h	/^#define switch_to(/;"	d
 sync_dev	fs/buffer.c	/^int sync_dev(int dev)$/;"	f
 sync_inodes	fs/inode.c	/^void sync_inodes(void)$/;"	f
 sys_access	fs/open.c	/^int sys_access(const char * filename,int mode)$/;"	f
@@ -1839,10 +1824,10 @@ tms_cstime	include/sys/times.h	/^	time_t tms_cstime;$/;"	m	struct:tms
 tms_cutime	include/sys/times.h	/^	time_t tms_cutime;$/;"	m	struct:tms
 tms_stime	include/sys/times.h	/^	time_t tms_stime;$/;"	m	struct:tms
 tms_utime	include/sys/times.h	/^	time_t tms_utime;$/;"	m	struct:tms
-toascii	include/ctype.h	29;"	d
-tolower	include/ctype.h	31;"	d
+toascii	include/ctype.h	/^#define toascii(/;"	d
+tolower	include/ctype.h	/^#define tolower(/;"	d
 top	kernel/chr_drv/console.c	/^static unsigned long	top,bottom;$/;"	v	file:
-toupper	include/ctype.h	32;"	d
+toupper	include/ctype.h	/^#define toupper(/;"	d
 trace_bitmap	include/linux/sched.h	/^	long	trace_bitmap;	\/* bits: trace 0, bitmap 16-31 *\/$/;"	m	struct:tss_struct
 track	boot/bootsect.s	/^track:	.word 0			! current track$/;"	l
 track	kernel/blk_drv/floppy.c	/^	unsigned int size, sect, head, track, stretch;$/;"	m	struct:floppy_struct	file:
@@ -1888,11 +1873,10 @@ ustat	include/sys/types.h	/^struct ustat {$/;"	s
 utimbuf	include/utime.h	/^struct utimbuf {$/;"	s
 utime	include/linux/sched.h	/^	long utime,stime,cutime,cstime,start_time;$/;"	m	struct:task_struct
 utsname	include/sys/utsname.h	/^struct utsname {$/;"	s
-va_arg	include/stdarg.h	24;"	d
-va_end	include/stdarg.h	22;"	d
+va_arg	include/stdarg.h	/^#define va_arg(/;"	d
+va_end	include/stdarg.h	/^#define va_end(/;"	d
 va_list	include/stdarg.h	/^typedef char *va_list;$/;"	t
-va_start	include/stdarg.h	13;"	d
-va_start	include/stdarg.h	16;"	d
+va_start	include/stdarg.h	/^#define va_start(/;"	d
 verify_area	kernel/fork.c	/^void verify_area(void * addr,int size)$/;"	f
 version	include/sys/utsname.h	/^	char version[9];$/;"	m	struct:utsname
 video_erase_char	kernel/chr_drv/console.c	/^static unsigned short	video_erase_char;	\/* Char+Attrib to erase with	*\/$/;"	v	file:
