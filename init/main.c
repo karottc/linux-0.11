@@ -46,20 +46,27 @@ static inline _syscall1(int,setup,void *,BIOS)
 // int sync()系统调用：更新文件系统。
 static inline _syscall0(int,sync)
 
+// tty头文件，定义了有关tty_io, 串行通信方面的参数、常数
 #include <linux/tty.h>
+// 调度程序头文件，定义了任务结构task_struct、第1个初始任务的数据。还有一些以宏的形式
+// 定义的有关描述符参数设置和获取的嵌入式汇编函数程序。
 #include <linux/sched.h>
 #include <linux/head.h>
+// 以宏的形式定义了许多有关设置或修改描述符/中断门等嵌入式汇编子程序
 #include <asm/system.h>
+// 以宏的嵌入式汇编程序形式定义对IO端口操作的函数
 #include <asm/io.h>
 
 #include <stddef.h>
 #include <stdarg.h>
 #include <unistd.h>
+// 用于文件及描述符的操作控制常数符号的定义
 #include <fcntl.h>
 #include <sys/types.h>
-
+// 定义文件结构(file,buffer_head,m_inode等)
 #include <linux/fs.h>
 
+// 用于内核显示信息的缓存
 static char printbuf[1024];
 
 extern int vsprintf();
@@ -69,13 +76,17 @@ extern void chr_dev_init(void);
 extern void hd_init(void);
 extern void floppy_init(void);
 extern void mem_init(long start, long end);
+// 虚拟盘初始化
 extern long rd_init(long mem_start, int length);
-extern long kernel_mktime(struct tm * tm);
-extern long startup_time;
+extern long kernel_mktime(struct tm * tm);      //计算系统开始启动时间（秒）
+extern long startup_time;       // 内核启动时间（开机时间）（秒）
 
 /*
  * This is set up by the setup-routine at boot-time
  */
+// 下面三行分别将指定的线性地址强行转换为给定数据类型的指针，并获取指针所指
+// 的内容。由于内核代码段被映射到从物理地址零开始的地方，因此这些线性地址
+// 正好也是对应的物理地址。这些指定地址处内存值的含义请参见setup程序读取并保存的参数。
 #define EXT_MEM_K (*(unsigned short *)0x90002)
 #define DRIVE_INFO (*(struct drive_info *)0x90080)
 #define ORIG_ROOT_DEV (*(unsigned short *)0x901FC)
@@ -86,18 +97,25 @@ extern long startup_time;
  * clock I'd be interested. Most of this was trial and error, and some
  * bios-listing reading. Urghh.
  */
-
+// 这段宏读取CMOS实时时钟信息，outb_p,inb_p是include/asm/io.h中定义的端口输入输出宏
 #define CMOS_READ(addr) ({ \
-outb_p(0x80|addr,0x70); \
-inb_p(0x71); \
+outb_p(0x80|addr,0x70); \       // 0x70是写地址端口号，0x80|addr是读取的CMOS内存地址
+inb_p(0x71); \                  // 0x71 是读取数据端口号
 })
 
+// 将BCD码转换成二进制数值。BCD码利用半个字节（4 bit）表示一个10进制数，因此
+// 一个字节表示2个10进制数。（val）&15取BCD表示10进制个位数，而(val)>>4 取BCD表示
+// 的10进制十位数，再乘以10.因此最后两者相加就是一个字节BCD码的实际二进制数值。
 #define BCD_TO_BIN(val) ((val)=((val)&15) + ((val)>>4)*10)
 
+// 该函数取CMOS实时时钟信息作为开机时间，并保存到全局变量startup_time（秒）中。
+// kernel_mktime()用于计算从1970年1月1号0时起到开机当日经过的秒数，作为开机时间。
 static void time_init(void)
 {
 	struct tm time;
 
+    // CMOS的访问速度很慢，为了减少时间误差，在读取了下面循环中的所有数值后，如果此时
+    // CMOS中秒值发生了变化，那么就重新读取所有值。这样内核就能把与CMOS时间误差控制在1秒之内。
 	do {
 		time.tm_sec = CMOS_READ(0);
 		time.tm_min = CMOS_READ(2);
@@ -112,16 +130,18 @@ static void time_init(void)
 	BCD_TO_BIN(time.tm_mday);
 	BCD_TO_BIN(time.tm_mon);
 	BCD_TO_BIN(time.tm_year);
-	time.tm_mon--;
-	startup_time = kernel_mktime(&time);
+	time.tm_mon--;                              // tm_mon中月份的范围是0-11
+	startup_time = kernel_mktime(&time);        // 计算开机时间。kernel/mktime.c文件
 }
 
-static long memory_end = 0;
-static long buffer_memory_end = 0;
-static long main_memory_start = 0;
+// 下面定义一些局部变量
+static long memory_end = 0;                     // 机器具有的物理内存容量（字节数）
+static long buffer_memory_end = 0;              // 高速缓冲区末端地址
+static long main_memory_start = 0;              // 主内存（将用于分页）开始的位置
 
-struct drive_info { char dummy[32]; } drive_info;
+struct drive_info { char dummy[32]; } drive_info;  // 用于存放硬盘参数表信息
 
+// 内核初始化主程序。初始化结束后将以任务0（idle任务即空闲任务）的身份运行。
 void main(void)		/* This really IS void, no error here. */
 {			/* The startup routine assumes (well, ...) this */
 /*
