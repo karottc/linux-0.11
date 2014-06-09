@@ -382,15 +382,26 @@ int sys_nice(long increment)
 	return 0;
 }
 
+// 内核调度程序的初始化子程序
 void sched_init(void)
 {
 	int i;
-	struct desc_struct * p;
+	struct desc_struct * p;                 // 描述符表结构指针
 
-	if (sizeof(struct sigaction) != 16)
+    // Linux系统开发之初，内核不成熟。内核代码会被经常修改。Linus怕自己无意中修改了
+    // 这些关键性的数据结构，造成与POSIX标准的不兼容。这里加入下面这个判断语句并无
+    // 必要，纯粹是为了提醒自己以及其他修改内核代码的人。
+	if (sizeof(struct sigaction) != 16)         // sigaction 是存放有关信号状态的结构
 		panic("Struct sigaction MUST be 16 bytes");
+    // 在全局描述符表中设置初始任务(任务0)的任务状态段描述符和局部数据表描述符。
+    // FIRST_TSS_ENTRY和FIRST_LDT_ENTRY的值分别是4和5，定义在include/linux/sched.h
+    // 中；gdt是一个描述符表数组(include/linux/head.h)，实际上对应程序head.s中
+    // 全局描述符表基址（_gdt）.因此gtd+FIRST_TSS_ENTRY即为gdt[FIRST_TSS_ENTRY](即为gdt[4]),
+    // 也即gdt数组第4项的地址。
 	set_tss_desc(gdt+FIRST_TSS_ENTRY,&(init_task.task.tss));
 	set_ldt_desc(gdt+FIRST_LDT_ENTRY,&(init_task.task.ldt));
+    // 清任务数组和描述符表项(注意 i=1 开始，所以初始任务的描述符还在)。描述符项结构
+    // 定义在文件include/linux/head.h中。
 	p = gdt+2+FIRST_TSS_ENTRY;
 	for(i=1;i<NR_TASKS;i++) {
 		task[i] = NULL;
@@ -400,12 +411,20 @@ void sched_init(void)
 		p++;
 	}
 /* Clear NT, so that we won't have troubles with that later on */
-	__asm__("pushfl ; andl $0xffffbfff,(%esp) ; popfl");
+    // NT标志用于控制程序的递归调用(Nested Task)。当NT置位时，那么当前中断任务执行
+    // iret指令时就会引起任务切换。NT指出TSS中的back_link字段是否有效。
+	__asm__("pushfl ; andl $0xffffbfff,(%esp) ; popfl");        // 复位NT标志
 	ltr(0);
 	lldt(0);
+    // 下面代码用于初始化8253定时器。通道0，选择工作方式3，二进制计数方式。通道0的
+    // 输出引脚接在中断控制主芯片的IRQ0上，它每10毫秒发出一个IRQ0请求。LATCH是初始
+    // 定时计数值。
 	outb_p(0x36,0x43);		/* binary, mode 3, LSB/MSB, ch 0 */
 	outb_p(LATCH & 0xff , 0x40);	/* LSB */
 	outb(LATCH >> 8 , 0x40);	/* MSB */
+    // 设置时钟中断处理程序句柄(设置时钟中断门)。修改中断控制器屏蔽码，允许时钟中断。
+    // 然后设置系统调用中断门。这两个设置中断描述符表IDT中描述符在宏定义在文件
+    // include/asm/system.h中。
 	set_intr_gate(0x20,&timer_interrupt);
 	outb(inb_p(0x21)&~0x01,0x21);
 	set_system_gate(0x80,&system_call);

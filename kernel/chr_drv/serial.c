@@ -23,14 +23,25 @@
 extern void rs1_interrupt(void);
 extern void rs2_interrupt(void);
 
+// 初始化串行端口
+// 设置指定串行端口的传输波特率(2400bps)并允许除了写保持寄存器空以为的所有中断源。
+// 另外，在输出2字节的波特率因子时，须首先设置线路控制寄存器DLAB位(位7).
+// 参数：port是串行端口基地址，串口1 - 0x3F8; 串口2 - 0x2F8
 static void init(int port)
 {
+    // 设置线路控制寄存器的DLAB位(位7)
 	outb_p(0x80,port+3);	/* set DLAB of line control reg */
+    // 发送波特率因子低字节，0x30 -> 2400bps
 	outb_p(0x30,port);	/* LS of divisor (48 -> 2400 bps */
+    // 发送波特率因子高字节，0x00
 	outb_p(0x00,port+1);	/* MS of divisor */
+    // 复位DLAB位,数据位为8位
 	outb_p(0x03,port+3);	/* reset DLAB */
+    // 设置DTR,RTS,辅助用户输出2
 	outb_p(0x0b,port+4);	/* set DTR,RTS, OUT_2 */
+    // 除了写(写保持空)以外，允许所有中断源中断
 	outb_p(0x0d,port+1);	/* enable all intrs but writes */
+    // 读数据口，以进行复位操作(?)
 	(void)inb(port);	/* read data port to reset things (?) */
 }
 

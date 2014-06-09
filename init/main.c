@@ -176,15 +176,17 @@ void main(void)		/* This really IS void, no error here. */
 	blk_dev_init();                         // 块设备初始化,kernel/blk_drv/ll_rw_blk.c
 	chr_dev_init();                         // 字符设备初始化, kernel/chr_drv/tty_io.c
 	tty_init();                             // tty初始化， kernel/chr_drv/tty_io.c
-	time_init();
-	sched_init();
+	time_init();                            // 设置开机启动时间 startup_time
+	sched_init();                           // 调度程序初始化(加载任务0的tr,ldtr)(kernel/sched.c)
+    // 缓冲管理初始化，建内存链表等。(fs/buffer.c)
 	buffer_init(buffer_memory_end);
-	hd_init();
-	floppy_init();
-	sti();
-	move_to_user_mode();
+	hd_init();                              // 硬盘初始化，kernel/blk_drv/hd.c
+	floppy_init();                          // 软驱初始化，kernel/blk_drv/floppy.c
+	sti();                                  // 所有初始化工作都做完了，开启中断
+    // 下面过程通过在堆栈中设置的参数，利用中断返回指令启动任务0执行。
+	move_to_user_mode();                    // 移到用户模式下执行
 	if (!fork()) {		/* we count on this going ok */
-		init();
+		init();                             // 在新建的子进程(任务1)中执行。
 	}
 /*
  *   NOTE!!   For any other task 'pause()' would mean we have to get a
@@ -193,6 +195,8 @@ void main(void)		/* This really IS void, no error here. */
  * can run). For task0 'pause()' just means we go check if some other
  * task can run, and if not we return here.
  */
+    // pause系统调用会把任务0转换成可中断等待状态，再执行调度函数。但是调度函数只要发现系统中
+    // 没有其他任务可以运行是就会切换到任务0，而不依赖于任务0的状态。
 	for(;;) pause();
 }
 

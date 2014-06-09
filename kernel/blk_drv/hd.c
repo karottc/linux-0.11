@@ -340,10 +340,17 @@ void do_hd_request(void)
 		panic("unknown hd-command");
 }
 
+// 硬盘系统初始化
+// 设置硬盘中断描述符，并允许硬盘控制器发送中断请求信号。
+// 该函数设置硬盘设备的请求项处理函数指针为do_hd_request(),然后设置硬盘中断门
+// 描述符。Hd_interrupt(kernel/system_call.s)是其中断处理过程。硬盘中断号为
+// int 0x2E(46),对应8259A芯片的中断请求信号IRQ13.接着复位接联的主8250A int2
+// 的屏蔽位，允许从片发出中断请求信号。再复位硬盘的中断请求屏蔽位(在从片上)，
+// 允许硬盘控制器发送中断信号。中断描述符表IDT内中断门描述符设置宏set_intr_gate().
 void hd_init(void)
 {
-	blk_dev[MAJOR_NR].request_fn = DEVICE_REQUEST;
+	blk_dev[MAJOR_NR].request_fn = DEVICE_REQUEST;      // do_hd_request()
 	set_intr_gate(0x2E,&hd_interrupt);
-	outb_p(inb_p(0x21)&0xfb,0x21);
-	outb(inb_p(0xA1)&0xbf,0xA1);
+	outb_p(inb_p(0x21)&0xfb,0x21);                      // 复位接联的主8259A int2的屏蔽位
+	outb(inb_p(0xA1)&0xbf,0xA1);                        // 复位硬盘中断请求屏蔽位(在从片上)
 }

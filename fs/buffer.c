@@ -348,37 +348,52 @@ struct buffer_head * breada(int dev,int first, ...)
 	return (NULL);
 }
 
+// 缓冲区初始化函数
+// 参数buffer_end是缓冲区内存末端。对于具有16MB内存的系统，缓冲区末端被设置为4MB.
+// 对于有8MB内存的系统，缓冲区末端被设置为2MB。该函数从缓冲区开始位置start_buffer
+// 处和缓冲区末端buffer_end处分别同时设置(初始化)缓冲块头结构和对应的数据块。直到
+// 缓冲区中所有内存被分配完毕。
 void buffer_init(long buffer_end)
 {
 	struct buffer_head * h = start_buffer;
 	void * b;
 	int i;
 
+    // 首先根据参数提供的缓冲区高端位置确定实际缓冲区高端位置b。如果缓冲区高端等于1Mb，
+    // 则因为从640KB - 1MB被显示内存和BIOS占用，所以实际可用缓冲区内存高端位置应该是
+    // 640KB。否则缓冲区内存高端一定大于1MB。
 	if (buffer_end == 1<<20)
 		b = (void *) (640*1024);
 	else
 		b = (void *) buffer_end;
+    // 这段代码用于初始化缓冲区，建立空闲缓冲区块循环链表，并获取系统中缓冲块数目。
+    // 操作的过程是从缓冲区高端开始划分1KB大小的缓冲块，与此同时在缓冲区低端建立
+    // 描述该缓冲区块的结构buffer_head,并将这些buffer_head组成双向链表。
+    // h是指向缓冲头结构的指针，而h+1是指向内存地址连续的下一个缓冲头地址，也可以说
+    // 是指向h缓冲头的末端外。为了保证有足够长度的内存来存储一个缓冲头结构，需要b所
+    // 指向的内存块地址 >= h 缓冲头的末端，即要求 >= h+1.
 	while ( (b -= BLOCK_SIZE) >= ((void *) (h+1)) ) {
-		h->b_dev = 0;
-		h->b_dirt = 0;
-		h->b_count = 0;
-		h->b_lock = 0;
-		h->b_uptodate = 0;
-		h->b_wait = NULL;
-		h->b_next = NULL;
-		h->b_prev = NULL;
-		h->b_data = (char *) b;
-		h->b_prev_free = h-1;
-		h->b_next_free = h+1;
-		h++;
-		NR_BUFFERS++;
-		if (b == (void *) 0x100000)
-			b = (void *) 0xA0000;
+		h->b_dev = 0;                       // 使用该缓冲块的设备号
+		h->b_dirt = 0;                      // 脏标志，即缓冲块修改标志
+		h->b_count = 0;                     // 缓冲块引用计数
+		h->b_lock = 0;                      // 缓冲块锁定标志
+		h->b_uptodate = 0;                  // 缓冲块更新标志(或称数据有效标志)
+		h->b_wait = NULL;                   // 指向等待该缓冲块解锁的进程
+		h->b_next = NULL;                   // 指向具有相同hash值的下一个缓冲头
+		h->b_prev = NULL;                   // 指向具有相同hash值的前一个缓冲头
+		h->b_data = (char *) b;             // 指向对应缓冲块数据块（1024字节）
+		h->b_prev_free = h-1;               // 指向链表中前一项
+		h->b_next_free = h+1;               // 指向连表中后一项
+		h++;                                // h指向下一新缓冲头位置
+		NR_BUFFERS++;                       // 缓冲区块数累加
+		if (b == (void *) 0x100000)         // 若b递减到等于1MB，则跳过384KB
+			b = (void *) 0xA0000;           // 让b指向地址0xA0000(640KB)处
 	}
-	h--;
-	free_list = start_buffer;
-	free_list->b_prev_free = h;
-	h->b_next_free = free_list;
+	h--;                                    // 让h指向最后一个有效缓冲块头
+	free_list = start_buffer;               // 让空闲链表头指向头一个缓冲快
+	free_list->b_prev_free = h;             // 链表头的b_prev_free指向前一项(即最后一项)。
+	h->b_next_free = free_list;             // h的下一项指针指向第一项，形成一个环链
+    // 最后初始化hash表，置表中所有指针为NULL。
 	for (i=0;i<NR_HASH;i++)
 		hash_table[i]=NULL;
 }	
