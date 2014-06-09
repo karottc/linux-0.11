@@ -102,10 +102,13 @@ struct tty_queue * table_list[]={
 	&tty_table[2].read_q, &tty_table[2].write_q
 	};
 
+// TTY终端初始化函数
+// 初始化串口终端和控制台终端
 void tty_init(void)
 {
+    // 初始化串行中断程序和串行接口1和2（serial.c）
 	rs_init();
-	con_init();
+	con_init();     // 初始化控制台终端(console.c文件中)
 }
 
 void tty_intr(struct tty_struct * tty, int mask)
