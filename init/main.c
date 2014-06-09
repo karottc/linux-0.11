@@ -148,18 +148,22 @@ void main(void)		/* This really IS void, no error here. */
  * Interrupts are still disabled. Do necessary setups, then
  * enable them
  */
+    // 下面这段代码用于保存：
+    // 根设备号 ->ROOT_DEV；高速缓存末端地址->buffer_memory_end;
+    // 机器内存数->memory_end；主内存开始地址->main_memory_start；
+    // 其中ROOT_DEV已在前面包含进的fs.h文件中声明为extern int
  	ROOT_DEV = ORIG_ROOT_DEV;
- 	drive_info = DRIVE_INFO;
-	memory_end = (1<<20) + (EXT_MEM_K<<10);
-	memory_end &= 0xfffff000;
-	if (memory_end > 16*1024*1024)
+ 	drive_info = DRIVE_INFO;        // 复制0x90080处的硬盘参数
+	memory_end = (1<<20) + (EXT_MEM_K<<10);     // 内存大小=1Mb + 扩展内存(k)*1024 byte
+	memory_end &= 0xfffff000;                   // 忽略不到4kb(1页)的内存数
+	if (memory_end > 16*1024*1024)              // 内存超过16Mb，则按16Mb计
 		memory_end = 16*1024*1024;
-	if (memory_end > 12*1024*1024) 
+	if (memory_end > 12*1024*1024)              // 如果内存>12Mb,则设置缓冲区末端=4Mb 
 		buffer_memory_end = 4*1024*1024;
-	else if (memory_end > 6*1024*1024)
+	else if (memory_end > 6*1024*1024)          // 否则若内存>6Mb,则设置缓冲区末端=2Mb
 		buffer_memory_end = 2*1024*1024;
 	else
-		buffer_memory_end = 1*1024*1024;
+		buffer_memory_end = 1*1024*1024;        // 否则设置缓冲区末端=1Mb
 	main_memory_start = buffer_memory_end;
 #ifdef RAMDISK
 	main_memory_start += rd_init(main_memory_start, RAMDISK*1024);
