@@ -165,9 +165,12 @@ void main(void)		/* This really IS void, no error here. */
 	else
 		buffer_memory_end = 1*1024*1024;        // 否则设置缓冲区末端=1Mb
 	main_memory_start = buffer_memory_end;
+    // 如果在Makefile文件中定义了内存虚拟盘符号RAMDISK,则初始化虚拟盘。此时主内存将减少。
 #ifdef RAMDISK
 	main_memory_start += rd_init(main_memory_start, RAMDISK*1024);
 #endif
+    // 以下是内核进行所有方面的初始化工作。阅读时最好跟着调用的程序深入进去看，若实在
+    // 看不下去了，就先放一放，继续看下一个初始化调用。——这是经验之谈。o(∩_∩)o 。;-)
 	mem_init(main_memory_start,memory_end);
 	trap_init();
 	blk_dev_init();
