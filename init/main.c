@@ -98,9 +98,11 @@ extern long startup_time;       // 内核启动时间（开机时间）（秒）
  * bios-listing reading. Urghh.
  */
 // 这段宏读取CMOS实时时钟信息，outb_p,inb_p是include/asm/io.h中定义的端口输入输出宏
+// 0x70是写地址端口号，0x80|addr是读取的CMOS内存地址
+// 0x71 是读取数据端口号
 #define CMOS_READ(addr) ({ \
-outb_p(0x80|addr,0x70); \       // 0x70是写地址端口号，0x80|addr是读取的CMOS内存地址
-inb_p(0x71); \                  // 0x71 是读取数据端口号
+outb_p(0x80|addr,0x70); \
+inb_p(0x71); \
 })
 
 // 将BCD码转换成二进制数值。BCD码利用半个字节（4 bit）表示一个10进制数，因此
