@@ -202,6 +202,10 @@ void main(void)		/* This really IS void, no error here. */
 	for(;;) pause();
 }
 
+// 下面函数产生格式化信息并输出到标准输出设备stdout(1),这里是指屏幕上显示。参数'*fmt'
+// 指定输出将采用的格式，具体可以看标准C语言书籍。该子程序正好是vsprintf如何使用一个
+// 简单例子。该程序使用vsprintf()将格式化的字符串放入printfbuf缓冲区，然后用write()将
+// 缓冲区的内容输出到标准设备(1--stdout).vsprintf()函数实现在kernel/vsprintf.c中。
 static int printf(const char *fmt, ...)
 {
 	va_list args;
@@ -213,41 +217,77 @@ static int printf(const char *fmt, ...)
 	return i;
 }
 
-static char * argv_rc[] = { "/bin/sh", NULL };
-static char * envp_rc[] = { "HOME=/", NULL };
+// 读取并执行/etc/rc文件时所使用的命令行参数和环境参数
+static char * argv_rc[] = { "/bin/sh", NULL };      // 调用执行程序时参数字符串数组
+static char * envp_rc[] = { "HOME=/", NULL };       // 调用执行程序时环境字符串数组
 
+// 运行登录shell时所使用的命令行参数和环境参数
+// 下面 argv[0]中的字符“-”是传递给shell程序sh的一个标志。通过识别该标志，
+// sh程序会作为登录shell执行。其执行过程与在shell提示符下执行sh不一样。
 static char * argv[] = { "-/bin/sh",NULL };
 static char * envp[] = { "HOME=/usr/root", NULL };
 
+// 在main()中已经进行了系统初始化，包括内存管理、各种硬件设备和驱动程序。init()函数
+// 运行在任务0第1次创建的子进程(任务1)中。它首先对第一个将要执行的程序(shell)的环境
+// 进行初始化，然后以登录shell方式加载该程序并执行。
 void init(void)
 {
 	int pid,i;
 
-	setup((void *) &drive_info);
+    // setup()是一个系统调用。用于读取硬盘参数包括分区表信息并加载虚拟盘(若存在的话)
+    // 和安装根文件系统设备。该函数用25行上的宏定义，对应函数是sys_setup()，在块设备
+    // 子目录kernel/blk_drv/hd.c中。
+	setup((void *) &drive_info);        // drive_info结构是2个硬盘参数表
+    // 下面以读写访问方式打开设备"/dev/tty0",它对应终端控制台。由于这是第一次打开文件
+    // 操作，因此产生的文件句柄号(文件描述符)肯定是0。该句柄是UNIX类操作系统默认的
+    // 控制台标准输入句柄stdin。这里再把它以读和写的方式别人打开是为了复制产生标准输出(写)
+    // 句柄stdout和标准出错输出句柄stderr。函数前面的"(void)"前缀用于表示强制函数无需返回值。
 	(void) open("/dev/tty0",O_RDWR,0);
-	(void) dup(0);
-	(void) dup(0);
+	(void) dup(0);                      // 复制句柄，产生句柄1号——stdout标准输出设备
+	(void) dup(0);                      // 复制句柄，产生句柄2号——stderr标准出错输出设备
+    // 打印缓冲区块数和总字节数，每块1024字节，以及主内存区空闲内存字节数
 	printf("%d buffers = %d bytes buffer space\n\r",NR_BUFFERS,
 		NR_BUFFERS*BLOCK_SIZE);
 	printf("Free mem: %d bytes\n\r",memory_end-main_memory_start);
+    // 下面fork()用于创建一个子进程(任务2)。对于被创建的子进程，fork()将返回0值，对于
+    // 原进程(父进程)则返回子进程的进程号pid。该子进程关闭了句柄0(stdin)、以只读方式打开
+    // /etc/rc文件，并使用execve()函数将进程自身替换成/bin/sh程序(即shell程序)，然后
+    // 执行/bin/sh程序。然后执行/bin/sh程序。所携带的参数和环境变量分别由argv_rc和envp_rc
+    // 数组给出。关闭句柄0并立即打开/etc/rc文件的作用是把标准输入stdin重定向到/etc/rc文件。
+    // 这样shell程序/bin/sh就可以运行rc文件中的命令。由于这里的sh的运行方式是非交互的，
+    // 因此在执行完rc命令后就会立刻退出，进程2也随之结束。
+    // _exit()退出时出错码1 - 操作未许可；2 - 文件或目录不存在。
 	if (!(pid=fork())) {
 		close(0);
 		if (open("/etc/rc",O_RDONLY,0))
-			_exit(1);
-		execve("/bin/sh",argv_rc,envp_rc);
-		_exit(2);
+			_exit(1);                       // 如果打开文件失败，则退出(lib/_exit.c)
+		execve("/bin/sh",argv_rc,envp_rc);  // 替换成/bin/sh程序并执行
+		_exit(2);                           // 若execve()执行失败则退出。
 	}
+    // 下面还是父进程(1)执行语句。wait()等待子进程停止或终止，返回值应是子进程的进程号(pid).
+    // 这三句的作用是父进程等待子进程的结束。&i是存放返回状态信息的位置。如果wait()返回值
+    // 不等于子进程号，则继续等待。
 	if (pid>0)
 		while (pid != wait(&i))
 			/* nothing */;
+    // 如果执行到这里，说明刚创建的子进程的执行已停止或终止了。下面循环中首先再创建
+    // 一个子进程，如果出错，则显示“初始化程序创建子进程失败”信息并继续执行。对于所
+    // 创建的子进程将关闭所有以前还遗留的句柄(stdin, stdout, stderr),新创建一个会话
+    // 并设置进程组号，然后重新打开/dev/tty0作为stdin,并复制成stdout和sdterr.再次
+    // 执行系统解释程序/bin/sh。但这次执行所选用的参数和环境数组另选了一套。然后父
+    // 进程再次运行wait()等待。如果子进程又停止了执行，则在标准输出上显示出错信息
+    // “子进程pid挺直了运行，返回码是i”,然后继续重试下去....，形成一个“大”循环。
+    // 此外，wait()的另外一个功能是处理孤儿进程。如果一个进程的父进程先终止了，那么
+    // 这个进程的父进程就会被设置为这里的init进程(进程1)，并由init进程负责释放一个
+    // 已终止进程的任务数据结构等资源。
 	while (1) {
 		if ((pid=fork())<0) {
 			printf("Fork failed in init\r\n");
 			continue;
 		}
-		if (!pid) {
+		if (!pid) {                                 // 新的子进程
 			close(0);close(1);close(2);
-			setsid();
+			setsid();                               // 创建一新的会话期
 			(void) open("/dev/tty0",O_RDWR,0);
 			(void) dup(0);
 			(void) dup(0);
@@ -257,7 +297,10 @@ void init(void)
 			if (pid == wait(&i))
 				break;
 		printf("\n\rchild %d died with code %04x\n\r",pid,i);
-		sync();
+		sync();                                     // 同步操作，刷新缓冲区。
 	}
+    // _exit()和exit()都用于正常终止一个函数。但_exit()直接是一个sys_exit系统调用，
+    // 而exit()则通常是普通函数库中的一个函数。它会先执行一些清除操作，例如调用
+    // 执行各终止处理程序、关闭所有标准IO等，然后调用sys_exit。
 	_exit(0);	/* NOTE! _exit, not exit() */
 }
