@@ -20,20 +20,26 @@
 
 #include <signal.h>
 
+// 该宏取信号nr在信号位图中对应位的二进制数值。信号编号1-32.比如信号5的位图
+// 数值等于 1 <<(5-1) = 16 = 00010000b
 #define _S(nr) (1<<((nr)-1))
+// 除了SIGKILL 和SIGSTOP信号以外其他信号都是可阻塞的(...1011,1111,1110,1111,111b)
 #define _BLOCKABLE (~(_S(SIGKILL) | _S(SIGSTOP)))
 
+// 内核调试函数。显示任务号nr的进程号、进程状态和内核堆栈空闲字节数(大约)
 void show_task(int nr,struct task_struct * p)
 {
 	int i,j = 4096-sizeof(struct task_struct);
 
 	printk("%d: pid=%d, state=%d, ",nr,p->pid,p->state);
 	i=0;
-	while (i<j && !((char *)(p+1))[i])
+	while (i<j && !((char *)(p+1))[i])      // 检测指定任务数据结构以后等于0的字节数。
 		i++;
 	printk("%d (of %d) chars free in kernel stack\n\r",i,j);
 }
 
+// 显示所有任务的任务号、进程号、进程状态和内核堆栈空闲字节数
+// NR_TASKS是系统能容纳的最大进程(任务)数量(64个)。
 void show_stat(void)
 {
 	int i;
@@ -43,27 +49,46 @@ void show_stat(void)
 			show_task(i,task[i]);
 }
 
+// PC机8253定时芯片的输入时钟频率约为1.193180MHz. Linux内核希望定时器发出中断的频率是
+// 100Hz，也即没10ms发出一次时钟中断。因此这里的LATCH是设置8253芯片的初值。
 #define LATCH (1193180/HZ)
 
-extern void mem_use(void);
+extern void mem_use(void);      // 没有任何地方定义和引用该函数
 
-extern int timer_interrupt(void);
-extern int system_call(void);
+extern int timer_interrupt(void);       // 时钟中断处理程序
+extern int system_call(void);           // 系统调用中断处理程序
 
+// 每个任务(进程)在内核态运行时都有自己的内核态堆栈。这里定义了任务的内核态堆栈结构。
+// 定义任务联合(任务结构成员和stack字符数组成员)。因为一个任务的数据结构与其内核态堆栈
+// 在同一内存页中，所以从堆栈段寄存器ss可以获得其数据端选择符。
 union task_union {
 	struct task_struct task;
 	char stack[PAGE_SIZE];
 };
 
-static union task_union init_task = {INIT_TASK,};
+static union task_union init_task = {INIT_TASK,};   // 定义初始任务的数据
 
+// 从开机开始算起的滴答数时间值全局变量(10ms/滴答)。系统时钟中断每发生一次即一个滴答。
+// 前面的限定符volatile,英文解释是易改变的、不稳定的意思。这个限定词的含义是向编译器
+// 指明变量的内容可能会由于被其他程序修改而变化。通常在程序中声明一个变量时，编译器
+// 会尽量把它存放在通用寄存器中，例如ebx，以提高访问效率。当CPU把其值放到ebx中后一般
+// 就不会再关心该变量对应内存位置中的内容。若此时其他程序(例如内核程序或一个中断过程)
+// 修改了内存中该变量的值，ebx中的值并不会随之更新。为了解决这种情况就创建了volatile
+// 限定符，让代码在引用该变量时一定要从指定内存位置中取得其值。这里即是要求gcc不要对
+// jiffies进行优化处理，也不要挪动位置，并且需要从内存中取其值。因此时钟中断处理过程
+// 等程序会修改它的值。
 long volatile jiffies=0;
-long startup_time=0;
-struct task_struct *current = &(init_task.task);
-struct task_struct *last_task_used_math = NULL;
+long startup_time=0;                                // 开机时间，从1970:0:0:0开始计时
+struct task_struct *current = &(init_task.task);    // 当前任务指针(初始化指向任务0)
+struct task_struct *last_task_used_math = NULL;     // 使用过协处理器任务的指针。
 
-struct task_struct * task[NR_TASKS] = {&(init_task.task), };
+struct task_struct * task[NR_TASKS] = {&(init_task.task), }; // 定义任务指针数组
 
+// 定义用户堆栈，共1K项，容量4K字节。在内核初始化操作过程中被用作内核栈，初始化完成
+// 以后将被用作任务0的用户态堆栈。在运行任务0之前它是内核栈，以后用作任务0和1的用
+// 户态栈。下面结构用于设置堆栈ss:esp(数据的选择符，指针)。ss被设置为内核数据段
+// 选择符(0x10),指针esp指在user_stack数组最后一项后面。这是因为Intel CPU执行堆栈操作
+// 时是先递减堆栈指针sp值，然后在sp指针处保存入栈内容。
 long user_stack [ PAGE_SIZE>>2 ] ;
 
 struct {
@@ -74,20 +99,27 @@ struct {
  *  'math_state_restore()' saves the current math information in the
  * old math state array, and gets the new ones from the current task
  */
+// 当任务被调度交换过以后，该函数用以保存原任务的协处理器状态(上下文)并恢复新调度
+// 进来的当前任务的协处理器执行状态。
 void math_state_restore()
 {
+    // 如果任务没变则返回(上一个任务就是当前任务)。这里“上一个任务”是指刚被交换出去的任务。
 	if (last_task_used_math == current)
 		return;
+    // 在发送协处理器命令之前要先发WAIT指令。如果上个任务使用了协处理器。则保存其状态。
 	__asm__("fwait");
 	if (last_task_used_math) {
 		__asm__("fnsave %0"::"m" (last_task_used_math->tss.i387));
 	}
+    // 现在，last_task_used_math指向当前任务，以备当前任务交换出去时使用。此时如果当前任务
+    // 用过协处理器，则恢复其状态。否则的话说明是第一次使用，于是就向协处理器发初始化命令，
+    // 并设置使用了协处理器标志。
 	last_task_used_math=current;
 	if (current->used_math) {
 		__asm__("frstor %0"::"m" (current->tss.i387));
 	} else {
-		__asm__("fninit"::);
-		current->used_math=1;
+		__asm__("fninit"::);        // 向协处理器发初始化命令
+		current->used_math=1;       // 设置已使用协处理器标志
 	}
 }
 
@@ -108,12 +140,19 @@ void schedule(void)
 
 /* check alarm, wake up any interruptible tasks that have got a signal */
 
+    // 从任务数组中最后一个任务开始循环检测alarm。在循环时跳过空指针项。
 	for(p = &LAST_TASK ; p > &FIRST_TASK ; --p)
 		if (*p) {
+            // 如果设置过任务的定时值alarm，并且已经过期(alarm<jiffies)，则在
+            // 信号位图中置SIGALRM信号，即向任务发送SIGALARM信号。然后清alarm。
+            // 该信号的默认操作是终止进程。jiffies是系统从开机开始算起的滴答数(10ms/滴答)。
 			if ((*p)->alarm && (*p)->alarm < jiffies) {
 					(*p)->signal |= (1<<(SIGALRM-1));
 					(*p)->alarm = 0;
 				}
+            // 如果信号位图中除被阻塞的信号外还有其他信号，并且任务处于可中断状态，则
+            // 置任务为就绪状态。其中'~(_BLOCKABLE & (*p)->blocked)'用于忽略被阻塞的信号，但
+            // SIGKILL 和SIGSTOP不能呗阻塞。
 			if (((*p)->signal & ~(_BLOCKABLE & (*p)->blocked)) &&
 			(*p)->state==TASK_INTERRUPTIBLE)
 				(*p)->state=TASK_RUNNING;
