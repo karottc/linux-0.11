@@ -19,27 +19,37 @@
 #include <asm/segment.h>
 #include <asm/io.h>
 
+// 以下语句定义了三个嵌入式汇编宏语句函数。有关嵌入式汇编的基本语法见本程序
+// 列表后的说明。用圆括号扩祝的组合语句(花括号中的语句)可以作为表达式使用，
+// 其中最后的__res是其输出值。
 #define get_seg_byte(seg,addr) ({ \
 register char __res; \
 __asm__("push %%fs;mov %%ax,%%fs;movb %%fs:%2,%%al;pop %%fs" \
 	:"=a" (__res):"0" (seg),"m" (*(addr))); \
 __res;})
 
+// 取段seg 中地址addr处的一个长字(4 byte).
+// 参数：seg - 段选择符；addr - 段内指定地址。
+// 输出：%0 - eax(__res)；输入：%1 - eax(seg); %2 - 内存地址(*(addr)).
 #define get_seg_long(seg,addr) ({ \
 register unsigned long __res; \
 __asm__("push %%fs;mov %%ax,%%fs;movl %%fs:%2,%%eax;pop %%fs" \
 	:"=a" (__res):"0" (seg),"m" (*(addr))); \
 __res;})
 
+// 取fs段寄存器的值(选择符)
+// 输出：%0 - eax(__res).
 #define _fs() ({ \
 register unsigned short __res; \
 __asm__("mov %%fs,%%ax":"=a" (__res):); \
 __res;})
 
-int do_exit(long code);
+int do_exit(long code);             // 程序退出处理
 
-void page_exception(void);
+void page_exception(void);          // 页异常
 
+// 以下定义了一些中断处理程序原型，用于在函数trap_init()中设置相应中断门描述符。
+// 这些代码在asm.s或system_call.s中。
 void divide_error(void);
 void debug(void);
 void nmi(void);
@@ -60,12 +70,19 @@ void reserved(void);
 void parallel_interrupt(void);
 void irq13(void);
 
+// 该子程序用来打印出错中断的名称、出错号、调用程序的EIP、EFLAGS、ESP、fs段寄存器值、
+// 段的基址、段的长度、进程号PID、任务号、10字节指令码。如果堆栈在用户数据段，则还
+// 打印16字节的堆栈内容。
 static void die(char * str,long esp_ptr,long nr)
 {
 	long * esp = (long *) esp_ptr;
 	int i;
 
 	printk("%s: %04x\n\r",str,nr&0xffff);
+    // 下行打印语句显示当前调用进程的CS：EIP、EFLAGS和SS:ESP的值。
+    // EIP:\t%04x:%p\n - esp[1]是段选择符(cs)，esp[0]是eip.
+    // EFLAGS:\t%p\n - esp[2]是eflags
+    // ESP:\t%04x:%p\n - esp[4]是源ss，esp[3]是源esp
 	printk("EIP:\t%04x:%p\nEFLAGS:\t%p\nESP:\t%04x:%p\n",
 		esp[1],esp[0],esp[2],esp[4],esp[3]);
 	printk("fs: %04x\n",_fs());
@@ -76,7 +93,7 @@ static void die(char * str,long esp_ptr,long nr)
 			printk("%p ",get_seg_long(0x17,i+(long *)esp[3]));
 		printk("\n");
 	}
-	str(i);
+	str(i);                 // 取当前运行任务的任务号
 	printk("Pid: %d, process nr: %d\n\r",current->pid,0xffff & i);
 	for(i=0;i<10;i++)
 		printk("%02x ",0xff & get_seg_byte(esp[1],(i+(char *)esp[0])));
@@ -84,6 +101,7 @@ static void die(char * str,long esp_ptr,long nr)
 	do_exit(11);		/* play segment exception */
 }
 
+// 下面do开头的函数是asm.s中对应中断处理程序调用的C函数
 void do_double_fault(long esp, long error_code)
 {
 	die("double fault",esp,error_code);
