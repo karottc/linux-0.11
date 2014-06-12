@@ -271,10 +271,12 @@ repeat:	current->state = TASK_INTERRUPTIBLE;
 		tmp->state=0;
 }
 
+// 唤醒*p指向的让任务。*p是任务等待队列头指针。由于新等待任务是插入在等待队列头指针处的，
+// 因此唤醒的是最后进入等待队列的任务。
 void wake_up(struct task_struct **p)
 {
 	if (p && *p) {
-		(**p).state=0;
+		(**p).state=0;          // 置为就绪(可运行)状态TASK_RUNNING.
 		*p=NULL;
 	}
 }
@@ -284,25 +286,46 @@ void wake_up(struct task_struct **p)
  * proper. They are here because the floppy needs a timer, and this
  * was the easiest way of doing it.
  */
+// 下面代码用于处理软驱定时。在阅读这段代码之前请先看一下块设备中的驱动程序(floppy.c)后面
+// 的说明，或者到阅读软盘块设备驱动程序时再来看这段代码。其实时间单位：1个滴答=1/100秒。
+// 下面数组存放等待软驱马达启动到正常转速的进程指针。数组索引0-3分别对应软驱A-D。
 static struct task_struct * wait_motor[4] = {NULL,NULL,NULL,NULL};
+// 下面数组分别存放各软驱马达启动所需的滴答数。程序中默认启动时间为50个滴答(0.5秒)。
 static int  mon_timer[4]={0,0,0,0};
+// 下面数组分别存放各软驱在马达停转之前需维持的时间。程序中设定为10000个滴答(100秒)
 static int moff_timer[4]={0,0,0,0};
-unsigned char current_DOR = 0x0C;
+// 对应软驱控制器中当前数字输出寄存器。该寄存器每位的定义如下：
+// 位7-4：分别控制驱动器D-A马达的启动。1-启动；0-关闭。
+// 位3：1 - 允许DMA和中断请求；0 - 禁止DMA和中断请求。
+// 位2：1 - 允许软盘控制器；0 - 复位软盘控制器。
+// 位1-0：00-11，用于选择控制的软驱A-D。
+unsigned char current_DOR = 0x0C;       // 允许DMA中断请求、启动FDC
 
+// 指定软驱启动到正常运转状态所需等待时间。
+// 参数nr - 软驱号(0 -3),返回值为滴答数。
+// 局部变量selected是选中软驱标志,mask是所选软驱对应的数字输出寄存器中马达启动
+// 比特位。mask高4位是各软驱启动马达标志。
 int ticks_to_floppy_on(unsigned int nr)
 {
 	extern unsigned char selected;
 	unsigned char mask = 0x10 << nr;
 
+    // 系统最多4个软驱。首先预先设置好指定软驱nr停转之前需要经过的时间(100秒)。然后
+    // 取当前DDR寄存器值到临时变量mask中，并把指定软驱的马达启动标志置位。
 	if (nr>3)
 		panic("floppy_on: nr>3");
 	moff_timer[nr]=10000;		/* 100 s = very big :-) */
 	cli();				/* use floppy_off to turn it off */
 	mask |= current_DOR;
+    // 如果当前没有选择软驱，则首先复位其他软驱的选择位，然后置指定软驱选择位。
 	if (!selected) {
 		mask &= 0xFC;
 		mask |= nr;
 	}
+    // 如果数字输出寄存器的当前值与要求的值不同，则向FDC数字输出端口输出新值(mask)，
+    // 并且如果要求启动的马达还没有启动，则置相应软驱的马达启动定时器值(HZ/2 = 0.5秒
+    // 或50个滴答)。若已经启动，则再设置启动定时为2个滴答，能满足下面do_floppy_timer()
+    // 中先递减后判断的要求。执行本次定时代码的要求即可。此后更新当前数字输出寄存器current_DOR.
 	if (mask != current_DOR) {
 		outb(mask,FD_DOR);
 		if ((mask ^ current_DOR) & 0xf0)
@@ -311,69 +334,94 @@ int ticks_to_floppy_on(unsigned int nr)
 			mon_timer[nr] = 2;
 		current_DOR = mask;
 	}
-	sti();
-	return mon_timer[nr];
+	sti();                      // 开中断
+	return mon_timer[nr];       // 最后返回启动马达所需的时间值
 }
 
+// 等待指定软驱马达启动所需的一段时间，然后返回。
+// 设置指定软驱的马达启动到正常转速所需的延时，然后睡眠等待。在定时中断过程中会一直递减
+// 判断这里设定的延时值。当延时到期，就会唤醒这里的等待进程。
 void floppy_on(unsigned int nr)
 {
-	cli();
+	cli();                                  // 关中断
+    // 如果马达启动定时还没到，就一直把当前进程置为不可中断睡眠状态并放入等待马达运行的队列中。
 	while (ticks_to_floppy_on(nr))
 		sleep_on(nr+wait_motor);
-	sti();
+	sti();                                  // 开中断
 }
 
+// 置关闭相应软驱马达停转定时器(3秒)
+// 若不使用该函数明确关闭指定的软驱马达，则在马达开启100秒之后也会被关闭
 void floppy_off(unsigned int nr)
 {
 	moff_timer[nr]=3*HZ;
 }
 
+// 软盘定时处理子程序。更新马达启动定时值和马达关闭停转计时值。该子程序会在时钟定时中断
+// 过程中被调用，因此系统每经过一个滴答(10ms)就会被调用一次，随时更新马达开启或停转定时器
+// 的值。如果某一个马达停转定时到，则将数字输出寄存器马达启动位复位。
 void do_floppy_timer(void)
 {
 	int i;
 	unsigned char mask = 0x10;
 
 	for (i=0 ; i<4 ; i++,mask <<= 1) {
-		if (!(mask & current_DOR))
+		if (!(mask & current_DOR))          // 如果不是DOR指定的马达则跳过。
 			continue;
-		if (mon_timer[i]) {
+		if (mon_timer[i]) {                 // 如果马达启动定时到则唤醒进程。
 			if (!--mon_timer[i])
 				wake_up(i+wait_motor);
-		} else if (!moff_timer[i]) {
+		} else if (!moff_timer[i]) {        // 如果马达停转定时到则复位相应马达，并更新数字输出寄存器
 			current_DOR &= ~mask;
 			outb(current_DOR,FD_DOR);
 		} else
-			moff_timer[i]--;
+			moff_timer[i]--;                // 否则马达停转计时递减。
 	}
 }
 
+// 下面是关于定时器的代码，最多可有64个定时器。
 #define TIME_REQUESTS 64
 
+// 定时器链表结构和定时器数组。该定时器链表专用于供软驱关闭马达和启动马达定时操作。
+// 这种类型定时器类似现代Linux系统中的动态定时器(Dynamic Timer)，仅供内核使用。
 static struct timer_list {
-	long jiffies;
-	void (*fn)();
-	struct timer_list * next;
-} timer_list[TIME_REQUESTS], * next_timer = NULL;
+	long jiffies;                   // 定时滴答数
+	void (*fn)();                   // 定时处理程序
+	struct timer_list * next;       // 链接指向下一个定时器
+} timer_list[TIME_REQUESTS], * next_timer = NULL;   // next_timer是定时器队列头指针
 
+// 添加定时器。输入参数为指定的定时值(滴答数)和相应的处理程序指针。
+// 软盘驱动程序(floppy.c)利用该函数执行启动或关闭马达的延时操作。
+// 参数jiffies - 以10毫秒计的滴答数：*fn() - 定时时间到时执行的函数
 void add_timer(long jiffies, void (*fn)(void))
 {
 	struct timer_list * p;
 
+    // 如果定时处理程序指针为空，则退出
 	if (!fn)
 		return;
 	cli();
+    // 如果定时值 <= 0,则立刻调用其处理程序。并且该定时器不加入链表中。
 	if (jiffies <= 0)
 		(fn)();
 	else {
+        // 否则从定时器数组中，找一个空闲项。
 		for (p = timer_list ; p < timer_list + TIME_REQUESTS ; p++)
 			if (!p->fn)
 				break;
+        // 如果已经用完了定时器数组，则系统崩溃;-).否则向定时器数据结构填入相应信息，
+        // 并链入链表头。
 		if (p >= timer_list + TIME_REQUESTS)
 			panic("No more time requests free");
 		p->fn = fn;
 		p->jiffies = jiffies;
 		p->next = next_timer;
 		next_timer = p;
+        // 链表项按定时值从小到大排序。在排序时减去排在前面需要的滴答数，这样在
+        // 处理定时器时只要查看链表头的第一项的定时是否到期即可。[[ 这段程序没有
+        // 考虑周全。如果新插入的定时器值小于原来头一个定时器值时根本不会进入循环中，
+        // 但此时还是应该将紧随其后面的一个定时器值减去新的第一个定时值。即如果
+        // 第1个定时值<=第2个，则第2个定时值扣除第1个的值即可，否则进入下面循环中进行处理]]
 		while (p->next && p->next->jiffies < p->jiffies) {
 			p->jiffies -= p->next->jiffies;
 			fn = p->fn;
@@ -388,39 +436,58 @@ void add_timer(long jiffies, void (*fn)(void))
 	sti();
 }
 
+/// 时钟中断C函数处理程序，在system_call.s中timer_interrupt被调用。
+// 参数cpl是当前特权级0或3，是时钟中断发生时正在被执行的代码选择符中的特权级。
+// cpl=0时表示中断发生时正在执行内核代码；cpl=3表示中断发生时正在执行用户代码。
+// 对于一个进程由于执行时间片用完时，则进城任务切换。并执行一个计时更新工作。
 void do_timer(long cpl)
 {
-	extern int beepcount;
-	extern void sysbeepstop(void);
+	extern int beepcount;               // 扬声器发声滴答数
+	extern void sysbeepstop(void);      // 关闭扬声器。
 
+    // 如果发声计数次数到，则关闭发声。(向0x61口发送命令，复位位0和1，位0
+    // 控制8253计数器2的工作，位1控制扬声器)
 	if (beepcount)
 		if (!--beepcount)
 			sysbeepstop();
 
+    // 如果当前特权级(cpl)为0，则将内核代码运行时间stime递增；
 	if (cpl)
 		current->utime++;
 	else
 		current->stime++;
 
+    // 如果有定时器存在，则将链表第1个定时器的值减1.如果已等于0，则调用相应的
+    // 处理程序，并将该处理程序指针置空。然后去掉该项定时器。next_timer是定时器
+    // 链表的头指针。
 	if (next_timer) {
 		next_timer->jiffies--;
 		while (next_timer && next_timer->jiffies <= 0) {
-			void (*fn)(void);
+			void (*fn)(void);       // 这里插入了一个函数指针定义!!!! o(︶︿︶)o 
 			
 			fn = next_timer->fn;
 			next_timer->fn = NULL;
 			next_timer = next_timer->next;
-			(fn)();
+			(fn)();                 // 调用处理函数
 		}
 	}
+    // 如果当前软盘控制器FDC的数字输出寄存器中马达启动位有置位的，则执行软盘定时程序
 	if (current_DOR & 0xf0)
 		do_floppy_timer();
+    // 如果进程运行时间还没完，则退出。否则置当前任务计数值为0.并且若发生时钟中断
+    // 正在内核代码中运行则返回，否则调用执行调度函数。
 	if ((--current->counter)>0) return;
 	current->counter=0;
-	if (!cpl) return;
+	if (!cpl) return;                       // 内核态程序不依赖counter值进行调度
 	schedule();
 }
 
+// 系统调用功能 - 设置报警定时时间值(秒)
+// 如果参数seconds大于0，则设置新定时值，并返回原定时时刻还剩余的间隔时间。否则
+// 返回0.进程数据结构中报警定时值alarm的单位是系统滴答(1滴答为10ms),它是系统开机起
+// 到设置定时操作时系统滴答值jiffies和转换成滴答单位的定时值之和，即'jiffies + HZ*定时秒值'。
+// 而参数给出的是以秒为单位的定时值，因此本函数的主要操作是进行两种单位的转换。
+// 其中常数HZ = 100，是内核系统运行频率。seconds是新的定时时间值，单位：秒。
 int sys_alarm(long seconds)
 {
 	int old = current->alarm;
@@ -431,36 +498,44 @@ int sys_alarm(long seconds)
 	return (old);
 }
 
+// 取当前进程号pid
 int sys_getpid(void)
 {
 	return current->pid;
 }
 
+// 取父进程号ppid
 int sys_getppid(void)
 {
 	return current->father;
 }
 
+// 取用户号uid
 int sys_getuid(void)
 {
 	return current->uid;
 }
 
+// 取有效用户号euid
 int sys_geteuid(void)
 {
 	return current->euid;
 }
 
+// 取组号gid
 int sys_getgid(void)
 {
 	return current->gid;
 }
 
+// 取有效组号egid
 int sys_getegid(void)
 {
 	return current->egid;
 }
 
+// 系统调用功能 - 降低对CPU的使用优先权(有人会用吗？o(∩_∩)o )
+// 应该限制increment为大于0的值，否则可使优先权增大!!
 int sys_nice(long increment)
 {
 	if (current->priority-increment>0)
