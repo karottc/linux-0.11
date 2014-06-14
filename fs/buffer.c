@@ -26,6 +26,9 @@
 #include <asm/system.h>
 #include <asm/io.h>
 
+// 变量end是由编译时的连接程序ld生成，用于表明内核代码的末端，即指明内核模块某段位置。
+// 也可以从编译内核时生成的System.map文件中查出。这里用它来表明高速缓冲区开始于内核
+// 代码某段位置。
 extern int end;
 extern void put_super(int);
 extern void invalidate_inodes(int);
