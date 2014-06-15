@@ -29,53 +29,87 @@
 // 变量end是由编译时的连接程序ld生成，用于表明内核代码的末端，即指明内核模块某段位置。
 // 也可以从编译内核时生成的System.map文件中查出。这里用它来表明高速缓冲区开始于内核
 // 代码某段位置。
+// buffer_wait等变量是等待空闲缓冲块而睡眠的任务队列头指针。它与缓冲块头部结构中b_wait
+// 指针的租用不同。当任务申请一个缓冲块而正好遇到系统缺乏可用空闲缓冲块时，当前任务
+// 就会被添加到buffer_wait睡眠等待队列中。而b_wait则是专门供等待指定缓冲块(即b_wait
+// 对应的缓冲块)的任务使用的等待队列头指针。
 extern int end;
 extern void put_super(int);
 extern void invalidate_inodes(int);
 
 struct buffer_head * start_buffer = (struct buffer_head *) &end;
-struct buffer_head * hash_table[NR_HASH];
-static struct buffer_head * free_list;
-static struct task_struct * buffer_wait = NULL;
-int NR_BUFFERS = 0;
+struct buffer_head * hash_table[NR_HASH];           // NR_HASH ＝ 307项
+static struct buffer_head * free_list;              // 空闲缓冲块链表头指针
+static struct task_struct * buffer_wait = NULL;     // 等待空闲缓冲块而睡眠的任务队列
+// 下面定义系统缓冲区中含有的缓冲块个数。这里，NR_BUFFERS是一个定义在linux/fs.h中的
+// 宏，其值即使变量名nr_buffers，并且在fs.h文件中声明为全局变量。大写名称通常都是一个
+// 宏名称，Linus这样编写代码是为了利用这个大写名称来隐含地表示nr_buffers是一个在内核
+// 初始化之后不再改变的“变量”。它将在后面的缓冲区初始化函数buffer_init中被设置。
+int NR_BUFFERS = 0;                                 // 系统含有缓冲区块的个数
 
+//// 等待指定缓冲块解锁
+// 如果指定的缓冲块bh已经上锁就让进程不可中断地睡眠在该缓冲块的等待队列b_wait中。
+// 在缓冲块解锁时，其等待队列上的所有进程将被唤醒。虽然是在关闭中断(cli)之后
+// 去睡眠的，但这样做并不会影响在其他进程上下文中影响中断。因为每个进程都在自己的
+// TSS段中保存了标志寄存器EFLAGS的值，所以在进程切换时CPU中当前EFLAGS的值也随之
+// 改变。使用sleep_on进入睡眠状态的进程需要用wake_up明确地唤醒。
 static inline void wait_on_buffer(struct buffer_head * bh)
 {
-	cli();
-	while (bh->b_lock)
+	cli();                          // 关中断
+	while (bh->b_lock)              // 如果已被上锁则进程进入睡眠，等待其解锁
 		sleep_on(&bh->b_wait);
-	sti();
+	sti();                          // 开中断
 }
 
+//// 设备数据同步。
+// 同步设备和内存高速缓冲中数据，其中sync_inode()定义在inode.c中。
 int sys_sync(void)
 {
 	int i;
 	struct buffer_head * bh;
 
+    // 首先调用i节点同步函数，把内存i节点表中所有修改过的i节点写入高速缓冲中。
+    // 然后扫描所有高速缓冲区，对已被修改的缓冲块产生写盘请求，将缓冲中数据写入
+    // 盘中，做到高速缓冲中的数据与设备中的同步。
 	sync_inodes();		/* write out inodes into buffers */
 	bh = start_buffer;
 	for (i=0 ; i<NR_BUFFERS ; i++,bh++) {
-		wait_on_buffer(bh);
+		wait_on_buffer(bh);                 // 等待缓冲区解锁(如果已经上锁的话)
 		if (bh->b_dirt)
-			ll_rw_block(WRITE,bh);
+			ll_rw_block(WRITE,bh);          // 产生写设备块请求
 	}
 	return 0;
 }
 
+//// 对指定设备进行高速缓冲数据与设备上数据的同步操作
+// 该函数首先搜索高速缓冲区所有缓冲块。对于指定设备dev的缓冲块，若其数据已经
+// 被修改过就写入盘中(同步操作)。然后把内存中i节点表数据写入 高速缓冲中。之后
+// 再对指定设备dev执行一次与上述相同的写盘操作。
 int sync_dev(int dev)
 {
 	int i;
 	struct buffer_head * bh;
 
+    // 首先对参数指定的设备执行数据同步操作，让设备上的数据与高速缓冲区中的数据
+    // 同步。方法是扫描高速缓冲区中所有缓冲块，对指定设备dev的缓冲块，先检测其
+    // 是否已被上锁，若已被上锁就睡眠等待其解锁。然后再判断一次该缓冲块是否还是
+    // 指定设备的缓冲块并且已修改过(b_dirt标志置位)，若是就对其执行写盘操作。
+    // 因为在我们睡眠期间该缓冲块有可能已被释放或者被挪作他用，所以在继续执行前
+    // 需要再次判断一下该缓冲块是否还是指定设备的缓冲块。
 	bh = start_buffer;
 	for (i=0 ; i<NR_BUFFERS ; i++,bh++) {
-		if (bh->b_dev != dev)
+		if (bh->b_dev != dev)               // 不是设备dev的缓冲块则继续
 			continue;
-		wait_on_buffer(bh);
+		wait_on_buffer(bh);                     // 等待缓冲区解锁
 		if (bh->b_dev == dev && bh->b_dirt)
 			ll_rw_block(WRITE,bh);
 	}
+    // 再将i节点数据吸入高速缓冲。让i姐电表inode_table中的inode与缓冲中的信息同步。
 	sync_inodes();
+    // 然后在高速缓冲中的数据更新之后，再把他们与设备中的数据同步。这里采用两遍同步
+    // 操作是为了提高内核执行效率。第一遍缓冲区同步操作可以让内核中许多"脏快"变干净，
+    // 使得i节点的同步操作能够高效执行。本次缓冲区同步操作则把那些由于i节点同步操作
+    // 而又变脏的缓冲块与设备中数据同步。
 	bh = start_buffer;
 	for (i=0 ; i<NR_BUFFERS ; i++,bh++) {
 		if (bh->b_dev != dev)
@@ -87,6 +121,8 @@ int sync_dev(int dev)
 	return 0;
 }
 
+//// 使指定设备在高速缓冲区中的数据无效
+// 扫描高速缓冲区中所有缓冲块，对指定设备的缓冲块复位其有效(更新)标志和已修改标志
 void inline invalidate_buffers(int dev)
 {
 	int i;
@@ -94,9 +130,11 @@ void inline invalidate_buffers(int dev)
 
 	bh = start_buffer;
 	for (i=0 ; i<NR_BUFFERS ; i++,bh++) {
+        // 如果不是指定设备的缓冲块，则继续扫描下一块
 		if (bh->b_dev != dev)
 			continue;
 		wait_on_buffer(bh);
+        // 由于进程执行过程睡眠等待，所以需要再判断一下缓冲区是否是指定设备的。
 		if (bh->b_dev == dev)
 			bh->b_uptodate = bh->b_dirt = 0;
 	}
@@ -116,14 +154,19 @@ void inline invalidate_buffers(int dev)
  * and that mount/open needn't know that floppies/whatever are
  * special.
  */
+// 检查磁盘是否更换，如果已更换就使对应高速缓冲区无效
 void check_disk_change(int dev)
 {
 	int i;
 
+    // 首先检测一下是不是软盘设备。因为现在仅支持软盘可移动介质。如果不是则
+    // 退出。然后测试软盘是否已更换，如果没有则退出。
 	if (MAJOR(dev) != 2)
 		return;
 	if (!floppy_change(dev & 0x03))
 		return;
+    // 软盘已经更换，所以解释对应设备的i节点位图和逻辑块位图所占的高速缓冲区；
+    // 并使该设备的i节点和数据库信息所占据的高速缓冲块无效。
 	for (i=0 ; i<NR_SUPER ; i++)
 		if (super_block[i].s_dev == dev)
 			put_super(super_block[i].s_dev);
