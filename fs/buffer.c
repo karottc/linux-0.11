@@ -174,9 +174,19 @@ void check_disk_change(int dev)
 	invalidate_buffers(dev);
 }
 
+// 下面两行代码是hash（散列）函数定义和Hash表项的计算宏
+// hash表的主要作用是减少查找比较元素所花费的时间。通过在元素的存储位置与关
+// 键字之间建立一个对应关系(hash函数)，我们就可以直接通过函数计算立刻查询到指定
+// 的元素。建立hash函数的指导条件主要是尽量确保散列在任何数组项的概率基本相等。
+// 建立函数的方法有多种，这里Linux-0.11主要采用了关键字除留余数法。因为我们
+// 寻找的缓冲块有两个条件，即设备号dev和缓冲块号block，因此设计的hash函数肯定
+// 需要包含这两个关键值。这两个关键字的异或操作只是计算关键值的一种方法。再对
+// 关键值进行MOD运算就可以保证函数所计算得到的值都处于函数数组项范围内。
 #define _hashfn(dev,block) (((unsigned)(dev^block))%NR_HASH)
 #define hash(dev,block) hash_table[_hashfn(dev,block)]
 
+//// 从hash队列和空闲缓冲区队列中移走缓冲块。
+// hash队列是双向链表结构，空闲缓冲块队列是双向循环链表结构。
 static inline void remove_from_queues(struct buffer_head * bh)
 {
 /* remove from hash-queue */
@@ -184,6 +194,8 @@ static inline void remove_from_queues(struct buffer_head * bh)
 		bh->b_next->b_prev = bh->b_prev;
 	if (bh->b_prev)
 		bh->b_prev->b_next = bh->b_next;
+    // 如果该缓冲区是该队列的头一个块，则让hash表的对应项指向本队列中的下一个
+    // 缓冲区。
 	if (hash(bh->b_dev,bh->b_blocknr) == bh)
 		hash(bh->b_dev,bh->b_blocknr) = bh->b_next;
 /* remove from free list */
@@ -191,10 +203,12 @@ static inline void remove_from_queues(struct buffer_head * bh)
 		panic("Free block list corrupted");
 	bh->b_prev_free->b_next_free = bh->b_next_free;
 	bh->b_next_free->b_prev_free = bh->b_prev_free;
+    // 如果空闲链表头指向本缓冲区，则让其指向下一缓冲区。
 	if (free_list == bh)
 		free_list = bh->b_next_free;
 }
 
+//// 将缓冲块插入空闲链表尾部，同时放入hash队列中。
 static inline void insert_into_queues(struct buffer_head * bh)
 {
 /* put at end of free list */
@@ -203,19 +217,25 @@ static inline void insert_into_queues(struct buffer_head * bh)
 	free_list->b_prev_free->b_next_free = bh;
 	free_list->b_prev_free = bh;
 /* put the buffer in new hash-queue if it has a device */
+    // 请注意当hash表某项第1次插入项时，hash()计算值肯定为Null，因此此时得到
+    // 的bh->b_next肯定是NULL，所以应该在bh->b_next不为NULL时才能给b_prev赋
+    // bh值。
 	bh->b_prev = NULL;
 	bh->b_next = NULL;
 	if (!bh->b_dev)
 		return;
 	bh->b_next = hash(bh->b_dev,bh->b_blocknr);
 	hash(bh->b_dev,bh->b_blocknr) = bh;
-	bh->b_next->b_prev = bh;
+	bh->b_next->b_prev = bh;                // 此句前应添加"if (bh->b_next)"判断
 }
 
+//// 利用hash表在高速缓冲区中寻找给定设备和指定块号的缓冲区块。
+// 如果找到则返回缓冲区块的指针，否则返回NULL。
 static struct buffer_head * find_buffer(int dev, int block)
 {		
 	struct buffer_head * tmp;
 
+    // 搜索hash表，寻找指定设备号和块号的缓冲块。
 	for (tmp = hash(dev,block) ; tmp != NULL ; tmp = tmp->b_next)
 		if (tmp->b_dev==dev && tmp->b_blocknr==block)
 			return tmp;
@@ -229,17 +249,24 @@ static struct buffer_head * find_buffer(int dev, int block)
  * will force it bad). This shouldn't really happen currently, but
  * the code is ready.
  */
+//// 利用hash表在高速缓冲区中寻找指定的缓冲块。若找到则对该缓冲块上锁
+// 返回块头指针。
 struct buffer_head * get_hash_table(int dev, int block)
 {
 	struct buffer_head * bh;
 
 	for (;;) {
+        // 在高速缓冲中寻找给定设备和指定块的缓冲区块，如果没有找到则返回NULL。
 		if (!(bh=find_buffer(dev,block)))
 			return NULL;
+        // 对该缓冲块增加引用计数，并等待该缓冲块解锁。由于经过了睡眠状态，
+        // 因此有必要在验证该缓冲块的正确性，并返回缓冲块头指针。
 		bh->b_count++;
 		wait_on_buffer(bh);
 		if (bh->b_dev == dev && bh->b_blocknr == block)
 			return bh;
+        // 如果在睡眠时该缓冲块所属的设备号或块设备号发生了改变，则撤消对它的
+        // 引用计数，重新寻找。
 		bh->b_count--;
 	}
 }
