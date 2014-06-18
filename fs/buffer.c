@@ -375,14 +375,25 @@ void brelse(struct buffer_head * buf)
  * bread() reads a specified block and returns the buffer that contains
  * it. It returns NULL if the block was unreadable.
  */
+//// 从设备上读取数据块。
+// 该函数根据指定的设备号 dev 和数据块号 block，首先在高速缓冲区中申请一块
+// 缓冲块。如果该缓冲块中已经包含有有效的数据就直接返回该缓冲块指针，否则
+// 就从设备中读取指定的数据块到该缓冲块中并返回缓冲块指针。
 struct buffer_head * bread(int dev,int block)
 {
 	struct buffer_head * bh;
 
+    // 在高速缓冲区中申请一块缓冲块。如果返回值是NULL，则表示内核出错，停机。
+    // 然后我们判断其中说是否已有可用数据。如果该缓冲块中数据是有效的（已更新）
+    // 可以直接使用，则返回。
 	if (!(bh=getblk(dev,block)))
 		panic("bread: getblk returned NULL\n");
 	if (bh->b_uptodate)
 		return bh;
+    // 否则我们就调用底层快设备读写ll_rw_block函数，产生读设备块请求。然后
+    // 等待指定数据块被读入，并等待缓冲区解锁。在睡眠醒来之后，如果该缓冲区已
+    // 更新，则返回缓冲区头指针，退出。否则表明读设备操作失败，于是释放该缓
+    // 冲区，返回NULL，退出。
 	ll_rw_block(READ,bh);
 	wait_on_buffer(bh);
 	if (bh->b_uptodate)
@@ -391,6 +402,8 @@ struct buffer_head * bread(int dev,int block)
 	return NULL;
 }
 
+//// 复制内存块
+// 从from地址复制一块(1024 bytes)数据到 to 位置。
 #define COPYBLK(from,to) \
 __asm__("cld\n\t" \
 	"rep\n\t" \
@@ -404,11 +417,19 @@ __asm__("cld\n\t" \
  * all at the same time, not waiting for one to be read, and then another
  * etc.
  */
+//// 读设备上一个页面（4个缓冲块）的内容到指定内存地址。
+// 参数address是保存页面数据的地址：dev 是指定的设备号；b[4]是含有4个设备
+// 数据块号的数组。该函数仅用于mm/memory.c文件中的do_no_page()函数中。
 void bread_page(unsigned long address,int dev,int b[4])
 {
 	struct buffer_head * bh[4];
 	int i;
 
+    // 该函数循环执行4次，根据放在数组b[]中的4个块号从设备dev中读取一页内容
+    // 放到指定内存位置address处。对于参数b[i]给出的有效块号，函数首先从高速
+    // 缓冲中取指定设备和块号的缓冲块。如果缓冲块中数据无效(未更新)则产生读
+    // 设备请求从设备上读取相应数据块。对于b[i]无效的块号则不用去理他了。因此
+    // 本函数其实可以根据指定的b[]中的块号随意读取1-4个数据块。
 	for (i=0 ; i<4 ; i++)
 		if (b[i]) {
 			if ((bh[i] = getblk(dev,b[i])))
@@ -416,10 +437,13 @@ void bread_page(unsigned long address,int dev,int b[4])
 					ll_rw_block(READ,bh[i]);
 		} else
 			bh[i] = NULL;
+    // 随后将4个缓冲块上的内容顺序复制到指定地址处。在进行复制（使用）缓冲块之前
+    // 我们先要睡眠等待缓冲块解锁，另外，因为可能睡眠过了，所以我们还需要在复制
+    // 之前再检查一下缓冲块中的数据是否是有效的。复制完后我们还需要释放缓冲块。
 	for (i=0 ; i<4 ; i++,address += BLOCK_SIZE)
 		if (bh[i]) {
-			wait_on_buffer(bh[i]);
-			if (bh[i]->b_uptodate)
+			wait_on_buffer(bh[i]);          // 等待缓冲块解锁
+			if (bh[i]->b_uptodate)          // 若缓冲块中数据有效则复制
 				COPYBLK((unsigned long) bh[i]->b_data,address);
 			brelse(bh[i]);
 		}
