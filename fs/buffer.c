@@ -454,24 +454,35 @@ void bread_page(unsigned long address,int dev,int b[4])
  * blocks for reading as well. End the argument list with a negative
  * number.
  */
+//// 从指定设备读取指定的一些块
+// 函数参数个可变，是一些列指定的块号。成功时返回第一块的缓冲块头指针，
+// 否则返回NULL。
 struct buffer_head * breada(int dev,int first, ...)
 {
 	va_list args;
 	struct buffer_head * bh, *tmp;
 
+    // 首先可变参数表中第一个参数（块号）。接着从高速缓冲区中取指定设备和块号
+    // 的缓冲块。如果该缓冲块数据无效（更新标志未置位），则发出读设备数据块请求。
 	va_start(args,first);
 	if (!(bh=getblk(dev,first)))
 		panic("bread: getblk returned NULL\n");
 	if (!bh->b_uptodate)
 		ll_rw_block(READ,bh);
+    // 然后顺序取可变参数表中其他预读块号，并作与上面同样处理，但不引用。
 	while ((first=va_arg(args,int))>=0) {
 		tmp=getblk(dev,first);
 		if (tmp) {
 			if (!tmp->b_uptodate)
+                // 这句中的bh应该是tmp。
 				ll_rw_block(READA,bh);
+            // 因为这里是预读随后的数据块，只需读进高速缓冲区但并不是马上就使用，
+            // 所以这句需要将其引用计数递减释放该块(因为getblk()函数会增加引用计数值)
 			tmp->b_count--;
 		}
 	}
+    // 此时可变参数表中所有参数处理完毕。于是等待第一个缓冲区解锁，在等待退出之后，如果
+    // 缓冲区中数据仍然有效，则返回缓冲区头指针退出。否则释放该缓冲区返回NULL,退出。
 	va_end(args);
 	wait_on_buffer(bh);
 	if (bh->b_uptodate)
