@@ -10,37 +10,57 @@
 #include <linux/sched.h>
 #include <linux/kernel.h>
 
+//// 将指定地址（addr）处的一块1024字节内存清零
+// 输入：eax = 0; ecx = 以字节为单位的数据块长度（BLOCK_SIZE/4）；edi ＝ 指定
+// 起始地址addr。
 #define clear_block(addr) \
-__asm__ __volatile__ ("cld\n\t" \
-	"rep\n\t" \
+__asm__ __volatile__ ("cld\n\t" \       // 清方向位
+	"rep\n\t" \                         // 重复执行存储数据(0).
 	"stosl" \
 	::"a" (0),"c" (BLOCK_SIZE/4),"D" ((long) (addr)))
 
+//// 把指定地址开始的第nr个位偏移处的bit位置位(nr可大于321).返回原bit位值。
+// 输入：%0-eax(返回值)：%1 -eax(0)；%2-nr，位偏移值；%3-(addr)，addr的内容。
+// res是一个局部寄存器变量。该变量将被保存在指定的eax寄存器中，以便于高效
+// 访问和操作。这种定义变量的方法主要用于内嵌汇编程序中。详细说明可以参考
+// gcc手册”在指定寄存器中的变量“。整个宏是一个语句表达式(即圆括号括住的组合句)，
+// 其值是组合语句中最后一条表达式语句res的值。
+// btsl指令用于测试并设置bit位。把基地址(%3)和bit位偏移值(%2)所指定的bit位值
+// 先保存到进位标志CF中，然后设置该bit位为1.指令setb用于根据进位标志CF设置
+// 操作数(%al)。如果CF=1则%al = 1,否则%al = 0。
 #define set_bit(nr,addr) ({\
 register int res ; \
 __asm__ __volatile__("btsl %2,%3\n\tsetb %%al": \
 "=a" (res):"0" (0),"r" (nr),"m" (*(addr))); \
 res;})
 
+//// 复位指定地址开始的第nr位偏移处的bit位。返回原bit位值的反码。
+// 输入：%0-eax(返回值)；%1-eax(0)；%2-nr,位偏移值；%3-(addr)，addr的内容。
+// btrl指令用于测试并复位bit位。其作用与上面的btsl类似，但是复位指定bit位。
+// 指令setnb用于根据进位标志CF设置操作数(%al).如果CF=1则%al=0,否则%al=1.
 #define clear_bit(nr,addr) ({\
 register int res ; \
 __asm__ __volatile__("btrl %2,%3\n\tsetnb %%al": \
 "=a" (res):"0" (0),"r" (nr),"m" (*(addr))); \
 res;})
 
+//// 从addr开始寻找第1个0值bit位。
+// 输入：%0-ecx(返回值)；%1-ecx(0); %2-esi(addr).
+// 在addr指定地址开始的位图中寻找第1个是0的bit位，并将其距离addr的bit位偏移
+// 值返回。addr是缓冲块数据区的地址，扫描寻找的范围是1024字节（8192bit位）。
 #define find_first_zero(addr) ({ \
 int __res; \
-__asm__ __volatile__ ("cld\n" \
-	"1:\tlodsl\n\t" \
-	"notl %%eax\n\t" \
-	"bsfl %%eax,%%edx\n\t" \
-	"je 2f\n\t" \
-	"addl %%edx,%%ecx\n\t" \
-	"jmp 3f\n" \
-	"2:\taddl $32,%%ecx\n\t" \
-	"cmpl $8192,%%ecx\n\t" \
-	"jl 1b\n" \
-	"3:" \
+__asm__ __volatile__ ("cld\n" \         // 清方向位
+	"1:\tlodsl\n\t" \                   // 取[esi]→eax.
+	"notl %%eax\n\t" \                  // eax中每位取反。
+	"bsfl %%eax,%%edx\n\t" \            // 从位0扫描eax中是1的第1个位，其偏移值→edx
+	"je 2f\n\t" \                       // 如果eax中全是0，则向前跳转到标号2处。
+	"addl %%edx,%%ecx\n\t" \            // 偏移值加入ecx(ecx是位图首个0值位的偏移值)
+	"jmp 3f\n" \                        // 向前跳转到标号3处
+	"2:\taddl $32,%%ecx\n\t" \          // 未找到0值位，则将ecx加1个字长的位偏移量32
+	"cmpl $8192,%%ecx\n\t" \            // 已经扫描了8192bit位(1024字节)
+	"jl 1b\n" \                         // 若还没有扫描完1块数据，则向前跳转到标号1处
+	"3:" \                              // 结束。此时ecx中是位偏移量。
 	:"=c" (__res):"c" (0),"S" (addr)); \
 __res;})
 
