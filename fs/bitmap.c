@@ -109,12 +109,21 @@ void free_block(int dev, int block)
 	sb->s_zmap[block/8192]->b_dirt = 1;
 }
 
+//// 向设备申请一个逻辑块。
+// 函数首先取得设备的超级块，并在超级块中的逻辑块位图中寻找第一个0值bit位(代表一个
+// 空闲逻辑块)。然后位置对应逻辑块在逻辑块位图中的bit位。接着为该逻辑块在缓冲区中取得
+// 一块对应缓冲块。最后将该缓冲块清零，并设置其已更新标志和已修改标志。并返回逻辑块
+// 号。函数执行成功则返回逻辑块号，否则返回0.
 int new_block(int dev)
 {
 	struct buffer_head * bh;
 	struct super_block * sb;
 	int i,j;
 
+    // 首先获取设备dev的超级块。如果指定设备的超级块不存在，则出错当机。然后扫描
+    // 文件系统的8块逻辑位图，寻找首个0值bit位，以寻找空闲逻辑块，获取放置该逻辑块的
+    // 块号。如果全部扫描完8块逻辑块位图的所有bit位(i >= 8 或 j >= 8192)还没找到0值
+    // bit位或者位图所在的缓冲块指针无效(bh=NULL)则返回0退出(没有空闲逻辑块)。
 	if (!(sb = get_super(dev)))
 		panic("trying to get new block from nonexistant device");
 	j = 8192;
@@ -124,12 +133,21 @@ int new_block(int dev)
 				break;
 	if (i>=8 || !bh || j>=8192)
 		return 0;
+    // 接着设置找到的新逻辑块j对应逻辑块位图中的bit位。若对应bit位已经置位，则出错
+    // 停机。否则置存放位图的对应缓冲区块已修改标志。因为逻辑块位图仅表示盘上数据区
+    // 中逻辑块的占用情况，则逻辑块位图中bit位偏移值表示从数据区开始处算起的块号，
+    // 因此这里需要加上数据区第1个逻辑块的块号，把j转换成逻辑块号。此时如果新逻辑块
+    // 大于该设备上的总逻辑块数，则说明指定逻辑块在对应设备上不存在。申请失败，返回0退出。
 	if (set_bit(j,bh->b_data))
 		panic("new_block: bit already set");
 	bh->b_dirt = 1;
 	j += i*8192 + sb->s_firstdatazone-1;
 	if (j >= sb->s_nzones)
 		return 0;
+    // 然后在高速缓冲区中为该设备上指定的逻辑块号取得一个缓冲块，并返回缓冲块头指针。
+    // 因为刚取得的逻辑块其引用次数一定为1(getblk()中会设置)，因此若不为1则停机。
+    // 最后将新逻辑块清零，并设置其已更新标志和已修改标志。然后释放对应缓冲块，返回
+    // 逻辑块号。
 	if (!(bh=getblk(dev,j)))
 		panic("new_block: cannot get block");
 	if (bh->b_count != 1)
@@ -141,29 +159,48 @@ int new_block(int dev)
 	return j;
 }
 
+//// 释放指定的i节点
+// 该函数首先判断参数给出的i节点号的有效性和课释放性。若i节点仍然在使用中则不能
+// 被释放。然后利用超级块信息对i节点位图进行操作，复位i节点号对应的i节点位图中
+// bit位，并清空i节点结构。
 void free_inode(struct m_inode * inode)
 {
 	struct super_block * sb;
 	struct buffer_head * bh;
 
+    // 首先判断参数给出的需要释放的i节点有效性或合法性。如果i节点指针＝NULL，则
+    // 退出。如果i节点上的设备号字段为0，则说明该节点没有使用。于是用0清空对应i
+    // 节点所占内存区并返回。memset()定义在include/string.h中，这里表示用0填写
+    // inode指针指定处、长度是sizeof(*inode)的内存快。
 	if (!inode)
 		return;
 	if (!inode->i_dev) {
 		memset(inode,0,sizeof(*inode));
 		return;
 	}
+    // 如果此i节点还有其他程序引用，则不能释放，说明内核有问题，停机。如果文件
+    // 连接数不为0，则表示还有其他文件目录项在使用该节点，因此也不应释放，而应该放回等。
 	if (inode->i_count>1) {
 		printk("trying to free inode with count=%d\n",inode->i_count);
 		panic("free_inode");
 	}
 	if (inode->i_nlinks)
 		panic("trying to free inode with links");
+    // 在判断完i节点的合理性之后，我们开始利用超级块信息对其中的i节点位图进行
+    // 操作。首先取i节点所在设备的超级块，测试设备是否存在。然后判断i节点号的
+    // 范围是否正确，如果i节点号等于0或大于该设备上i节点总数，则出错(0号i节点
+    // 保留没有使用)。如果该i节点对应的节点位图不存在，则出错。因为一个缓冲块
+    // 的i节点位图有8192 bit。因此i_num>>13(即i_num/8192)可以得到当前i节点所在
+    // 的s_imap[]项，即所在盘块。
 	if (!(sb = get_super(inode->i_dev)))
 		panic("trying to free inode on nonexistent device");
 	if (inode->i_num < 1 || inode->i_num > sb->s_ninodes)
 		panic("trying to free inode 0 or nonexistant inode");
 	if (!(bh=sb->s_imap[inode->i_num>>13]))
 		panic("nonexistent imap in superblock");
+    // 现在我们复位i节点对应的节点位图中的bit位。如果该bit位已经等于0，则显示
+    // 出错警告信息。最后置i节点位图所在缓冲区已修改标志，并清空该i节点结构
+    // 所占内存区。
 	if (clear_bit(inode->i_num&8191,bh->b_data))
 		printk("free_inode: bit already cleared.\n\r");
 	bh->b_dirt = 1;
