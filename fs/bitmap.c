@@ -64,16 +64,27 @@ __asm__ __volatile__ ("cld\n" \         // 清方向位
 	:"=c" (__res):"c" (0),"S" (addr)); \
 __res;})
 
+//// 释放设备dev上数据区中的逻辑块block.
+// 复位指定逻辑块block对应的逻辑块位图bit位
+// 参数：dev是设备号，block是逻辑块号（盘块号）
 void free_block(int dev, int block)
 {
 	struct super_block * sb;
 	struct buffer_head * bh;
 
+    // 首先取设备dev上文件系统的超级块信息，根据其中数据区开始逻辑块号和文件系统中逻辑
+    // 块总数信息判断参数block的有效性。如果指定设备超级块不存在，则出错当机。若逻辑块
+    // 号小于盘上面数据区第一个逻辑块的块号或者大于设备上总逻辑块数，也出错当机。
 	if (!(sb = get_super(dev)))
 		panic("trying to free block on nonexistent device");
 	if (block < sb->s_firstdatazone || block >= sb->s_nzones)
 		panic("trying to free block not in datazone");
+    // 然后从hash表中寻找该块数据。若找到了则判断其有效性，并清已修改和更新标志，释放
+    // 该数据块。该段代码的主要用途是如果该逻辑块目前存在于高速缓冲区中，就释放对应
+    // 的缓冲块。
 	bh = get_hash_table(dev,block);
+    // 下面的代码会造成数据块不能释放。因为当b_count > 1时，这段代码会仅打印一段信息而
+    // 没有执行释放操作。
 	if (bh) {
 		if (bh->b_count != 1) {
 			printk("trying to free block (%04x:%d), count=%d\n",
@@ -84,11 +95,17 @@ void free_block(int dev, int block)
 		bh->b_uptodate=0;
 		brelse(bh);
 	}
+    // 接着我们复位block在逻辑块位图中的bit（置0），先计算block在数据区开始算起的数据
+    // 逻辑块号(从1开始计数)。然后对逻辑块(区块)位图进行操作，复位对应的bit位。如果对应
+    // bit位原来就是0，则出错停机。由于1个缓冲块有1024字节，即8192比特位，因此block/8192
+    // 即可计算出指定块block在逻辑位图中的哪个块上。而block&8192可以得到block在逻辑块位图
+    // 当前块中的bit偏移位置。
 	block -= sb->s_firstdatazone - 1 ;
 	if (clear_bit(block&8191,sb->s_zmap[block/8192]->b_data)) {
 		printk("block (%04x:%d) ",dev,block+sb->s_firstdatazone-1);
 		panic("free_block: bit already cleared");
 	}
+    // 最后置相应逻辑块位图所在缓冲区已修改标志。
 	sb->s_zmap[block/8192]->b_dirt = 1;
 }
 
