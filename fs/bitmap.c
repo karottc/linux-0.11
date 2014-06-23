@@ -207,6 +207,8 @@ void free_inode(struct m_inode * inode)
 	memset(inode,0,sizeof(*inode));
 }
 
+//// 为设备dev建立一个新i节点。初始化并返回该新i节点的指针。
+// 在内存i节点表中获取一个空闲i节点表项，并从i节点位图中找一个空闲i节点。
 struct m_inode * new_inode(int dev)
 {
 	struct m_inode * inode;
@@ -214,6 +216,10 @@ struct m_inode * new_inode(int dev)
 	struct buffer_head * bh;
 	int i,j;
 
+    // 首先从内存i节点表(inode_table)中获取一个空闲i节点项，并读取指定设备的
+    // 超级块结构。然后扫描超级块中8块i节点位图，寻找首个0bit位，寻找空闲节点，
+    // 获取放置该i节点的节点号。如果全部扫描完还没找到，或者位图所在的缓冲块无效
+    // (bh=NULL),则放回先前申请的i节点表中的i节点，并返回NULL退出(没有空闲的i节点)。
 	if (!(inode=get_empty_inode()))
 		return NULL;
 	if (!(sb = get_super(dev)))
@@ -227,16 +233,18 @@ struct m_inode * new_inode(int dev)
 		iput(inode);
 		return NULL;
 	}
+    // 现在我们已经找到了还未使用的i节点号j。于是置位i节点j对应的i节点位图相应bit位。
+    // 然后置i节点位图所在缓冲块已修改标志。最后初始化该i节点结构(i_ctime是i节点内容改变时间)。
 	if (set_bit(j,bh->b_data))
 		panic("new_inode: bit already set");
 	bh->b_dirt = 1;
-	inode->i_count=1;
-	inode->i_nlinks=1;
-	inode->i_dev=dev;
-	inode->i_uid=current->euid;
-	inode->i_gid=current->egid;
-	inode->i_dirt=1;
-	inode->i_num = j + i*8192;
+	inode->i_count=1;                           // 引用计数
+	inode->i_nlinks=1;                          // 文件目录项连接数
+	inode->i_dev=dev;                           // i节点所在的设备号
+	inode->i_uid=current->euid;                 // i节点所属用户ID
+	inode->i_gid=current->egid;                 // 组id
+	inode->i_dirt=1;                            // 已修改标志置位
+	inode->i_num = j + i*8192;                  // 对应设备中的i节点号
 	inode->i_mtime = inode->i_atime = inode->i_ctime = CURRENT_TIME;
 	return inode;
 }
