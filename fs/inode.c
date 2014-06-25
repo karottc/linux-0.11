@@ -12,11 +12,17 @@
 #include <linux/mm.h>
 #include <asm/system.h>
 
+// 内存中i节点表(NR_INODE=32)
 struct m_inode inode_table[NR_INODE]={{0,},};
 
+// 读指定i节点号的i节点信息
 static void read_inode(struct m_inode * inode);
+// 写i节点信息到高速缓冲中
 static void write_inode(struct m_inode * inode);
 
+//// 等待指定的i节点可用
+// 如果i节点已被锁定，则将当前任务置为不可中断的等待状态，并添加到该
+// i节点的等待队列i_wait中。直到该i节点解锁并明确地唤醒本地任务。
 static inline void wait_on_inode(struct m_inode * inode)
 {
 	cli();
@@ -25,6 +31,9 @@ static inline void wait_on_inode(struct m_inode * inode)
 	sti();
 }
 
+//// 对指定的i节点上锁(锁定指定的i节点)
+// 如果i节点已被锁定，则将当前任务置为不可中断的等待状态，并添加到该
+// i节点的等待队列i_wait中，直到该i节点解锁并明确地唤醒本地任务。然后对其上锁。
 static inline void lock_inode(struct m_inode * inode)
 {
 	cli();
@@ -34,18 +43,26 @@ static inline void lock_inode(struct m_inode * inode)
 	sti();
 }
 
+//// 对指定的i节点解锁
+// 复位i节点的锁定标志，并明确地唤醒等待在此i节点等待i_wait上的所有进程。
 static inline void unlock_inode(struct m_inode * inode)
 {
 	inode->i_lock=0;
 	wake_up(&inode->i_wait);
 }
 
+//// 释放设备dev在内存i节点表中的所有i节点
+// 扫描内存中的i节点表数组，如果是指定设备使用的i节点就释放之。
 void invalidate_inodes(int dev)
 {
 	int i;
 	struct m_inode * inode;
 
-	inode = 0+inode_table;
+    // 首先让指针指向内存i节点表数组首项。然后扫描i节点表指针数组中的所有i
+    // 节点。针对其中每个i节点，先等待该i节点解锁可用，再判断是否属于指定设备
+    // 的i节点。如果是指定设备的i节点，则看看它是否还被使用着，即其引用计数
+    // 是否不为0.若是则显示警告信息。然后释放之，即把i节点的设备号字段i_dev置0.
+	inode = 0+inode_table;                      // 指向i节点表指针数组首项
 	for(i=0 ; i<NR_INODE ; i++,inode++) {
 		wait_on_inode(inode);
 		if (inode->i_dev == dev) {
