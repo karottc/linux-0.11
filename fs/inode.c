@@ -73,11 +73,17 @@ void invalidate_inodes(int dev)
 	}
 }
 
+//// 同步所有i节点
+// 把内存i节点表中所有i节点与设备上i节点作同步操作
 void sync_inodes(void)
 {
 	int i;
 	struct m_inode * inode;
 
+    // 首先让内存i节点类型的指针指向i节点表首项，然后扫描整个i节点表中的节点。针对
+    // 其中每个i节点，先等待该i节点解锁可用(若目前正被上锁的话)，然后判断该i节点
+    // 是否已被修改并且不是管道节点。若是这种情况则将该i节点写入高速缓冲区中。
+    // 缓冲区管理程序buffer.c会在适当时机将他们写入盘中。
 	inode = 0+inode_table;
 	for(i=0 ; i<NR_INODE ; i++,inode++) {
 		wait_on_inode(inode);
@@ -86,15 +92,26 @@ void sync_inodes(void)
 	}
 }
 
+//// 文件数据块映射到盘块的处理操作。（block位图处理函数，bmap - block map）
+// 参数：inode - 文件的i节点指针；block - 文件中的数据块号；create - 创建块标志。
+// 该函数把指定的文件数据块block对应到设备上逻辑块上，并返回逻辑块号。如果创建标志
+// 置位，则在设备上对应逻辑块不存在时就申请新磁盘块，返回文件数据块block对应在设备
+// 上的逻辑块号（盘块号）。
 static int _bmap(struct m_inode * inode,int block,int create)
 {
 	struct buffer_head * bh;
 	int i;
 
+    // 首先判断参数文件数据块号block的有效性。如果块号小于0，则停机。如果块号大于
+    // 直接块数+间接块数+二次间接块数，超出文件系统表示范围，则停机。
 	if (block<0)
 		panic("_bmap: block<0");
 	if (block >= 7+512+512*512)
 		panic("_bmap: block>big");
+    // 然后根据文件块号的大小值和是否设置了创建标志分别进行处理。如果该块号小于7，
+    // 则使用直接块表示。如果创建标志置位，并且i节点中对应块的逻辑块(区段)字段为0，
+    // 则相应设备申请一磁盘块（逻辑块），并且将磁盘上逻辑块号（盘块号）填入逻辑块
+    // 字段中。然后设置i节点改变时间，置i节点已修改标志。然后返回逻辑块号。
 	if (block<7) {
 		if (create && !inode->i_zone[block])
 			if ((inode->i_zone[block]=new_block(inode->i_dev))) {
@@ -103,6 +120,12 @@ static int _bmap(struct m_inode * inode,int block,int create)
 			}
 		return inode->i_zone[block];
 	}
+    // 如果该块号>=7,且小于7+512，则说明使用的是一次间接块。下面对一次间接块进行处理。
+    // 如果是创建，并且该i节点中对应间接块字段i_zone[7]是0，表明文件是首次使用间接块，
+    // 则需申请一磁盘块用于存放间接块信息，并将此实际磁盘块号填入间接块字段中。然后
+    // 设置i节点修改标志和修改时间。如果创建时申请磁盘块失败，则此时i节点间接块字段
+    // i_zone[7] = 0,则返回0.或者不创建，但i_zone[7]原来就为0，表明i节点中没有间接块，
+    // 于是映射磁盘是吧，则返回0退出。
 	block -= 7;
 	if (block<512) {
 		if (create && !inode->i_zone[7])
@@ -112,6 +135,10 @@ static int _bmap(struct m_inode * inode,int block,int create)
 			}
 		if (!inode->i_zone[7])
 			return 0;
+        // 现在读取设备上该i节点的一次间接块。并取该间接块上第block项中的逻辑块号（盘块
+        // 号）i。每一项占2个字节。如果是创建并且间接块的第block项中的逻辑块号为0的话，
+        // 则申请一磁盘块，并让间接块中的第block项等于该新逻辑块块号。然后置位间接块的
+        // 已修改标志。如果不是创建，则i就是需要映射（寻找）的逻辑块号。
 		if (!(bh = bread(inode->i_dev,inode->i_zone[7])))
 			return 0;
 		i = ((unsigned short *) (bh->b_data))[block];
@@ -120,9 +147,17 @@ static int _bmap(struct m_inode * inode,int block,int create)
 				((unsigned short *) (bh->b_data))[block]=i;
 				bh->b_dirt=1;
 			}
+        // 最后释放该间接块占用的缓冲块，并返回磁盘上新申请或原有的对应block的逻辑块号。
 		brelse(bh);
 		return i;
 	}
+    // 若程序运行到此，则表明数据块属于二次间接块。其处理过程与一次间接块类似。下面是对
+    // 二次间接块的处理。首先将block再减去间接块所容纳的块数(512)，然后根据是否设置了
+    // 创建标志进行创建或寻找处理。如果是新创建并且i节点的二次间接块字段为0，则序申请一
+    // 磁盘块用于存放二次间接块的一级信息，并将此实际磁盘块号填入二次间接块字段中。之后，
+    // 置i节点已修改标志和修改时间。同样地，如果创建时申请磁盘块失败，则此时i节点二次
+    // 间接块字段i_zone[8]为0，则返回0.或者不是创建，但i_zone[8]原来为0，表明i节点中没有
+    // 间接块，于是映射磁盘块失败，返回0退出。
 	block -= 512;
 	if (create && !inode->i_zone[8])
 		if ((inode->i_zone[8]=new_block(inode->i_dev))) {
@@ -131,6 +166,11 @@ static int _bmap(struct m_inode * inode,int block,int create)
 		}
 	if (!inode->i_zone[8])
 		return 0;
+    // 现在读取设备上该i节点的二次间接块。并取该二次间接块的一级块上第 block/512 项中
+    // 的逻辑块号i。如果是创建并且二次间接块的一级块上第 block/512 项中的逻辑块号为0的
+    // 话，则需申请一磁盘块(逻辑块)作为二次间接块的二级快i，并让二次间接块的一级块中
+    // 第block/512 项等于二级块的块号i。然后置位二次间接块的一级块已修改标志。并释放
+    // 二次间接块的一级块。如果不是创建，则i就是需要映射的逻辑块号。
 	if (!(bh=bread(inode->i_dev,inode->i_zone[8])))
 		return 0;
 	i = ((unsigned short *)bh->b_data)[block>>9];
@@ -140,16 +180,22 @@ static int _bmap(struct m_inode * inode,int block,int create)
 			bh->b_dirt=1;
 		}
 	brelse(bh);
+    // 如果二次间接块的二级块块号为0，表示申请磁盘块失败或者原来对应块号就为0，则返回
+    // 0退出。否则就从设备上读取二次间接块的二级块，并取该二级块上第block项中的逻辑块号。
 	if (!i)
 		return 0;
 	if (!(bh=bread(inode->i_dev,i)))
 		return 0;
 	i = ((unsigned short *)bh->b_data)[block&511];
+    // 如果是创建并且二级块的第block项中逻辑块号为0的话，则申请一磁盘块（逻辑块），作为
+    // 最终存放数据信息的块。并让二级块中的第block项等于该新逻辑块块号(i)。然后置位二级块
+    // 的已修改标志。
 	if (create && !i)
 		if ((i=new_block(inode->i_dev))) {
 			((unsigned short *) (bh->b_data))[block&511]=i;
 			bh->b_dirt=1;
 		}
+    // 最后释放该二次间接块的二级块，返回磁盘上新申请的或原有的对应block的逻辑块号。
 	brelse(bh);
 	return i;
 }
