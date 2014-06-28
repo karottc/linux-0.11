@@ -200,23 +200,38 @@ static int _bmap(struct m_inode * inode,int block,int create)
 	return i;
 }
 
+//// 取文件数据块block在设备上对应的逻辑块号。
+// 参数：inode - 文件的内存i节点指针；block - 文件中的数据块号。
+// 若操作成功则返回对应的逻辑块号，否则返回0.
 int bmap(struct m_inode * inode,int block)
 {
 	return _bmap(inode,block,0);
 }
 
+//// 取文件数据块block在设备上对应的逻辑块号。
+// 如果对应的逻辑块不存在就创建一块。返回设备上对应的已存在或新建的逻辑块号。
+// 参数：inode - 文件内存i节点指针；block - 文件中的数据块号。
 int create_block(struct m_inode * inode, int block)
 {
 	return _bmap(inode,block,1);
 }
-		
+
+//// 放回(放置)一个i节点引用计数值递减1，并且若是管道i节点，则唤醒等待的进程。
+// 若是块设备文件i节点则刷新设备。并且若i节点的链接计数为0，则释放该i节点占用
+// 的所有磁盘逻辑块，并释放该i节点。
 void iput(struct m_inode * inode)
 {
+    // 首先判断参数给出的i节点的有效性，并等待inode节点解锁，如果i节点的引用计数
+    // 为0，表示该i节点已经是空闲的。内核再要求对其进行放回操作，说明内核中其他
+    // 代码有问题。于是显示错误信息并停机。
 	if (!inode)
 		return;
 	wait_on_inode(inode);
 	if (!inode->i_count)
 		panic("iput: trying to free free inode");
+    // 如果是管道i节点，则唤醒等待该管道的进程，引用次数减1，如果还有引用则返回。
+    // 否则释放管道占用的内存页面，并复位该节点的引用计数值、已修改标志和管道标志，
+    // 并返回。对于管道节点，inode->i_size存放这内存也地址。
 	if (inode->i_pipe) {
 		wake_up(&inode->i_wait);
 		if (--inode->i_count)
@@ -227,14 +242,22 @@ void iput(struct m_inode * inode)
 		inode->i_pipe=0;
 		return;
 	}
+    // 如果i节点对应的设备号 ＝ 0，则将此节点的引用计数递减1，返回。例如用于管道操作
+    // 的i节点，其i节点的设备号为0.
 	if (!inode->i_dev) {
 		inode->i_count--;
 		return;
 	}
+    // 如果是块设备文件的i节点，此时逻辑块字段0(i_zone[0])中是设备号，则刷新该设备。
+    // 并等待i节点解锁。
 	if (S_ISBLK(inode->i_mode)) {
 		sync_dev(inode->i_zone[0]);
 		wait_on_inode(inode);
 	}
+    // 如果i节点的引用计数大于1，则计数递减1后就直接返回(因为该i节点还有人在用，不能
+    // 释放)，否则就说明i节点的引用计数值为1。如果i节点的链接数为0，则说明i节点对应文件
+    // 被删除。于是释放该i节点的所有逻辑块，并释放该i节点。函数free_inode()用于实际释
+    // 放i节点操作，即复位i节点对应的i节点位图bit位，清空i节点结构内容。
 repeat:
 	if (inode->i_count>1) {
 		inode->i_count--;
@@ -245,11 +268,17 @@ repeat:
 		free_inode(inode);
 		return;
 	}
+    // 如果该i节点已做过修改，则回写更新该i节点，并等待该i节点解锁。由于这里在写i节点
+    // 时需要等待睡眠，此时其他进程有可能修改i节点，因此在进程被唤醒后需要再次重复进行
+    // 上述判断过程(repeat)。
 	if (inode->i_dirt) {
 		write_inode(inode);	/* we can sleep - so do again */
 		wait_on_inode(inode);
 		goto repeat;
 	}
+    // 程序若能执行到此，则说明该i节点的引用计数值i_count是1、链接数不为零，并且内容
+    // 没有被修改过。因此此时只要把i节点引用计数递减1，返回。此时该i节点的i_count=0,
+    // 表示已释放。
 	inode->i_count--;
 	return;
 }
