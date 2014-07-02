@@ -283,6 +283,8 @@ repeat:
 	return;
 }
 
+//// 从i节点表(inode_table)中获取一个空闲i节点项。
+// 寻找引用计数count为0的i节点，并将其写盘后清零，返回指针。引用计数被置1.
 struct m_inode * get_empty_inode(void)
 {
 	struct m_inode * inode;
@@ -290,6 +292,11 @@ struct m_inode * get_empty_inode(void)
 	int i;
 
 	do {
+        // 在初始化last_inode指针指向i节点表头一项后循环扫描整个i节点表。如果last_inode
+        // 已经指向i节点表的最后一项之后，则让其重新指向i节点表开始处，以继续循环寻找空闲
+        // i节点项。如果last_inode所指向的i节点的计数值为0，则说明可能找到空闲i节点项。
+        // 让inode指向该i节点。如果该i节点的已修改标志和锁定标志均为0，则我们可以使用该i
+        // 节点，于是退出for循环。
 		inode = NULL;
 		for (i = NR_INODE; i ; i--) {
 			if (++last_inode >= inode_table + NR_INODE)
@@ -300,33 +307,49 @@ struct m_inode * get_empty_inode(void)
 					break;
 			}
 		}
+        // 如果没有找到空闲i节点（inode=NULL）,则将i节点表打印出来供调试使用，并停机。
 		if (!inode) {
 			for (i=0 ; i<NR_INODE ; i++)
 				printk("%04x: %6d\t",inode_table[i].i_dev,
 					inode_table[i].i_num);
 			panic("No free inodes in mem");
 		}
+        // 等待该i节点解锁，如果该i节点已修改标志被置位的话，则将该i节点刷新，因为刷新时
+        // 可能会睡眠，因此需要再次循环等待该i节点解锁。
 		wait_on_inode(inode);
 		while (inode->i_dirt) {
 			write_inode(inode);
 			wait_on_inode(inode);
 		}
+        // 如果i节点又被其他占用的话(i节点的计数值不为0了)，则重新寻找空闲i节点。否则
+        // 说明已找到符合要求的空闲i节点项。则将该i节点项内容清零，并置引用计数为1，
+        // 返回该i节点指针。
 	} while (inode->i_count);
 	memset(inode,0,sizeof(*inode));
 	inode->i_count = 1;
 	return inode;
 }
 
+//// 获取管道节点。
+// 首先扫描i节点表，寻找一个空闲i节点项，然后取得一页空闲内存供管道使用。然后将得
+// 到的i节点的引用计数置为2，初始化管道头和尾，置i节点的管道类型表示。
+// 返回为i节点指针，如果失败则返回NULL。
 struct m_inode * get_pipe_inode(void)
 {
 	struct m_inode * inode;
 
+    // 首先从内存i节点表中取得一个空闲i节点。如果找不到空闲i节点则返回NULL。然后为
+    // 该i节点申请一页内存，并让节点的i_size字段指向该页面。如果已没有空闲内存，
+    // 则释放该i节点，并返回NULL
 	if (!(inode = get_empty_inode()))
 		return NULL;
 	if (!(inode->i_size=get_free_page())) {
 		inode->i_count = 0;
 		return NULL;
 	}
+    // 然后设置该i节点的引用计数为2，并复位管道头尾指针。i节点逻辑块号数组i_zone[]
+    // 的i_zone[0]和i_zone[1]中分别用来存放管道头和管道尾指针。最后设置i节点是管
+    // 道i节点标志并返回该i节点号。
 	inode->i_count = 2;	/* sum of readers/writers */
 	PIPE_HEAD(*inode) = PIPE_TAIL(*inode) = 0;
 	inode->i_pipe = 1;
