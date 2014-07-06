@@ -356,24 +356,42 @@ struct m_inode * get_pipe_inode(void)
 	return inode;
 }
 
+//// 获得一个i节点
+// 参数：dev - 设备号； nr - i 节点号。
+// 从设备上读取指定节点号i节点到内存i节点表中，并返回该i节点指针。
+// 首先在位于高速缓冲区中的i节点表中搜寻，若找到指定节点号的i节点则在经过一些判断
+// 处理后返回该i节点指针。否则从设备dev上读取指定i节点号的i节点信息放入i节点表中，
+// 并返回该i节点指针。
 struct m_inode * iget(int dev,int nr)
 {
 	struct m_inode * inode, * empty;
 
+    // 首先判断参数的有效性。若设备号是0，则表明内核代码有问题，显示出错信息并停机。
+    // 然后预先从i节点表中取一个空闲i节点备用。
 	if (!dev)
 		panic("iget with dev==0");
 	empty = get_empty_inode();
+    // 接着扫描i节点表。寻找参数指定节点号nr的i节点。并递增该节点的引用次数。如果当
+    // 前扫描i节点的设备号不等于指定的设备号或者节点号不等于指定的节点号，则继续扫描。
 	inode = inode_table;
 	while (inode < NR_INODE+inode_table) {
 		if (inode->i_dev != dev || inode->i_num != nr) {
 			inode++;
 			continue;
 		}
+        // 如果找到指定设备号dev和节点号nr的i节点，则等待该节点解锁。在等待该节点解
+        // 锁过程中，i节点表可能会发生变化。所以再次进行上述相同判断。如果发生了变化，
+        // 则再次重新扫描整个i节点表。
 		wait_on_inode(inode);
 		if (inode->i_dev != dev || inode->i_num != nr) {
 			inode = inode_table;
 			continue;
 		}
+        // 到这里表示找到相应的i节点。于是将该i节点引用计数增1.然后再做进一步检查，看它
+        // 是否是另一个文件系统的安装点。若是则寻找被安装文件系统根节点并返回。如果
+        // 该i节点的确是其他文件系统的安装点，则在超级块表中搜寻安装在此i节点的超级块。
+        // 如果没有找到，则显示出错信息，并放回本函数开始时获取的空闲节点empty，
+        // 返回该i节点指针。
 		inode->i_count++;
 		if (inode->i_mount) {
 			int i;
@@ -387,16 +405,23 @@ struct m_inode * iget(int dev,int nr)
 					iput(empty);
 				return inode;
 			}
+            // 执行到这里表示已经找到安装到inode节点的文件系统超级块。于是将该i节点写盘
+            // 放回，并从安装在次i节点上的文件系统超级块中取设备号，并令i节点号为ROOT_INO，
+            // 即为1.然后重新扫描整个i节点表，以获取该被安装文件系统的根i节点信息。
 			iput(inode);
 			dev = super_block[i].s_dev;
 			nr = ROOT_INO;
 			inode = inode_table;
 			continue;
 		}
+        // 最终我们找到了相应的i节点。因此可以放弃本函数开始处临时申请的空闲的i节点，返回
+        // 找到的i节点指针。
 		if (empty)
 			iput(empty);
 		return inode;
 	}
+    // 如果我们在i节点表中没有找到指定的i节点，则利用前面申请的空闲i节点empty在i节点表中
+    // 建立该i节点。并从相应设备上读取该i节点信息，返回该i节点指针。
 	if (!empty)
 		return (NULL);
 	inode=empty;
