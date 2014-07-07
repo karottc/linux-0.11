@@ -431,15 +431,27 @@ struct m_inode * iget(int dev,int nr)
 	return inode;
 }
 
+//// 读取指定i节点信息。
+// 从设备上读取含有指定i节点信息的i节点盘块，然后复制到指定的i节点结构中。为了确定i节点
+// 所在的设备逻辑块号（或缓冲块），必须首先读取相应设备上的超级块，以获取用于计算逻辑
+// 块号的每块i节点数信息INODES_PER_BLOCK.在计算出i节点所在的逻辑块号后，就把该逻辑块读入
+// 一缓冲块中。然后把缓冲块中相应位置处的i节点内容复制到参数指定的位置处。
 static void read_inode(struct m_inode * inode)
 {
 	struct super_block * sb;
 	struct buffer_head * bh;
 	int block;
 
+    // 首先锁定该i节点，并取该节点所在设备的超级块。
 	lock_inode(inode);
 	if (!(sb=get_super(inode->i_dev)))
 		panic("trying to read inode without dev");
+    // 该i节点所在的设备逻辑块号＝（启动块+超级块）+i节点位图占用的块数+逻辑块位图占用的块数
+    // +（i节点号-1）/每块含有的i节点数。虽然i节点号从0开始编号，但第i个0号i节点不用，并且
+    // 磁盘上也不保存对应的0号i节点结构。因此存放i节点的盘块的第i块上保存的是i节点号是1--16
+    // 的i节点结构而不是0--15的。因此在上面计算i节点号对应的i节点结构所在盘块时需要减1，即：
+    // B=（i节点号-1)/每块含有i节点结构数。例如，节点号16的i节点结构应该在B=（16-1）/16 = 0的
+    // 块上。这里我们从设备上读取该i节点所在的逻辑块，并复制指定i节点内容到inode指针所指位置处。
 	block = 2 + sb->s_imap_blocks + sb->s_zmap_blocks +
 		(inode->i_num-1)/INODES_PER_BLOCK;
 	if (!(bh=bread(inode->i_dev,block)))
@@ -447,16 +459,24 @@ static void read_inode(struct m_inode * inode)
 	*(struct d_inode *)inode =
 		((struct d_inode *)bh->b_data)
 			[(inode->i_num-1)%INODES_PER_BLOCK];
+    // 最后释放读入的缓冲块，并解锁该i节点。
 	brelse(bh);
 	unlock_inode(inode);
 }
 
+//// 将i节点信息写入缓冲区中。
+// 该函数把参数指定的i节点写入缓冲区相应的缓冲块中，待缓冲区刷新时会写入盘中。为了确定i节点
+// 所在的设备逻辑块号（或缓冲块），必须首先读取相应设备上的超级块，以获取用于计算逻辑块号的
+// 每块i节点数信息INODES_PER_BLOCK。在计算出i节点所在的逻辑块号后，就把该逻辑块读入一缓冲块
+// 中。然后把i节点内容复制到缓冲块的相应位置处。
 static void write_inode(struct m_inode * inode)
 {
 	struct super_block * sb;
 	struct buffer_head * bh;
 	int block;
 
+    // 首先锁定该i节点，如果该i节点没有被修改或者该i节点的设备号等于零，则解锁该i节点，并退出。
+    // 对于没有被修改过的i节点，其内容与缓冲区中或设备中的相同。然后获取该i节点的超级块。
 	lock_inode(inode);
 	if (!inode->i_dirt || !inode->i_dev) {
 		unlock_inode(inode);
@@ -464,6 +484,9 @@ static void write_inode(struct m_inode * inode)
 	}
 	if (!(sb=get_super(inode->i_dev)))
 		panic("trying to write inode without device");
+    // 该i节点所在的设备逻辑块号＝（启动块+超级块）+i节点位图占用的块数+逻辑块位图占用的块数
+    // +（i节点号-1）/每块含有的i节点数。我们从设备上读取i节点所在的逻辑块，并将该i节点信息复制
+    // 到逻辑块对应i节点的项位置处。
 	block = 2 + sb->s_imap_blocks + sb->s_zmap_blocks +
 		(inode->i_num-1)/INODES_PER_BLOCK;
 	if (!(bh=bread(inode->i_dev,block)))
@@ -471,6 +494,8 @@ static void write_inode(struct m_inode * inode)
 	((struct d_inode *)bh->b_data)
 		[(inode->i_num-1)%INODES_PER_BLOCK] =
 			*(struct d_inode *)inode;
+    // 然后置缓冲区已修改标志，而i节点内容已经与缓冲区中的一致，因此修改标志置零。然后释放该
+    // 含有i节点的缓冲区，并解锁该i节点。
 	bh->b_dirt=1;
 	inode->i_dirt=0;
 	brelse(bh);
