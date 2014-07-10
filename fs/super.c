@@ -15,36 +15,56 @@
 #include <errno.h>
 #include <sys/stat.h>
 
+// 对指定设备执行高速缓冲与设备上数据的同步操作
 int sync_dev(int dev);
+// 等待击键
 void wait_for_keypress(void);
 
 /* set_bit uses setb, as gas doesn't recognize setc */
+//// 测试指定位偏移处bit位的值，并返回该原bit位值。
+// 嵌入式汇编宏，参数bitnr是bit位偏移值，addr是测试bit位操作的起始地址。
+// %0 - ax(__res), %1 - 0, %2 - bitnr, %3 - addr, 下面一行定义了一个寄存器变量。
+// 该变量将被保存在eax寄存器中，以便于高效访问和操作，指令bt用于对bit位进行测试，它
+// 会把地址addr（%3）和bit位偏移量bitnr（%2）指定的bit位的值放入进位标志CF中，指令setb
+// 用于根据进位标志CF设置操作数%al.如果CF=1，则%al=1,否则%al=0.
 #define set_bit(bitnr,addr) ({ \
 register int __res ; \
 __asm__("bt %2,%3;setb %%al":"=a" (__res):"a" (0),"r" (bitnr),"m" (*(addr))); \
 __res; })
 
+// 超级块结构表数组（NR_SUPER = 8）
 struct super_block super_block[NR_SUPER];
 /* this is initialized in init/main.c */
-int ROOT_DEV = 0;
+int ROOT_DEV = 0;       // 根文件系统设备号。
 
+// 以下3个函数（lock_super()、free_super()和wait_on_super()）的作用与inode.c文件中头
+// 3个函数的作用雷同，只是这里操作的对象换成了超级块。
+//// 锁定超级块
+// 如果超级块已被锁定，则将当前任务置为不可中断的等待状态，并添加到该超级块等待队列
+// s_wait中。直到该超级块解锁并明确地唤醒本地任务。然后对其上锁。
 static void lock_super(struct super_block * sb)
 {
-	cli();
-	while (sb->s_lock)
+	cli();                          // 关中断
+	while (sb->s_lock)              // 如果该超级块已经上锁，则睡眠等待。
 		sleep_on(&(sb->s_wait));
-	sb->s_lock = 1;
-	sti();
+	sb->s_lock = 1;                 // 会给超级块加锁（置锁定标志）
+	sti();                          // 开中断
 }
 
+//// 对指定超级块解锁
+// 复位超级块的锁定标志，并明确地唤醒等待在此超级块等待队列s_wait上的所有进程。
+// 如果使用ulock_super这个名称则可能更妥贴。
 static void free_super(struct super_block * sb)
 {
 	cli();
-	sb->s_lock = 0;
-	wake_up(&(sb->s_wait));
+	sb->s_lock = 0;             // 复位锁定标志
+	wake_up(&(sb->s_wait));     // 唤醒等待该超级块的进程。
 	sti();
 }
 
+//// 睡眠等待超级解锁
+// 如果超级块已被锁定，则将当前任务置为不可中断的等待状态，并添加到该超级块的等待
+// 队列s_wait中。知道该超级块解锁并明确的唤醒本地任务.
 static void wait_on_super(struct super_block * sb)
 {
 	cli();
