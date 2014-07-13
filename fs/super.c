@@ -73,30 +73,49 @@ static void wait_on_super(struct super_block * sb)
 	sti();
 }
 
+//// 取指定设备的超级块
+// 在超级块表（数组）中搜索指定设备dev的超级块结构信息。若找到刚返回超级块的指针，
+// 否则返回空指针
 struct super_block * get_super(int dev)
 {
 	struct super_block * s;
 
+    // 首先判断参数给出设备的有效性。若设备号为0则返回NULL，然后让s指向超级块数组
+    // 起始处，开始搜索整个超级块数组，以寻找指定设备dev的超级块。
 	if (!dev)
 		return NULL;
 	s = 0+super_block;
 	while (s < NR_SUPER+super_block)
+        // 如果当前搜索项是指定设备的超级块，即该超级块的设备号字段值与函数参数指定的
+        // 相同，则先等待该超级块解锁。在等待期间，该超级块项有可能被其他设备使用，因此
+        // 等待返回之后需要再判断一次是否是指定设备的超级块，如果是则返回该超级块的指针。
+        // 否则就重新对超级块数组再搜索一遍，因此此时s需重又指向超级块数组开始处。
 		if (s->s_dev == dev) {
 			wait_on_super(s);
 			if (s->s_dev == dev)
 				return s;
 			s = 0+super_block;
+        // 如果当前搜索项不是，则检查下一项，如果没有找到指定的超级块，则返回空指针。
 		} else
 			s++;
 	return NULL;
 }
 
+//// 释放指定设备的超级块
+// 释放设备所使用的超级块数组项，并释放该设备i节点的位图和逻辑块位图所占用的高速缓冲块。
+// 如果超级块对应的文件系统是根文件系统，或者其某个i节点上已经安装有其他的文件系统，
+// 则不能释放该超级块。
 void put_super(int dev)
 {
 	struct super_block * sb;
 	/* struct m_inode * inode;*/
 	int i;
 
+    // 首先判断参数的有效性和合法性。如果指定设备是根文件系统设备，则显示警告信息“根
+    // 系统盘改变了，准备生死决战吧”，并返回。然后在超级块表现中寻找指定设备号的文件系统
+    // 超级块。如果找不到指定设备的超级块，则返回。另外，如果该超级块指明该文件系统所安装
+    // 到的i节点还没有被处理过，则显示警告信息并返回。在文件系统卸载操作中，s_imount会先被
+    // 置成NULL以后才会调用本函数。
 	if (dev == ROOT_DEV) {
 		printk("root diskette changed: prepare for armageddon\n\r");
 		return;
@@ -107,6 +126,12 @@ void put_super(int dev)
 		printk("Mounted disk changed - tssk, tssk\n\r");
 		return;
 	}
+    // 然后在找到指定设备的超级块之后，我们先锁定该超级块，再置该超级块对应的设备号字段
+    // s_dev为0，也即释放该设备上的文件系统超级块。然后释放该超级块占用的其他内核资源，
+    // 即释放该设备上文件系统i节点位图和逻辑块位图在缓冲区中所占用的缓冲块。下面常数符号
+    // I_MAP_SLOTS和Z_MAP_LOTS均等于8，用于分别指明i节点位图和逻辑块位图占用的磁盘逻辑块
+    // 数。注意，若这些缓冲块内荣被修改过，则需要作同步操作才能把缓冲块中的数据写入设备
+    // 中,函数最后对该超级块解锁，并返回。
 	lock_super(sb);
 	sb->s_dev = 0;
 	for(i=0;i<I_MAP_SLOTS;i++)
@@ -117,15 +142,23 @@ void put_super(int dev)
 	return;
 }
 
+//// 读取指定设备的超级块
+// 如果指定设备dev上的文件系统超级块已经在超级块表中，则直接返回该超级块项的指针。否则
+// 就从设备dev上读取超级块到缓冲块中，并复制到超级块中。并返回超级块指针。
 static struct super_block * read_super(int dev)
 {
 	struct super_block * s;
 	struct buffer_head * bh;
 	int i,block;
 
+    // 首先判断参数的有效性。如果没有指明设备，则返回空指针。然后检查该设备是否可更换过
+    // 盘片（也即是否软盘设备）。如果更换盘片，则高速缓冲区有关设备的所有缓冲块均失效，
+    // 需要进行失效处理，即释放原来加载的文件系统。
 	if (!dev)
 		return NULL;
 	check_disk_change(dev);
+    // 如果该设备的超级块已经在超级块表中，则直接返回该超级块的指针。否则，首先在超级块
+    // 数组中找出一个空项（也即字段s_dev=0的项）。如果数组已经占满则返回空指针。
 	if ((s = get_super(dev)))
 		return s;
 	for (s = 0+super_block ;; s++) {
@@ -134,12 +167,19 @@ static struct super_block * read_super(int dev)
 		if (!s->s_dev)
 			break;
 	}
+    // 在超级块数组中找到空项之后，就将该超级块项用于指定设备dev上的文件系统。于是对该
+    // 超级块结构中的内存字段进行部分初始化处理。
 	s->s_dev = dev;
 	s->s_isup = NULL;
 	s->s_imount = NULL;
 	s->s_time = 0;
 	s->s_rd_only = 0;
 	s->s_dirt = 0;
+    // 然后锁定该超级块，并从设备上读取超级块信息到bh指向的缓冲块中。超级块位于设备的第
+    // 2个逻辑块（1号块）中，（第1个是引导盘块）。如果读超级块操作失败，则释放上面选定
+    // 的超级块数组中的项（即置s_dev=0），并解锁该项，返回空指针退出。否则就将设备上读取
+    // 的超级块信息从缓冲块数据区复制到超级块数组相应项结构中。并释放存放读取信息的高速
+    // 缓冲块。
 	lock_super(s);
 	if (!(bh = bread(dev,1))) {
 		s->s_dev=0;
@@ -149,11 +189,19 @@ static struct super_block * read_super(int dev)
 	*((struct d_super_block *) s) =
 		*((struct d_super_block *) bh->b_data);
 	brelse(bh);
+    // 现在我们从设备dev上得到了文件系统的超级块，于是开始检查这个超级块的有效性并从设备
+    // 上读取i节点位图和逻辑块位图等信息。如果所读取的超级块的文件系统魔数字段不对，说明
+    // 设备上不是正确的文件系统，因此同上面一样，释放上面选定的超级块数组中的项，并解锁该
+    // 项，返回空指针退出。对于该版Linux内核，只支持MINIX文件系统1.0版本，其魔数是0x1371。
 	if (s->s_magic != SUPER_MAGIC) {
 		s->s_dev = 0;
 		free_super(s);
 		return NULL;
 	}
+    // 下面开始读取设备上i节点的位图和逻辑块位图数据。首先初始化内存超级块结构中位图空间。
+    // 然后从设备上读取i节点位图和逻辑块位图信息，并存放在超级块对应字段中。i节点位图保存
+    // 在设备上2号块开始的逻辑块中，共占用s_imap_blocks个块，逻辑块位图在i节点位图所在块
+    // 的后续块中，共占用s_zmap_blocks个块。
 	for (i=0;i<I_MAP_SLOTS;i++)
 		s->s_imap[i] = NULL;
 	for (i=0;i<Z_MAP_SLOTS;i++)
@@ -169,6 +217,9 @@ static struct super_block * read_super(int dev)
 			block++;
 		else
 			break;
+    // 如果读出的位图块数不等于位图应该占有的逻辑块数，说明文件系统位图信息有问题，超级块
+    // 初始化是吧。因此只能释放前面申请并占用的所有资源，即释放i节点位图和逻辑块位图占用
+    // 的高速缓冲块、释放上面选定的超级块数组项、解锁该超级块项，并返回空指针退出。
 	if (block != 2+s->s_imap_blocks+s->s_zmap_blocks) {
 		for(i=0;i<I_MAP_SLOTS;i++)
 			brelse(s->s_imap[i]);
@@ -178,6 +229,10 @@ static struct super_block * read_super(int dev)
 		free_super(s);
 		return NULL;
 	}
+    // 否则一切成功，另外，由于对申请空闲i节点的函数来讲，如果设备上所有的i节点已经全被使用
+    // 则查找函数会返回0值。因此0号i节点是不能用的，所以这里将位图中第1块的最低bit位设置为1，
+    // 以防止文件系统分配0号i节点。同样的道理，也将逻辑块位图的最低位设置为1.最后函数解锁该
+    // 超级块，并放回超级块指针。
 	s->s_imap[0]->b_data[0] |= 1;
 	s->s_zmap[0]->b_data[0] |= 1;
 	free_super(s);
