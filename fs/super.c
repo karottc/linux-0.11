@@ -239,12 +239,20 @@ static struct super_block * read_super(int dev)
 	return s;
 }
 
+//// 卸载文件系统（系统调用）
+// 参数dev_name是文件系统所在设备的设备文件名
+// 该函数首先根据参数给出的设备文件名获得设备号，然后复位文件系统超级块中的相应字段，释放超级
+// 块和位图占用的缓冲块，最后对该设备执行高速缓冲与设备上数据的同步操作。若卸载操作成功则返回
+// 0，否则返回出错码。
 int sys_umount(char * dev_name)
 {
 	struct m_inode * inode;
 	struct super_block * sb;
 	int dev;
 
+    // 首先根据设备文件名找到对应的i节点，并取其中的设备号。设备文件所定义设备的设备号是保存在其
+    // i节点的i_zone[0]中的，参见sys_mknod()的代码。另外，由于文件系统需要存放在设备上，因此如果
+    // 不是设备文件，则返回刚申请的i节点dev_i,返回出错码。
 	if (!(inode=namei(dev_name)))
 		return -ENOENT;
 	dev = inode->i_zone[0];
@@ -252,9 +260,15 @@ int sys_umount(char * dev_name)
 		iput(inode);
 		return -ENOTBLK;
 	}
+    // OK,现在上面为了得到设备号而取得的i节点已完成了它的使命，因此这里放回该设备文件的i节点。接着
+    // 我们来检查一下卸载该文件系统的条件是否满足。如果设备上是根文件系统，则不能被卸载，返回。
 	iput(inode);
 	if (dev==ROOT_DEV)
 		return -EBUSY;
+    // 如果在超级块表中没有找到该设备上文件系统的超级块，或者已找到但是该设备上文件系统
+    // 没有安装过，则返回出错码。如果超级块所指明的被安装到的i节点并没有置位其安装标志
+    // i_mount，则显示警告信息。然后查找一下i节点表，看看是否有进程在使用该设备上的文件，
+    // 如果有则返回出错码。
 	if (!(sb=get_super(dev)) || !(sb->s_imount))
 		return -ENOENT;
 	if (!sb->s_imount->i_mount)
@@ -262,11 +276,16 @@ int sys_umount(char * dev_name)
 	for (inode=inode_table+0 ; inode<inode_table+NR_INODE ; inode++)
 		if (inode->i_dev==dev && inode->i_count)
 				return -EBUSY;
+    // 现在该设备上文件系统的卸载条件均得到满足，因此我们可以开始实施真正的卸载操作了。
+    // 首先复位被安装到的i节点的安装标志，释放该i节点。然后置超级块中被安装i节点字段为
+    // 空，并放回设备文件系统的根i节点。接着置超级块中被安装系统根i节点指针为空。
 	sb->s_imount->i_mount=0;
 	iput(sb->s_imount);
 	sb->s_imount = NULL;
 	iput(sb->s_isup);
 	sb->s_isup = NULL;
+    // 最后我们释放该设备上的超级块以及位图占用的高速缓冲块，并对该设备执行高速缓冲与
+    // 设备上数据的同步操作，然后返回0，表示卸载成功。
 	put_super(dev);
 	sync_dev(dev);
 	return 0;
