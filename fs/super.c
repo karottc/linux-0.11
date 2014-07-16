@@ -354,18 +354,27 @@ int sys_mount(char * dev_name, char * dir_name, int rw_flag)
 	return 0;			/* we do that in umount */
 }
 
+//// 安装根文件系统
+// 该函数属于系统初始化操作的一部分。函数首先初始化文件表数组file_table[]和超级块表（数组）
+// 然后读取根文件系统超级块，并取得文件系统根i节点。最后统计并显示出根文件系统上的可用资源
+// （空闲块数和空闲i节点数）。该函数会在系统开机进行初始化设置时被调用。
 void mount_root(void)
 {
 	int i,free;
 	struct super_block * p;
 	struct m_inode * mi;
 
+    // 若磁盘i节点结构不是32字节，则出错停机。该判断用于防止修改代码时出现不一致情况。
 	if (32 != sizeof (struct d_inode))
 		panic("bad i-node size");
+    // 首先初始化文件表数组（共64项，即系统同时只能打开64个文件）和超级块表。这里将所有文件
+    // 结构中的引用计数设置为0（表示空闲），并发超级块表中各项结构的设备字段初始化为0（也
+    // 表示空闲）。如果根文件系统所在设备是软盘的话，就提示“插入根文件系统盘，并按回车键”，
+    // 并等待按键。
 	for(i=0;i<NR_FILE;i++)
-		file_table[i].f_count=0;
+		file_table[i].f_count=0;                        // 初始化文件表
 	if (MAJOR(ROOT_DEV) == 2) {
-		printk("Insert root floppy and press ENTER");
+		printk("Insert root floppy and press ENTER");   // 提示插入根文件系统盘
 		wait_for_keypress();
 	}
 	for(p = &super_block[0] ; p < &super_block[NR_SUPER] ; p++) {
@@ -373,19 +382,32 @@ void mount_root(void)
 		p->s_lock = 0;
 		p->s_wait = NULL;
 	}
+    // 做好以上“份外”的初始化工作之后，我们开始安装根文件系统。于是从根设备上读取文件系统
+    // 超级块，并取得文件系统的根i节点（1号节点）在内存i节点表中的指针。如果读根设备上超级
+    // 块是吧或取根节点失败，则都显示信息并停机。
 	if (!(p=read_super(ROOT_DEV)))
 		panic("Unable to mount root");
 	if (!(mi=iget(ROOT_DEV,ROOT_INO)))
 		panic("Unable to read root i-node");
+    // 现在我们对超级块和根i节点进行设置。把根i节点引用次数递增3次。因此后面也引用了该i节点。
+    // 另外，iget()函数中i节点引用计数已被设置为1。然后置该超级块的被安装文件系统i节点和被
+    // 安装到i节点。再设置当前进程的当前工作目录和根目录i节点。此时当前进程是1号进程（init进程）。
 	mi->i_count += 3 ;	/* NOTE! it is logically used 4 times, not 1 */
 	p->s_isup = p->s_imount = mi;
 	current->pwd = mi;
 	current->root = mi;
+    // 然后我们对根文件系统的资源作统计工作。统计该设备上空闲块数和空闲i节点数。首先令i等于
+    // 超级块中表明的设备逻辑块总数。然后根据逻辑块相应bit位的占用情况统计出空闲块数。这里
+    // 宏函数set_bit()只是在测试bit位，而非设置bit位。“i&8191”用于取得i节点号在当前位图块中对应
+    // 的bit位偏移值。"i>>13"是将i除以8192，也即除一个磁盘块包含的bit位数。
 	free=0;
 	i=p->s_nzones;
 	while (-- i >= 0)
 		if (!set_bit(i&8191,p->s_zmap[i>>13]->b_data))
 			free++;
+    // 在显示过设备上空闲逻辑块数/逻辑块总数之后。我们再统计设备上空闲i节点数。首先令i等于超级块
+    // 中表明的设备上i节点总数+1.加1是将0节点也统计进去，然后根据i节点位图相应bit位的占用情况计算
+    // 出空闲i节点数。最后再显示设备上可用空闲i节点数和i节点总数
 	printk("%d/%d free blocks\n\r",free,p->s_nzones);
 	free=0;
 	i=p->s_ninodes+1;
