@@ -18,6 +18,21 @@
 #include <const.h>
 #include <sys/stat.h>
 
+// 下面宏中右侧表达式是访问数组的一种特殊使用方法。它基于这样的一个事实，
+// 即用数组名和数组下标所表示的数组项（例如a[b]）的值等同于使用数组首指针
+// 加上该项偏移地址的形式的值*(a+b),同时可知项a[b]也可以表示成b[a]的形式。
+// 因此对于字符数组项形式为“loveYou”[2](或者2["loveYou"])就等同于*("loveYou")+2
+// 另外，字符串“loveYou”在内存中被存储的位置就是其地址，因此数组项“LoveYou”[2]
+// 的值就是该字符串中索引值为2的字符'v'所对应的ASCII码值0x76，或用八进制表示
+// 就是0166.在C语言中，字符也可以用ASCII码值来表示，方法是在字符的ASCII码值
+// 前加一个反斜杠。例如字符“v”可以表示成“\x76”或者“\166”,对于不可显示的字符
+// 就可用其ASCII来表示。
+// 
+// 下面是访问模式宏。x是头文件fentl.h中定义的访问标志。这个宏根据文件访问
+// 标志x的值来索引双引号中对应的数值。双引号中有4个八进制数值（实际表示4个
+// 控制字符），分别表示读、写、执行的权限为：r,w,rw。并且分别对应x的索引值
+// 0-3.例如，如果x为2，则该宏返回把禁止呢006，表示可读写。另外，
+// O_ACCMODE＝ 00003，是索引值x的屏蔽码。
 #define ACC_MODE(x) ("\004\002\006\377"[(x)&O_ACCMODE])
 
 /*
@@ -37,11 +52,18 @@
  * I don't know if we should look at just the euid or both euid and
  * uid, but that should be easily changed.
  */
+//// 检测文件访问权限
+// 参数：inode - 文件的i节点指针；mask - 访问属性屏蔽码。
+// 返回：访问许可返回1，否则返回0.
 static int permission(struct m_inode * inode,int mask)
 {
 	int mode = inode->i_mode;
 
 /* special case: not even root can read/write a deleted file */
+    // 如果i节点有对应的设备，但该i节点的连接计数值等于0，表示该文件
+    // 已被删除，则返回。否则，如果进程的有效用户ID(euid)与i节点的
+    // 用户id相同，则取文件宿主的访问权限。否则如果与组id相同，
+    // 则取租用户的访问权限。
 	if (inode->i_dev && !inode->i_nlinks)
 		return 0;
 	else if (current->euid==inode->i_uid)
