@@ -82,14 +82,24 @@ static int permission(struct m_inode * inode,int mask)
  *
  * NOTE! unlike strncmp, match returns 1 for success, 0 for failure.
  */
+//// 指定长度字符串比较函数
+// 参数：len - 比较的字符串长度；name - 文件名指针；de - 目录项结构
+// 返回：相同返回1，不同返回0. 
+// 下面函数中的寄存器变了same被保存在eax寄存器中，以便高效访问。
 static int match(int len,const char * name,struct dir_entry * de)
 {
 	register int same ;
 
+    // 首先判断函数参数的有效性。如果目录项指针空，或者目录项i节点等于0，或者
+    // 要比较的字符串长度超过文件名长度，则返回0.如果要比较的长度len小于NAME_LEN，
+    // 但是目录项中文件名长度超过len，也返回0.
 	if (!de || !de->inode || len > NAME_LEN)
 		return 0;
 	if (len < NAME_LEN && de->name[len])
 		return 0;
+    // 然后使用嵌套汇编语句进行快速比较操作。他会在用户数据空间(fs段)执行字符串的比较
+    // 操作。%0 - eax（比较结果same）；%1 - eax (eax初值0)；%2 - esi(名字指针)；
+    // %3 - edi(目录项名指针)；%4 - ecx(比较的字节长度值len).
 	__asm__("cld\n\t"
 		"fs ; repe ; cmpsb\n\t"
 		"setz %%al"
