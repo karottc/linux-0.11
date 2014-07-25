@@ -120,6 +120,13 @@ static int match(int len,const char * name,struct dir_entry * de)
  * This also takes care of the few special cases due to '..'-traversal
  * over a pseudo-root and a mount point.
  */
+//// 查找指定目录和文件名的目录项。
+// 参数：*dir - 指定目录i节点的指针；name - 文件名；namelen - 文件名长度；
+// 该函数在指定目录的数据（文件）中搜索指定文件名的目录项。并对指定文件名
+// 是'..'的情况根据当前进行的相关设置进行特殊处理。关于函数参数传递指针的指针
+// 作用，请参见seched.c中的注释。
+// 返回：成功则函数高速缓冲区指针，并在*res_dir处返回的目录项结构指针。失败则
+// 返回空指针NULL。
 static struct buffer_head * find_entry(struct m_inode ** dir,
 	const char * name, int namelen, struct dir_entry ** res_dir)
 {
@@ -129,6 +136,9 @@ static struct buffer_head * find_entry(struct m_inode ** dir,
 	struct dir_entry * de;
 	struct super_block * sb;
 
+    // 同样，本函数一上来也需要对函数参数的有效性进行判断和验证。如果我们在前面
+    // 定义了符号常数NO_TRUNCATE,那么如果文件名长度超过最大长度NAME_LEN，则不予
+    // 处理。如果没有定义过NO_TRUNCATE，那么在文件名长度超过最大长度NAME_LEN时截短之。
 #ifdef NO_TRUNCATE
 	if (namelen > NAME_LEN)
 		return NULL;
@@ -136,10 +146,21 @@ static struct buffer_head * find_entry(struct m_inode ** dir,
 	if (namelen > NAME_LEN)
 		namelen = NAME_LEN;
 #endif
+    // 首先计算本目录中目录项项数entries。目录i节点i_size字段中含有本目录包含的数据
+    // 长度，因此其除以一个目录项的长度（16字节）即课得到该目录中目录项数。然后置空
+    // 返回目录项结构指针。如果长度等于0，则返回NULL，退出。
 	entries = (*dir)->i_size / (sizeof (struct dir_entry));
 	*res_dir = NULL;
 	if (!namelen)
 		return NULL;
+    // 接下来我们对目录项文件名是'..'的情况进行特殊处理。如果当前进程指定的根i节点就是
+    // 函数参数指定的目录，则说明对于本进程来说，这个目录就是它伪根目录，即进程只能访问
+    // 该目录中的项而不能后退到其父目录中去。也即对于该进程本目录就如同是文件系统的根目录，
+    // 因此我们需要将文件名修改为‘.’。
+    // 否则，如果该目录的i节点号等于ROOT_INO（1号）的话，说明确实是文件系统的根i节点。
+    // 则取文件系统的超级块。如果被安装到的i节点存在，则先放回原i节点，然后对被安装到
+    // 的i节点进行处理。于是我们让*dir指向该被安装到的i节点；并且该i节点的引用数加1.
+    // 即针对这种情况，我们悄悄的进行了“偷梁换柱”工程。:-)
 /* check for '..', as we might have to do some "magic" for it */
 	if (namelen==2 && get_fs_byte(name)=='.' && get_fs_byte(name+1)=='.') {
 /* '..' in a pseudo-root results in a faked '.' (just change namelen) */
@@ -156,13 +177,26 @@ static struct buffer_head * find_entry(struct m_inode ** dir,
 			}
 		}
 	}
+    // 现在我们开始正常操作，查找指定文件名的目录项在什么地方。因此我们需要读取目录的
+    // 数据，即取出目录i节点对应块设备数据区中的数据块（逻辑块）信息。这些逻辑块的块号
+    // 保存在i节点结构的i_zone[9]数组中。我们先取其中第一个块号。如果目录i节点指向的
+    // 第一个直接磁盘块好为0，则说明该目录竟然不含数据，这不正常。于是返回NULL退出，
+    // 否则我们就从节点所在设备读取指定的目录项数据块。当然，如果不成功，则也返回NULL 退出。
 	if (!(block = (*dir)->i_zone[0]))
 		return NULL;
 	if (!(bh = bread((*dir)->i_dev,block)))
 		return NULL;
+    // 此时我们就在这个读取的目录i节点数据块中搜索匹配指定文件名的目录项。首先让de指向
+    // 缓冲块中的数据块部分。并在不超过目录中目录项数的条件下，循环执行搜索。其中i是目录中
+    // 的目录项索引号。在循环开始时初始化为0.
 	i = 0;
 	de = (struct dir_entry *) bh->b_data;
 	while (i < entries) {
+        // 如果当前目录项数据块已经搜索完，还没有找到匹配的目录项，则释放当前目录项数据块。
+        // 再读入目录的下一个逻辑块。若这块为空。则只要还没有搜索完目录中的所有目录项，就
+        // 跳过该块，继续读目录的下一逻辑块。若该块不空，就让de指向该数据块，然后在其中继续
+        // 搜索。其中DIR_ENTRIES_PER_BLOCK可得到当前搜索的目录项所在目录文件中的块号，而bmap()
+        // 函数则课计算出在设备上对应的逻辑块号.
 		if ((char *)de >= BLOCK_SIZE+bh->b_data) {
 			brelse(bh);
 			bh = NULL;
@@ -173,6 +207,8 @@ static struct buffer_head * find_entry(struct m_inode ** dir,
 			}
 			de = (struct dir_entry *) bh->b_data;
 		}
+        // 如果找到匹配的目录项的话，则返回该目录项结构指针de和该目录项i节点指针*dir以及该目录项
+        // 数据块指针bh，并退出函数。否则继续在目录项数据块中比较下一个目录项。
 		if (match(namelen,name,de)) {
 			*res_dir = de;
 			return bh;
@@ -180,6 +216,8 @@ static struct buffer_head * find_entry(struct m_inode ** dir,
 		de++;
 		i++;
 	}
+    // 如果指定目录中的所有目录项都搜索完后，还没有找到相应的目录项，则释放目录的数据块，
+    // 最后返回NULL（失败）。
 	brelse(bh);
 	return NULL;
 }
