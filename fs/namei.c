@@ -232,6 +232,9 @@ static struct buffer_head * find_entry(struct m_inode ** dir,
  * may not sleep between calling this and putting something into
  * the entry, as someone else might have used it while you slept.
  */
+//// 根据指定的目录和文件名添加目录项
+// 参数：dir - 指定目录的i节点；name - 文件名；namelen - 文件名长度；
+// 返回：高速缓冲区指针；res_dir - 返回的目录项结构指针。
 static struct buffer_head * add_entry(struct m_inode * dir,
 	const char * name, int namelen, struct dir_entry ** res_dir)
 {
@@ -239,6 +242,10 @@ static struct buffer_head * add_entry(struct m_inode * dir,
 	struct buffer_head * bh;
 	struct dir_entry * de;
 
+    // 同样，本函数一上来也需要对函数参数的有效性进行判断和验证。
+    // 如果我们在前面定义了符号常数NO_TRUNCATE，那么如果文件名长
+    // 度超过最大长度NAME_LEN，则不予处理。如果没有定义过NO_TRUNCATE，
+    // 那么在文件名长度超过最大长度NAME_LEN时截短之。
 	*res_dir = NULL;
 #ifdef NO_TRUNCATE
 	if (namelen > NAME_LEN)
@@ -247,15 +254,35 @@ static struct buffer_head * add_entry(struct m_inode * dir,
 	if (namelen > NAME_LEN)
 		namelen = NAME_LEN;
 #endif
+    // 现在我们开始操作，向指定目录中添加一个指定文件名的目录项。因此
+    // 我们需要先读取目录的数据，即取出目录i节点对应块数据区中的数据块
+    // 信息。这些逻辑块的块号保存在i节点结构i_zone[9]数组中。我们先取
+    // 其中第1个块号，如果目录i节点指向的第一个直接磁盘块号为0，则说明
+    // 该目录竟然不含数据，这不正常。于是返回NULL退出。否则我们就从节点
+    // 所在设备读取指定目录项数据块。当然，如果不成功，则也返回NULL退出。
+    // 如果参数提供的文件名长度等于0，则也返回NULL退出。
 	if (!namelen)
 		return NULL;
 	if (!(block = dir->i_zone[0]))
 		return NULL;
 	if (!(bh = bread(dir->i_dev,block)))
 		return NULL;
+    // 此时我们就在这个目录i节点数据块中循环查找最后未使用的空目录项。
+    // 首先让目录项结构指针de指向缓冲块中的数据块部分，即第一个目录项处。
+    // 其中i是目录中的目录项索引号，在循环开始时初始化为0.
 	i = 0;
 	de = (struct dir_entry *) bh->b_data;
 	while (1) {
+        // 如果当前目录项数据块已经搜索完毕，但还没有找到需要的空目录项，
+        // 则释放当前目录项数据块，再读入目录的下一个逻辑块。如果对应的逻辑块。
+        // 如果对应的逻辑块不存在就创建一块。如果读取或创建操作失败则返回空。
+        // 如果此次读取的磁盘逻辑块数据返回的缓冲块数据为空，说明这块逻辑块
+        // 可能是因为不存在而新创建的空块，则把目录项索引值加上一块逻辑块所
+        // 能容纳的目录项数DIR_ENTRIES_PER_BLOCK，用以跳过该块并继续搜索。
+        // 否则说明新读入的块上有目录项数据，于是让目录项结构指针de指向该块
+        // 的缓冲块数据部分，然后在其中继续搜索。其中i/DIR_ENTRIES_PER_BLOCK可
+        // 计算得到当前搜索的目录项i所在目录文件中的块号，而create_block函数则可
+        // 读取或创建出在设备上对应的逻辑块。
 		if ((char *)de >= BLOCK_SIZE+bh->b_data) {
 			brelse(bh);
 			bh = NULL;
@@ -268,12 +295,22 @@ static struct buffer_head * add_entry(struct m_inode * dir,
 			}
 			de = (struct dir_entry *) bh->b_data;
 		}
+        // 如果当前所操作的目录项序号i乘上目录结构大小所在长度值已经超过了该目录
+        // i节点信息所指出的目录数据长度值i_size，则说明整个目录文件数据中没有
+        // 由于删除文件留下的空目录项，因此我们只能把需要添加的新目录项附加到
+        // 目录文件数据的末端处。于是对该处目录项进行设置（置该目录项的i节点指针
+        // 为空），并更新该目录文件的长度值（加上一个目录项的长度），然后设置目录
+        // 的i节点已修改标志，再更新该目录的改变时间为当前时间。
 		if (i*sizeof(struct dir_entry) >= dir->i_size) {
 			de->inode=0;
 			dir->i_size = (i+1)*sizeof(struct dir_entry);
 			dir->i_dirt = 1;
 			dir->i_ctime = CURRENT_TIME;
 		}
+        // 若当前搜索的目录项de的i节点为空，则表示找到一个还未使用的空闲目录项
+        // 或是添加的新目录项。于是更新目录的修改时间为当前时间，并从用户数据区
+        // 复制文件名到该目录项的文件名字段，置含有本目录项的相应高速缓冲块已修改
+        // 标志。返回该目录项的指针以及该高速缓冲块的指针，退出。
 		if (!de->inode) {
 			dir->i_mtime = CURRENT_TIME;
 			for (i=0; i < NAME_LEN ; i++)
@@ -285,6 +322,8 @@ static struct buffer_head * add_entry(struct m_inode * dir,
 		de++;
 		i++;
 	}
+    // 本函数执行不到这里。这也许是Linus在写这段代码时，先复制了上面的find_entry()
+    // 函数的代码，而后修改成本函数的。:-)
 	brelse(bh);
 	return NULL;
 }
@@ -295,6 +334,9 @@ static struct buffer_head * add_entry(struct m_inode * dir,
  * Getdir traverses the pathname until it hits the topmost directory.
  * It returns NULL on failure.
  */
+//// 搜寻指定路径的目录（或文件名）的i节点。
+// 参数：pathname - 路径名
+// 返回：目录或文件的i节点指针。
 static struct m_inode * get_dir(const char * pathname)
 {
 	char c;
