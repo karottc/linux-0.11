@@ -346,10 +346,20 @@ static struct m_inode * get_dir(const char * pathname)
 	int namelen,inr,idev;
 	struct dir_entry * de;
 
+    // 搜索操作会从当前任务结构中设置的根（或伪根）i节点或当前工作目录i节点
+    // 开始，因此首先需要判断进程的根i节点指针和当前工作目录i节点指针是否有效。
+    // 如果当前进程没有设定根i节点，或者该进程根i节点指向是一个空闲i节点（引用为0），
+    // 则系统出错停机。如果进程的当前工作目录i节点指针为空，或者该当前工作目录
+    // 指向的i节点是一个空闲i节点，这也是系统有问题，停机。
 	if (!current->root || !current->root->i_count)
 		panic("No root inode");
 	if (!current->pwd || !current->pwd->i_count)
 		panic("No cwd inode");
+    // 如果用户指定的路径名的第1个字符是'/'，则说明路径名是绝对路径名。则从
+    // 根i节点开始操作，否则第一个字符是其他字符，则表示给定的相对路径名。
+    // 应从进程的当前工作目录开始操作。则取进程当前工作目录的i节点。如果路径
+    // 名为空，则出错返回NULL退出。此时变量inode指向了正确的i节点 -- 进程的
+    // 根i节点或当前工作目录i节点之一。
 	if ((c=get_fs_byte(pathname))=='/') {
 		inode = current->root;
 		pathname++;
@@ -357,6 +367,12 @@ static struct m_inode * get_dir(const char * pathname)
 		inode = current->pwd;
 	else
 		return NULL;	/* empty name is bad */
+    // 然后针对路径名中的各个目录名部分和文件名进行循环出路，首先把得到的i节点
+    // 引用计数增1，表示我们正在使用。在循环处理过程中，我们先要对当前正在处理
+    // 的目录名部分（或文件名）的i节点进行有效性判断，并且把变量thisname指向
+    // 当前正在处理的目录名部分（或文件名）。如果该i节点不是目录类型的i节点，
+    // 或者没有可进入该目录的访问许可，则放回该i节点，并返回NULL退出。当然，刚
+    // 进入循环时，当前的i节点就是进程根i节点或者是当前工作目录的i节点。
 	inode->i_count++;
 	while (1) {
 		thisname = pathname;
@@ -364,19 +380,33 @@ static struct m_inode * get_dir(const char * pathname)
 			iput(inode);
 			return NULL;
 		}
+        // 每次循环我们处理路径名中一个目录名（或文件名）部分。因此在每次循环中
+        // 我们都要从路径名字符串中分离出一个目录名（或文件名）。方法是从当前路径名
+        // 指针pathname开始处搜索检测字符，知道字符是一个结尾符（NULL）或者是一
+        // 个'/'字符。此时变量namelen正好是当前处理目录名部分的长度，而变量thisname
+        // 正指向该目录名部分的开始处。此时如果字符是结尾符NULL，则表明以及你敢搜索
+        // 到路径名末尾，并已到达最后指定目录名或文件名，则返回该i节点指针退出。
+        // 注意！如果路径名中最后一个名称也是一个目录名，但其后面没有加上'/'字符，
+        // 则函数不会返回该最后目录的i节点！例如：对于路径名/usr/src/linux，该函数
+        // 将只返回src/目录名的i节点。
 		for(namelen=0;(c=get_fs_byte(pathname++))&&(c!='/');namelen++)
 			/* nothing */ ;
 		if (!c)
 			return inode;
+        // 在得到当前目录名部分（或文件名）后，我们调用查找目录项函数find_entry()在
+        // 当前处理的目录中寻找指定名称的目录项。如果没有找到，则返回该i节点，并返回
+        // NULL退出。然后在找到的目录项中取出其i节点号inr和设备号idev，释放包含该目录
+        // 项的高速缓冲块并放回该i节点。然后去节点号inr的i节点inode，并以该目录项为
+        // 当前目录继续循环处理路径名中的下一目录名部分（或文件名）。
 		if (!(bh = find_entry(&inode,thisname,namelen,&de))) {
 			iput(inode);
 			return NULL;
 		}
-		inr = de->inode;
+		inr = de->inode;                        // 当前目录名部分的i节点号
 		idev = inode->i_dev;
 		brelse(bh);
 		iput(inode);
-		if (!(inode = iget(idev,inr)))
+		if (!(inode = iget(idev,inr)))          // 取i节点内容。
 			return NULL;
 	}
 }
@@ -387,6 +417,9 @@ static struct m_inode * get_dir(const char * pathname)
  * dir_namei() returns the inode of the directory of the
  * specified name, and the name within that directory.
  */
+// 参数：pathname - 目录路径名；namelen - 路径名长度；name - 返回的最顶层目录名。
+// 返回：指定目录名最顶层目录的i节点指针和最顶层目录名称及长度。出错时返回NULL。
+// 注意！！这里"最顶层目录"是指路径名中最靠近末端的目录。
 static struct m_inode * dir_namei(const char * pathname,
 	int * namelen, const char ** name)
 {
@@ -394,6 +427,10 @@ static struct m_inode * dir_namei(const char * pathname,
 	const char * basename;
 	struct m_inode * dir;
 
+    // 首先取得指定路径名最顶层目录的i节点。然后对路径名Pathname 进行搜索检测，查出
+    // 最后一个'/'字符后面的名字字符串，计算其长度，并且返回最顶层目录的i节点指针。
+    // 注意！如果路径名最后一个字符是斜杠字符'/'，那么返回的目录名为空，并且长度为0.
+    // 但返回的i节点指针仍然指向最后一个'/'字符钱目录名的i节点。
 	if (!(dir = get_dir(pathname)))
 		return NULL;
 	basename = pathname;
@@ -412,6 +449,9 @@ static struct m_inode * dir_namei(const char * pathname,
  * Open, link etc use their own routines, but this is enough for things
  * like 'chmod' etc.
  */
+//// 取指定路径名的i节点。
+// 参数：pathname - 路径名。
+// 返回：对应的i节点。
 struct m_inode * namei(const char * pathname)
 {
 	const char * basename;
@@ -420,15 +460,26 @@ struct m_inode * namei(const char * pathname)
 	struct buffer_head * bh;
 	struct dir_entry * de;
 
+    // 首先查找指定路径的最顶层目录的目录名并得到其i节点，若不存在，则返回NULL退出。
+    // 如果返回的最顶层名字长度是0，则表示该路径名以一个目录名为最后一项。因此我们
+    // 已经找到对应目录的i节点，可以直接返回该i节点退出。
 	if (!(dir = dir_namei(pathname,&namelen,&basename)))
 		return NULL;
 	if (!namelen)			/* special case: '/usr/' etc */
 		return dir;
+    // 然后在返回的顶层目录中寻找指定文件名目录项的i节点。注意！因为如果最后也是一个
+    // 目录名，但其后没有加'/',则不会返回该目录的i节点！例如：/usr/src/linux,将只返回
+    // src/目录名的i节点。因为函数dir_namei()把不以'/'结束的最后一个名字当作一个文件名
+    // 来看待，所以这里需要单独对这种情况使用寻找目录项i节点函数find_entry()进行处理。
+    // 此时de中含有寻找到的目录项指针，而dir是包含该目录项的目录的i节点指针。
 	bh = find_entry(&dir,basename,namelen,&de);
 	if (!bh) {
 		iput(dir);
 		return NULL;
 	}
+    // 接着取该目录项的i节点号和设备号，并释放包含该目录项的高速缓冲块并返回目录i节点。
+    // 然后取对应节点号的i节点，修改其被访问时间为当前时间，并置已修改标志。最后返回
+    // 该i节点指针。
 	inr = de->inode;
 	dev = dir->i_dev;
 	brelse(bh);
@@ -446,6 +497,14 @@ struct m_inode * namei(const char * pathname)
  *
  * namei for open - this is in fact almost the whole open-routine.
  */
+//// 文件打开namei函数。
+// 参数filename是文件名，flag是打开文件标志，他可取值：O_RDONLY(只读)、O_WRONLY(只写)
+// 或O_RDWR(读写)，以及O_CREAT(创建)、O_EXCL(被创建文件必须不存在)、O_APPEND(在文件尾
+// 添加数据)等其他一些标志的组合。如果本调用创建了一个新文件，则mode就用于指定文件的
+// 许可属性。这些属性有S_IRWXU(文件宿主具有读、写和执行权限)、S_IRUSR(用户具有读文件
+// 权限)、S_IRWXG(组成员具有读、写和执行权限)等等。对于新创建的文件，这些属性只应用于
+// 将来对文件的访问，创建了只读文件的打开调用也将返回一个可读写的文件句柄。
+// 返回：成功返回0，否则返回出错码；res_inode - 返回对应文件路径名的i节点指针。
 int open_namei(const char * pathname, int flag, int mode,
 	struct m_inode ** res_inode)
 {
@@ -455,10 +514,19 @@ int open_namei(const char * pathname, int flag, int mode,
 	struct buffer_head * bh;
 	struct dir_entry * de;
 
+    // 首先对函数参数进行合理的处理。如果文件访问模式标志是只读(0)，但是文件截零标志
+    // O_TRUNC却置位了，则在文件打开标志中添加只写O_WRONLY。这样做的原因是由于截零标志
+    // O_TRUNC必须在文件可写情况下才有效。然后使用当前进程的文件访问许可屏蔽码，屏蔽掉
+    // 给定模式中的相应位，并添上对普通文件标志I_REGULAR。该标志将用于打开的文件不存在
+    // 而需要创建文件时，作为新文件的默认属性。
 	if ((flag & O_TRUNC) && !(flag & O_ACCMODE))
 		flag |= O_WRONLY;
 	mode &= 0777 & ~current->umask;
 	mode |= I_REGULAR;
+    // 然后根据指定的路径名寻找对应的i节点，以及最顶端目录名及其长度。此时如果最顶端目录
+    // 名长度为0（例如'/usr/'这种路径名的情况），那么若操作不是读写、创建和文件长度截0，
+    // 则表示是在打开一个目录名文件操作。于是直接返回该目录的i节点并返回0退出。否则说明
+    // 进程操作非法，于是放回该i节点，返回出错码。
 	if (!(dir = dir_namei(pathname,&namelen,&basename)))
 		return -ENOENT;
 	if (!namelen) {			/* special case: '/usr/' etc */
