@@ -537,6 +537,11 @@ int open_namei(const char * pathname, int flag, int mode,
 		iput(dir);
 		return -EISDIR;
 	}
+    // 接着根据上面得到的最顶层目录名的i节点dir，在其中查找取得路径名字符串中最后的文件名
+    // 对应的目录项结构de，并同时得到该目录项所在的高速缓冲区指针。如果该高速缓冲指针为NULL，
+    // 则表示没有找到对应文件名的目录项，因此只可能是创建文件操作。此时如果不是创建文件，则
+    // 放回该目录的i节点，返回出错号退出。如果用户在该目录没有写的权力，则放回该目录的i节点，
+    // 返回出错号退出。
 	bh = find_entry(&dir,basename,namelen,&de);
 	if (!bh) {
 		if (!(flag & O_CREAT)) {
@@ -547,6 +552,10 @@ int open_namei(const char * pathname, int flag, int mode,
 			iput(dir);
 			return -EACCES;
 		}
+        // 现在我们确定了是创建操作并且有写操作许可。因此我们就在目录i节点对设备上申请一个
+        // 新的i节点给路径名上指定的文件使用。若失败则放回目录的i节点，并返回没有空间出错码。
+        // 否则使用该新i节点，对其进行初始设置：置节点的用户id；对应节点访问模式；置已修改
+        // 标志。然后并在指定目录dir中添加一个新目录项。
 		inode = new_inode(dir->i_dev);
 		if (!inode) {
 			iput(dir);
@@ -556,6 +565,11 @@ int open_namei(const char * pathname, int flag, int mode,
 		inode->i_mode = mode;
 		inode->i_dirt = 1;
 		bh = add_entry(dir,basename,namelen,&de);
+        // 如果返回的应该含有新目录项的高速缓冲区指针为NULL，则表示添加目录项操作失败。于是
+        // 将该新i节点的引用计数减1，放回该i节点与目录的i节点并返回出错码退出。否则说明添加
+        // 目录项操作成功。于是我们来设置该新目录的一些初始值：置i节点号为新申请的i节点的号
+        // 码；并置高速缓冲区已修改标志。然后释放该高速缓冲区，放回目录的i节点。返回新目录
+        // 项的i节点指针，并成功退出。
 		if (!bh) {
 			inode->i_nlinks--;
 			iput(inode);
@@ -569,12 +583,17 @@ int open_namei(const char * pathname, int flag, int mode,
 		*res_inode = inode;
 		return 0;
 	}
+    // 若上面在目录中取文件名对应目录项结构的操作成功（即bh不为NULL），则说明指定打开的文件已
+    // 经存在。于是取出该目录项的i节点号和其所在设备号，并释放该高速缓冲区以及放回目录的i节点
+    // 如果此时堵在操作标志O_EXCL置位，但现在文件已经存在，则返回文件已存在出错码退出。
 	inr = de->inode;
 	dev = dir->i_dev;
 	brelse(bh);
 	iput(dir);
 	if (flag & O_EXCL)
 		return -EEXIST;
+    // 然后我们读取该目录项的i节点内容。若该i节点是一个目录i节点并且访问模式是只写或读写，或者
+    // 没有访问的许可权限，则放回该i节点，返回访问权限出错码退出。
 	if (!(inode=iget(dev,inr)))
 		return -EACCES;
 	if ((S_ISDIR(inode->i_mode) && (flag & O_ACCMODE)) ||
@@ -582,6 +601,8 @@ int open_namei(const char * pathname, int flag, int mode,
 		iput(inode);
 		return -EPERM;
 	}
+    // 接着我们更新该i节点的访问时间字段值为当前时间。如果设立了截0标志，则将该i节点的文件长度
+    // 截0.最后返回该目录项i节点的指针，并返回0（成功）。
 	inode->i_atime = CURRENT_TIME;
 	if (flag & O_TRUNC)
 		truncate(inode);
