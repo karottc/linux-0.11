@@ -610,6 +610,10 @@ int open_namei(const char * pathname, int flag, int mode,
 	return 0;
 }
 
+//// 创建一个设备特殊文件或普通文件节点(node)
+// 该函数创建名称为filename,由mode和dev指定的文件系统节点（普通文件、设备特殊文件或命名管道）
+// 参数：filename - 路径名；mode - 指定使用许可以及所创建节点的类型；dev - 设备号。
+// 返回：成功则返回0，否则返回出错码。
 int sys_mknod(const char * filename, int mode, int dev)
 {
 	const char * basename;
@@ -617,7 +621,12 @@ int sys_mknod(const char * filename, int mode, int dev)
 	struct m_inode * dir, * inode;
 	struct buffer_head * bh;
 	struct dir_entry * de;
-	
+
+    // 首先检查操作许可和参数的有效性并取路径名中顶层目录的i节点。如果不是超级用户，则返回
+    // 访问许可出错码。如果找不到对应路径名中顶层目录的i节点，则返回出错码。如果最顶端的
+    // 文件名长度为0，则说明给出的路径名最后没有指定文件名，放回该目录i节点，返回出错码退出。
+    // 如果在该目录中没有写的权限，则放回该目录的i节点，返回访问许可出错码退出。如果不是超级
+    // 用户，则返回访问许可出错码。
 	if (!suser())
 		return -EPERM;
 	if (!(dir = dir_namei(filename,&namelen,&basename)))
@@ -630,12 +639,19 @@ int sys_mknod(const char * filename, int mode, int dev)
 		iput(dir);
 		return -EPERM;
 	}
+    // 然后我们搜索一下路径名指定的文件是否已经存在。若已经存在则不能创建同名文件节点。
+    // 如果对应路径名上最后的文件名的目录项已经存在，则释放包含该目录项的缓冲区块并放回
+    // 目录的i节点，放回文件已存在的出错码退出。
 	bh = find_entry(&dir,basename,namelen,&de);
 	if (bh) {
 		brelse(bh);
 		iput(dir);
 		return -EEXIST;
 	}
+    // 否则我们就申请一个新的i节点，并设置该i节点的属性模式。如果要创建的是块设备文件或者是
+    // 字符设备文件，则令i节点的直接逻辑块指针0等于设备号。即对于设备文件来说，其i节点的
+    // i_zone[0]中存放的是该设备文件所定义设备的设备号。然后设置该i节点的修改时间、访问
+    // 时间为当前时间，并设置i节点已修改标志。
 	inode = new_inode(dir->i_dev);
 	if (!inode) {
 		iput(dir);
@@ -646,6 +662,8 @@ int sys_mknod(const char * filename, int mode, int dev)
 		inode->i_zone[0] = dev;
 	inode->i_mtime = inode->i_atime = CURRENT_TIME;
 	inode->i_dirt = 1;
+    // 接着为这个新的i节点在目录中新添加一个目录项。如果失败（包含该目录项的高速缓冲块指针为
+    // NULL），则放回目录的i节点，吧所申请的i节点引用连接计数复位，并放回该i节点，返回出错码退出。
 	bh = add_entry(dir,basename,namelen,&de);
 	if (!bh) {
 		iput(dir);
@@ -653,6 +671,8 @@ int sys_mknod(const char * filename, int mode, int dev)
 		iput(inode);
 		return -ENOSPC;
 	}
+    // 现在添加目录项操作也成功了，于是我们来设置这个目录项内容。令该目录项的i节点字段于新i节点
+    // 号，并置高速缓冲区已修改标志，放回目录和新的i节点，释放高速缓冲区，最后返回0（成功）。
 	de->inode = inode->i_num;
 	bh->b_dirt = 1;
 	iput(dir);
@@ -661,6 +681,9 @@ int sys_mknod(const char * filename, int mode, int dev)
 	return 0;
 }
 
+//// 创建一个目录
+// 参数：pathname - 路径名；mode - 目录使用的权限属性。
+// 返回：成功则返回0，否则返回出错码。
 int sys_mkdir(const char * pathname, int mode)
 {
 	const char * basename;
@@ -669,6 +692,11 @@ int sys_mkdir(const char * pathname, int mode)
 	struct buffer_head * bh, *dir_block;
 	struct dir_entry * de;
 
+    // 首先检查操作许可和参数的有效性并取路径名中顶层目录的i节点。如果不是超级用户，则
+    // 放回访问许可出错码。如果找不到对应路径名中顶层目录的i节点，则返回出错码。如果最
+    // 顶端的文件名长度为0，则说明给出的路径名最后没有指定文件名，放回该目录i节点，返回
+    // 出错码退出。如果在该目录中没有写权限，则放回该目录的i节点，返回访问许可出错码退出。
+    // 如果不是超级用户，则返回访问许可出错码。
 	if (!suser())
 		return -EPERM;
 	if (!(dir = dir_namei(pathname,&namelen,&basename)))
@@ -681,6 +709,11 @@ int sys_mkdir(const char * pathname, int mode)
 		iput(dir);
 		return -EPERM;
 	}
+    // 然后我们搜索一下路径名指定的目录名是否已经存在。若已经存在则不能创建同名目录节点。
+    // 如果对应路径名上最后的目录名的目录项已经存在，则释放包含该目录项的缓冲区块并放回
+    // 目录的i节点，返回文件已经存在的出错码退出。否则我们就申请一个新的i节点，并设置该i
+    // 节点的属性模式：置该新i节点对应的文件长度为32字节（2个目录项的大小），置节点已修改
+    // 标志，以及节点的修改时间和访问时间，2个目录项分别用于‘.’和'..'目录。
 	bh = find_entry(&dir,basename,namelen,&de);
 	if (bh) {
 		brelse(bh);
@@ -695,6 +728,9 @@ int sys_mkdir(const char * pathname, int mode)
 	inode->i_size = 32;
 	inode->i_dirt = 1;
 	inode->i_mtime = inode->i_atime = CURRENT_TIME;
+    // 接着为该新i节点申请一用于保存目录项数据的磁盘块，用于保存目录项结构信息。并令i节
+    // 点的第一个直接块指针等于该块号。如果申请失败则放回对应目录的i节点；复位新申请的i
+    // 节点连接计数；放回该新的i节点，返回没有空间出错码退出。否则置该新的i节点已修改标志。
 	if (!(inode->i_zone[0]=new_block(inode->i_dev))) {
 		iput(dir);
 		inode->i_nlinks--;
@@ -702,6 +738,9 @@ int sys_mkdir(const char * pathname, int mode)
 		return -ENOSPC;
 	}
 	inode->i_dirt = 1;
+    // 从设备上读取新申请的磁盘块（目的是吧对应块放到高速缓冲区中）。若出错，则放回对应
+    // 目录的i节点；释放申请的磁盘块；复位新申请的i节点连接计数；放回该新的i节点，返回没有
+    // 空间出错码退出。
 	if (!(dir_block=bread(inode->i_dev,inode->i_zone[0]))) {
 		iput(dir);
 		free_block(inode->i_dev,inode->i_zone[0]);
@@ -709,6 +748,11 @@ int sys_mkdir(const char * pathname, int mode)
 		iput(inode);
 		return -ERROR;
 	}
+    // 然后我们在缓冲块中建立起所创建目录文件中的2个默认的新目录项('.'和'..')结构数据。
+    // 首先令de指向存放目录项的数据块，然后置该目录项的i节点号字段等于新申请的i节点号，
+    // 名字字段等于'.'。然后de指向下一个目录项结构，并在该结构中存放上级目录的i节点号
+    // 和名字'..'。然后设置该高速缓冲块 已修改标志，并释放该缓冲块。再初始化设置新i节点
+    // 的模式字段，并置该i节点已修改标志。
 	de = (struct dir_entry *) dir_block->b_data;
 	de->inode=inode->i_num;
 	strcpy(de->name,".");
@@ -720,6 +764,9 @@ int sys_mkdir(const char * pathname, int mode)
 	brelse(dir_block);
 	inode->i_mode = I_DIRECTORY | (mode & 0777 & ~current->umask);
 	inode->i_dirt = 1;
+    // 现在我们在指定目录中新添加一个目录项，用于存放新建目录的i节点号和目录名。如果
+    // 失败(包含该目录项的高速缓冲区指针为NULL)，则放回目录的i节点；所申请的i节点引用
+    // 连接计数复位，并放回该i节点。返回出错码退出。
 	bh = add_entry(dir,basename,namelen,&de);
 	if (!bh) {
 		iput(dir);
@@ -728,6 +775,8 @@ int sys_mkdir(const char * pathname, int mode)
 		iput(inode);
 		return -ENOSPC;
 	}
+    // 最后令该新目录项的i节点字段等于新i节点号，并置高速缓冲块已修改标志，放回目录和
+    // 新的i节点，是否高速缓冲块，最后返回0(成功).
 	de->inode = inode->i_num;
 	bh->b_dirt = 1;
 	dir->i_nlinks++;
