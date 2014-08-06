@@ -888,6 +888,12 @@ int sys_rmdir(const char * name)
 		iput(dir);
 		return -EPERM;
 	}
+    // 然后根据指定目录的i节点和目录名利用函数find_entry()寻找对应目录项，并返回
+    // 包含该目录项的缓冲块指针bh、包含该目录项的目录的i节点指针dir和该目录项指针
+    // de。再根据该目录项de中的i节点号利用iget()函数得到对应的i节点inode。如果对应
+    // 路径名上最后目录名的目录项不存在，则释放包含该目录项的高速缓冲区，放回目录的
+    // i节点，返回文件已经存在出错码，并退出。如果取目录项的i节点出错，则放回目录的
+    // i节点，并释放含有目录项的高速缓冲区，返回出错号。
 	bh = find_entry(&dir,basename,namelen,&de);
 	if (!bh) {
 		iput(dir);
@@ -898,6 +904,11 @@ int sys_rmdir(const char * name)
 		brelse(bh);
 		return -EPERM;
 	}
+    // 此时我们已有包含要被删除目录项的目录i节点dir、要被删除目录项的i节点inode和要被
+    // 删除目录项指针de。下面我们通过对3个对象中信息的检查来验证删除操作的可行性。
+    // 若该目录设置了受限删除标志并且进程的有效用户ID（euid）不是root,并且进程的有效
+    // 用户id（euid）不等于该i节点的用户id，则表示当前进程没有权限删除该目录，于是放回
+    // 包含要删除目录名的目录i节点和该要删除目录的i节点，然后释放高速缓冲区，放回出错码。
 	if ((dir->i_mode & S_ISVTX) && current->euid &&
 	    inode->i_uid != current->euid) {
 		iput(dir);
@@ -905,30 +916,44 @@ int sys_rmdir(const char * name)
 		brelse(bh);
 		return -EPERM;
 	}
+    // 如果要被删除的目录项i节点的设备号不等于包含该目录项的目录的设备号，或者该被删除目录
+    // 的引用连接计数1(表示有符号链接等)，则不能删除该目录。于是释放包含要删除目录名的目录
+    // i节点和该要删除目录的i节点，释放高速缓冲块，返回出错码。
 	if (inode->i_dev != dir->i_dev || inode->i_count>1) {
 		iput(dir);
 		iput(inode);
 		brelse(bh);
 		return -EPERM;
 	}
+    // 如果要被删除目录的目录项i节点就等于包含该需删除目录的目录i节点，则表示试图删除'.'目录，
+    // 这是不允许的。于是放回包含要删除目录名的目录i节点和要删除目录的i节点。释放高速缓冲块，
+    // 放回出错码。
 	if (inode == dir) {	/* we may not delete ".", but "../dir" is ok */
 		iput(inode);
 		iput(dir);
 		brelse(bh);
 		return -EPERM;
 	}
+    // 若要被删除目录i节点的属性表明这不是一个目录，则本删除操作的前提完全不存在。于是放回
+    // 包含删除目录名的目录i节点和该要删除目录的i节点，释放高速缓冲块，放回出错码。
 	if (!S_ISDIR(inode->i_mode)) {
 		iput(inode);
 		iput(dir);
 		brelse(bh);
 		return -ENOTDIR;
 	}
+    // 若该需要被删除的目录不空，则也不能删除。于是放回包含要删除目录名的目录i节点和该要删除
+    // 目录的i节点，释放高速缓冲块，返回出错码。
 	if (!empty_dir(inode)) {
 		iput(inode);
 		iput(dir);
 		brelse(bh);
 		return -ENOTEMPTY;
 	}
+    // 对于一个空目录，其目录项链接数应该为2(连接到上层目录和本目录)。若该需被删除目录的i节点和
+    // 链接数不等于2，则显示警告信息。但删除操作仍然继续执行。于是置该需被删除目录的目录项的i节点
+    // 号字段为0，表示该目录项不再使用，并置含有该目录项的高速缓冲块已修改标志，并是否该缓冲块。
+    // 然后在置被删除目录i节点的连接 数为0(表示空闲)，并置i节点已修改标志。
 	if (inode->i_nlinks != 2)
 		printk("empty directory has nlink!=2 (%d)",inode->i_nlinks);
 	de->inode = 0;
@@ -936,6 +961,8 @@ int sys_rmdir(const char * name)
 	brelse(bh);
 	inode->i_nlinks=0;
 	inode->i_dirt=1;
+    // 再将包含被删除目录名的目录的i节点连接计数减一，修改其改变时间和修改时间为当前时间，并置该
+    // 节点已修改标志。最后放回包含要删除目录名的目录i节点和该要修改目录的i节点，返回0（表示删除成功）。
 	dir->i_nlinks--;
 	dir->i_ctime = dir->i_mtime = CURRENT_TIME;
 	dir->i_dirt=1;
