@@ -971,6 +971,11 @@ int sys_rmdir(const char * name)
 	return 0;
 }
 
+//// 删除（释放）文件名对应的目录项
+// 从文件系统删除一个名字。如果是文件的最后一个连接，并且没有进程正打开该文件，则该文件也将被
+// 删除，并释放所占用的设备空间。
+// 参数：name - 文件名（路径名）
+// 返回：成功则返回0，否则返回出错号。
 int sys_unlink(const char * name)
 {
 	const char * basename;
@@ -979,6 +984,11 @@ int sys_unlink(const char * name)
 	struct buffer_head * bh;
 	struct dir_entry * de;
 
+    // 首先检查参数的有效性并取路径名中顶层目录的i节点。如果找不到对应路径名中顶层
+    // 目录的i节点，则返回出错码.如果最顶端的文件名长度为0，则说明给出的路径名最后
+    // 没有指定文件名，放回该目录i节点，返回出错码退出。如果在该目录中没有写权限，则
+    // 放回该目录的i节点，返回访问许可出错码退出。如果找不到对应路径名顶层目录的i节点，
+    // 则返回出错码。
 	if (!(dir = dir_namei(name,&namelen,&basename)))
 		return -ENOENT;
 	if (!namelen) {
@@ -989,6 +999,12 @@ int sys_unlink(const char * name)
 		iput(dir);
 		return -EPERM;
 	}
+    // 然后根据指定目录的i节点和目录名利用函数find_entry()寻找对应目录项，
+    // 并返回包含该目录项的缓冲块指针bh、包含该目录项的目录的i节点指针dir和该目录项
+    // 指针de。再根据该目录项de中的i节点号利用iget()函数得到对应的i节点inode。如果对
+    // 应路径名上最后目录名的目录项不存在，则释放包含该目录项的高速缓冲区，放回目录的
+    // i节点，返回文件已经存在出错码，并退出。如果取自目录项的i节点出错，则放回目录的
+    // i节点，并释放含有目录项的高速缓冲区，返回出错号。
 	bh = find_entry(&dir,basename,namelen,&de);
 	if (!bh) {
 		iput(dir);
@@ -999,6 +1015,12 @@ int sys_unlink(const char * name)
 		brelse(bh);
 		return -ENOENT;
 	}
+    // 此时我们已有包含要被删除目录项的目录i节点dir、要被删除目录项的i节点inode和要被
+    // 删除目录项指针de。下面我们通过对这3个对象中信息的检查来验证删除操作的可行性。
+    // 若该目录设置了受限删除标志并且进程的有效用户id(euid)不是root，并且进程的euid
+    // 不等于该i节点的用户id，并且进程的euid也不等于目录i节点的用户id，则表示当前进程
+    // 没有权限删除该目录，于是放回包含要删除目录名的目录i节点和该要删除目录的i节点。
+    // 然后释放高速缓冲块，返回出错码。
 	if ((dir->i_mode & S_ISVTX) && !suser() &&
 	    current->euid != inode->i_uid &&
 	    current->euid != dir->i_uid) {
@@ -1007,20 +1029,29 @@ int sys_unlink(const char * name)
 		brelse(bh);
 		return -EPERM;
 	}
+    // 如果该指定文件名是一个目录，则也不能删除。放回该目录i节点和该文件名目录项的i节
+    // 点，释放包含该目录项的缓冲块，返回出错号。
 	if (S_ISDIR(inode->i_mode)) {
 		iput(inode);
 		iput(dir);
 		brelse(bh);
 		return -EPERM;
 	}
+    // 如果该i节点的连接计数值已经为0，则显示警告信息，并修正为1.
 	if (!inode->i_nlinks) {
 		printk("Deleting nonexistent file (%04x:%d), %d\n",
 			inode->i_dev,inode->i_num,inode->i_nlinks);
 		inode->i_nlinks=1;
 	}
+    // 现在我们可以删除文件名对应的目录项了，于是将该文件名目录项中的i节点号字段置为0，
+    // 表示释放该目录项，并设置包含该目录项的缓冲块已修改标志，释放该高速缓冲块。
 	de->inode = 0;
 	bh->b_dirt = 1;
 	brelse(bh);
+    // 然后把文件名对应i节点的链接数减1，置已修改标志，更新改变时间为当前时间。最后放回
+    // 该i节点和目录的i节点，返回0(成功)。如果是文件的最后一个链接，即i节点链接数减1后等
+    // 于0，并且此时没有进程正打开该文件，那么在调用iput()放回i节点时，该文件也将被删除，
+    // 并释放所占用的设备空间。
 	inode->i_nlinks--;
 	inode->i_dirt = 1;
 	inode->i_ctime = CURRENT_TIME;
