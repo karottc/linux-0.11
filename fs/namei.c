@@ -1060,6 +1060,10 @@ int sys_unlink(const char * name)
 	return 0;
 }
 
+//// 为文件建立一个文件名目录项
+// 为一个已存在的文件创建一个新链接(也称为硬链接 - hard link)
+// 参数：oldname - 原路径名；newname - 新的路径名
+// 返回：若成功则返回0，否则返回出错号。
 int sys_link(const char * oldname, const char * newname)
 {
 	struct dir_entry * de;
@@ -1068,6 +1072,9 @@ int sys_link(const char * oldname, const char * newname)
 	const char * basename;
 	int namelen;
 
+    // 首先对原文件名进行有效性验证，它应该存在并且不是一个目录名。所以我们先取得原文件
+    // 路径名对应的i节点oldname.若果为0，则表示出错，返回出错号。若果原路径名对应的是
+    // 一个目录名，则放回该i节点，也返回出错号。
 	oldinode=namei(oldname);
 	if (!oldinode)
 		return -ENOENT;
@@ -1075,6 +1082,9 @@ int sys_link(const char * oldname, const char * newname)
 		iput(oldinode);
 		return -EPERM;
 	}
+    // 然后查找新路径名的最顶层目录的i节点dir，并返回最后的文件名及其长度。如果目录的
+    // i节点没有找到，则放回原路径名的i节点，返回出错号。如果新路径名中不包括文件名，
+    // 则放回原路径名i节点和新路径名目录的i节点，返回出错号。
 	dir = dir_namei(newname,&namelen,&basename);
 	if (!dir) {
 		iput(oldinode);
@@ -1085,6 +1095,10 @@ int sys_link(const char * oldname, const char * newname)
 		iput(dir);
 		return -EPERM;
 	}
+    // 我们不能跨设备建立硬链接。因此如果新路径名顶层目录的设备号与原路径名的设备号不
+    // 一样，则放回新路径名目录的i节点和原路径名的i节点，返回出错号。另外，如果用户没
+    // 有在新目录中写的权限，则也不能建立连接，于是放回新路径名目录的i节点和原路径名
+    // 的i节点，返回出错号。
 	if (dir->i_dev != oldinode->i_dev) {
 		iput(dir);
 		iput(oldinode);
@@ -1095,6 +1109,8 @@ int sys_link(const char * oldname, const char * newname)
 		iput(oldinode);
 		return -EACCES;
 	}
+    // 现在查询该新路径名是否已经存在，如果存在则也不能建立链接。于是释放包含该已存在
+    // 目录项的高速缓冲块，放回新路径名目录的i节点和原路径名的i节点，返回出错号。
 	bh = find_entry(&dir,basename,namelen,&de);
 	if (bh) {
 		brelse(bh);
@@ -1102,6 +1118,9 @@ int sys_link(const char * oldname, const char * newname)
 		iput(oldinode);
 		return -EEXIST;
 	}
+    // 现在所有条件都满足了，于是我们在新目录中添加一个目录项。若失败则放回该目录的
+    // i节点和原路径名的i节点，返回出错号。否则初始设置该目录项的i节点号等于原路径名的
+    // i节点号，并置包含该新添加目录项的缓冲块已修改标志，释放该缓冲块，放回目录的i节点。
 	bh = add_entry(dir,basename,namelen,&de);
 	if (!bh) {
 		iput(dir);
@@ -1112,6 +1131,8 @@ int sys_link(const char * oldname, const char * newname)
 	bh->b_dirt = 1;
 	brelse(bh);
 	iput(dir);
+    // 再将原节点的链接计数加1，修改其改变时间为当前时间，并设置i节点已修改标志。最后
+    // 放回原路径名的i节点，并返回0（成功）。
 	oldinode->i_nlinks++;
 	oldinode->i_ctime = CURRENT_TIME;
 	oldinode->i_dirt = 1;
