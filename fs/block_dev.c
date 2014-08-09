@@ -66,8 +66,14 @@ int block_write(int dev, long * pos, char * buf, int count)
 	return written;
 }
 
+//// 数据块读函数 - 从指定设备和位置处读入指定长度数据到用户缓冲区中。
+// 参数：dev - 设备号；pos - 设备文件中偏移量指针；buf - 用户空间缓冲区地址；
+// count - 要传送的字节数。
+// 返回已读入字节数。若没有读入任何字节或出错，则返回出错号。
 int block_read(int dev, unsigned long * pos, char * buf, int count)
 {
+    // 首先由文件中位置pos换算成开始读写盘块的块序号block，并求出需读第1个字节在块中
+    // 的偏移位置offset.
 	int block = *pos >> BLOCK_SIZE_BITS;
 	int offset = *pos & (BLOCK_SIZE-1);
 	int chars;
@@ -75,6 +81,12 @@ int block_read(int dev, unsigned long * pos, char * buf, int count)
 	struct buffer_head * bh;
 	register char * p;
 
+    // 然后针对要读入的字节数count，循环执行以下操作，直到数据全部读入。在循环执行
+    // 过程中，先计算在当前处理的数据块中需读入的字节数。如果需要读入的字节数还不满
+    // 一块，那么就只需要读count字节。然后调用读块函数breada()读如需要的数据块，并
+    // 预读下两块数据，如果读操作出错，则返回已读字节数，如果没有读入任何字节，则
+    // 返回出错号。然后将块号递增1.为下次操作做好准备。如果缓冲块操作失败，则返回已
+    // 写字节数，如果没有读入任何字节，则返回出错号（负数）。
 	while (count>0) {
 		chars = BLOCK_SIZE-offset;
 		if (chars > count)
@@ -82,10 +94,16 @@ int block_read(int dev, unsigned long * pos, char * buf, int count)
 		if (!(bh = breada(dev,block,block+1,block+2,-1)))
 			return read?read:-EIO;
 		block++;
+        // 接着先把指针p指向读出盘块的缓冲中开始读入数据的位置处。若最后一次循环读
+        // 操作的数据不足一块，则需从块起始处读取所需字节，因此这里需预先设置offset
+        // 为零。此后将文件中偏移指针pos前移此次将要读的字节数chars,并且累加这些要读
+        // 的字节数到统计值read中。再把还需要读的计数值count减去此次要读的字节数chars。
+        // 然后我们从高速缓冲块中p指向的开始读的位置处复制chars个字节到用户缓冲区中，
+        // 同时把用户缓冲区指针前移。本次复制完后就释放该缓冲块。
 		p = offset + bh->b_data;
 		offset = 0;
 		*pos += chars;
-		read += chars;
+		read += chars;                      // 读入累计字节数
 		count -= chars;
 		while (chars-->0)
 			put_fs_byte(*(p++),buf++);
