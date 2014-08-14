@@ -64,6 +64,9 @@ int file_read(struct m_inode * inode, struct file * filp, char * buf, int count)
 	return (count-left)?(count-left):-ERROR;
 }
 
+//// 文件写函数 - 根据i节点和文件结构信息，将用户数据写入文件中。
+// 由i节点我们可以知道设备号，而由file结构可以知道文件中当前读写指针位置。buf指定
+// 用户态缓冲区的位置，count为需要写入的字节数。返回值是实际写入的字节数，或出错号。
 int file_write(struct m_inode * inode, struct file * filp, char * buf, int count)
 {
 	off_t pos;
@@ -76,20 +79,37 @@ int file_write(struct m_inode * inode, struct file * filp, char * buf, int count
  * ok, append may not work when many processes are writing at the same time
  * but so what. That way leads to madness anyway.
  */
+    // 首先确定数据写入文件的位置。如果是要向文件后添加数据，则将文件读写指针移到
+    // 文件尾部。否则就将在文件当前读写指针处写入。
 	if (filp->f_flags & O_APPEND)
 		pos = inode->i_size;
 	else
 		pos = filp->f_pos;
+    // 然后在已写入字节数i(刚开始为0)小于指定写入字节数count时，循环执行以下操作。
+    // 在循环操作过程中，我们先取文件数据块号(pos/BLOCK_SIZE)在设备上对应的逻辑
+    // 块号block。如果对应的逻辑块不存在就创建一块。如果得到的逻辑块号=0，则表示
+    // 创建失败，于是退出循环。否则我们根据该逻辑块号读取设备上的相应逻辑块，若出
+    // 错也退出循环。
 	while (i<count) {
 		if (!(block = create_block(inode,pos/BLOCK_SIZE)))
 			break;
 		if (!(bh=bread(inode->i_dev,block)))
 			break;
+        // 此时缓冲块指针bh正指向刚读入的文件数据库。现在再求出文件当前读写指针在该
+        // 数据块中的偏移值c，并将指针p指向缓冲块中开始写入数据的位置，并置该缓冲块已
+        // 修改标志。对于块中当前指针，从开始读写位置到块末共可写入c=(BLOCK_SIZE - c)
+        // 个字节。若c大于剩余还需写入的字节数(count - i)，则此次只需再写入c = (count - i)
+        // 个字节即可。
 		c = pos % BLOCK_SIZE;
 		p = c + bh->b_data;
 		bh->b_dirt = 1;
 		c = BLOCK_SIZE-c;
 		if (c > count-i) c = count-i;
+        // 在写入数据之前，我们先预先设置好下一次循环操作要读写文件中的位置。因此我们
+        // 把pos指针前移此次需写入的字节数。如果此时pos位置值超过了文件当前长度，则
+        // 修改i节点中文件长度字段，并置i节点已修改标志。然后把此次要写入的字节数c累加到
+        // 已写入字节计数值i中，供循环判断使用。接着从用户缓冲区buf中复制c个字节到告诉缓
+        // 冲块中p指向的开始位置处。复制完后就释放该缓冲块。
 		pos += c;
 		if (pos > inode->i_size) {
 			inode->i_size = pos;
@@ -100,6 +120,10 @@ int file_write(struct m_inode * inode, struct file * filp, char * buf, int count
 			*(p++) = get_fs_byte(buf++);
 		brelse(bh);
 	}
+    // 当数据已全部写入文件或者在写操作工程中发生问题时就会退出循环。此时我们更改文件修改
+    // 时间为当前时间，并调整文件读写指针。如果此次操作不是在文件尾部添加数据，则把文件
+    // 读写指针调整到当前读写位置pos处，并更改文件i节点的修改时间为当前时间。最后返回写入
+    // 的字节数，若写入字节数为0，则返回出错号-1.
 	inode->i_mtime = CURRENT_TIME;
 	if (!(filp->f_flags & O_APPEND)) {
 		filp->f_pos = pos;
