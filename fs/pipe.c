@@ -51,11 +51,19 @@ int read_pipe(struct m_inode * inode, char * buf, int count)
 	wake_up(&inode->i_wait);
 	return read;
 }
-	
+
+//// 管道写操作函数。
+// 参数inode是管道对应的i节点，buf是数据缓冲区指针，count是将写入管道的字节数。
 int write_pipe(struct m_inode * inode, char * buf, int count)
 {
 	int chars, size, written = 0;
 
+    // 如果要写入的字节数count大于0，那么我们就循环执行以下操作。在循环操作过程
+    // 中，若当前管道中没有已经满了(空闲空间size = 0),则唤醒等待该节点的进程，
+    // 通常唤醒的是读管道进程。如果已没有读管道者，即i节点引用计数值小于2，则
+    // 向当前进程发送SIGPIPE信号，并返回已写入的字节数退出；若写入0字节，则返回
+    // -1.否则让当前进程在该i节点睡眠，以等待读管道进程读取数据，从而让管道腾出
+    // 空间。宏PIPE_SIZE()、PIPE_HEAD()等定义在文件fs.h中。
 	while (count>0) {
 		while (!(size=(PAGE_SIZE-1)-PIPE_SIZE(*inode))) {
 			wake_up(&inode->i_wait);
@@ -65,6 +73,11 @@ int write_pipe(struct m_inode * inode, char * buf, int count)
 			}
 			sleep_on(&inode->i_wait);
 		}
+        // 程序执行到这里表示管道缓冲区中有可写空间size.于是我们管道头指针到缓冲区
+        // 末端空间字节数chars。写管道操作是从管道头指针处开始写的。如果chars大于还
+        // 需要写入的字节数count，则令其等于count。如果chars大于当前管道中空闲空间
+        // 长度size，则令其等于size，然后把需要写入字节数count减去此次可写入的字节数
+        // chars，并把写入字节数累驾到witten中。
 		chars = PAGE_SIZE-PIPE_HEAD(*inode);
 		if (chars > count)
 			chars = count;
@@ -72,12 +85,16 @@ int write_pipe(struct m_inode * inode, char * buf, int count)
 			chars = size;
 		count -= chars;
 		written += chars;
+        // 再令size指向管道数据头指针处，并调整当前管道数据头部指针(前移chars字节)。
+        // 若头指针超过管道末端则绕回。然后从用户缓冲区复制chars个字节到管道头指针
+        // 开始处。对于管道i节点，其i_size字段中是管道缓冲块指针。
 		size = PIPE_HEAD(*inode);
 		PIPE_HEAD(*inode) += chars;
 		PIPE_HEAD(*inode) &= (PAGE_SIZE-1);
 		while (chars-->0)
 			((char *)inode->i_size)[size++]=get_fs_byte(buf++);
 	}
+    // 当此次写管道操作结束，则唤醒等待管道的进程，返回已写入的字节数，退出。
 	wake_up(&inode->i_wait);
 	return written;
 }
