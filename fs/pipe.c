@@ -99,6 +99,10 @@ int write_pipe(struct m_inode * inode, char * buf, int count)
 	return written;
 }
 
+//// 创建管道系统调用。
+// 在fildes所指的数组中创建一对文件句柄(描述符)。这对句柄指向一管道i节点。
+// 参数：filedes - 文件句柄数组。fildes[0]用于读管道数据，fildes[1]向管道写入数据。
+// 成功时返回0，出错时返回-1.
 int sys_pipe(unsigned long * fildes)
 {
 	struct m_inode * inode;
@@ -106,6 +110,8 @@ int sys_pipe(unsigned long * fildes)
 	int fd[2];
 	int i,j;
 
+    // 首先从系统文件表中取两个空闲项(引用计数字段为0的项)，并分别设置引用计数为1。
+    // 若只有1个空闲项，则释放该项(引用计数复位).若没有找到两个空闲项，则返回-1.
 	j=0;
 	for(i=0;j<2 && i<NR_FILE;i++)
 		if (!file_table[i].f_count)
@@ -114,6 +120,10 @@ int sys_pipe(unsigned long * fildes)
 		f[0]->f_count=0;
 	if (j<2)
 		return -1;
+    // 针对上面取得的两个文件表结构项，分别分配一文件句柄号，并使用进程文件结构指针
+    // 数组的两项分别指向这两个文件结构。而文件句柄即是该数组的索引号。类似的，如果
+    // 只有一个空闲文件句柄，则释放该句柄(置空相应数组项)。如果没有找到两个空闲句柄，
+    // 则释放上面获取的两个文件结构项(复位引用计数值)，并返回-1.
 	j=0;
 	for(i=0;j<2 && i<NR_OPEN;i++)
 		if (!current->filp[i]) {
@@ -126,12 +136,17 @@ int sys_pipe(unsigned long * fildes)
 		f[0]->f_count=f[1]->f_count=0;
 		return -1;
 	}
+    // 然后利用函数get_pipe_inode()申请一个管道使用的i节点，并为管道分配一页内存作为
+    // 缓冲区。如果不成功，则相应释放两个文件句柄和文件结构项，并返回-1.
 	if (!(inode=get_pipe_inode())) {
 		current->filp[fd[0]] =
 			current->filp[fd[1]] = NULL;
 		f[0]->f_count = f[1]->f_count = 0;
 		return -1;
 	}
+    // 如果管道i节点申请成功，则对两个文件结构进行初始化操作，让他们都指向同一个管道
+    // i节点，并把读写指针都置零。第1个文件结构的文件模式置为读，第2个文件结构的文件
+    // 模式置为写。最后将文件句柄数组复制到对应的用户空间数组中，成功返回0，退出。
 	f[0]->f_inode = f[1]->f_inode = inode;
 	f[0]->f_pos = f[1]->f_pos = 0;
 	f[0]->f_mode = 1;		/* read */
