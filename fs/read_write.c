@@ -12,7 +12,9 @@
 #include <linux/sched.h>
 #include <asm/segment.h>
 
+// 字符设备读写函数。
 extern int rw_char(int rw,int dev, char * buf, int count, off_t * pos);
+// 读管道操作函数。
 extern int read_pipe(struct m_inode * inode, char * buf, int count);
 extern int write_pipe(struct m_inode * inode, char * buf, int count);
 extern int block_read(int dev, off_t * pos, char * buf, int count);
