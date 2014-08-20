@@ -16,31 +16,43 @@
 extern int tty_read(unsigned minor,char * buf,int count);
 extern int tty_write(unsigned minor,char * buf,int count);
 
+// 定义字符设备读写函数指针类型
 typedef int (*crw_ptr)(int rw,unsigned minor,char * buf,int count,off_t * pos);
 
+//// 串口终端读写操作函数。
+// 参数：rw - 读写命令；minor - 终端子设备号；buf - 缓冲区；count - 读写字节数
+// pos - 读写操作当前指针，对于中断操作，该指针无用
+// 返回：实际读写的字节数。若失败则返回出错码。
 static int rw_ttyx(int rw,unsigned minor,char * buf,int count,off_t * pos)
 {
 	return ((rw==READ)?tty_read(minor,buf,count):
 		tty_write(minor,buf,count));
 }
 
+//// 终端读写操作函数。
+// 同rw_ttyx，只是增加了对进程是否有控制终端的检测。
 static int rw_tty(int rw,unsigned minor,char * buf,int count, off_t * pos)
 {
+    // 若进程没有控制终端，则返回出错号。否则调用终端读写函数rw_ttyx()，
+    // 并返回实际读写字节数。
 	if (current->tty<0)
 		return -EPERM;
 	return rw_ttyx(rw,current->tty,buf,count,pos);
 }
 
+// 内存数据读写
 static int rw_ram(int rw,char * buf, int count, off_t *pos)
 {
 	return -EIO;
 }
 
+// 物理内存数据读写
 static int rw_mem(int rw,char * buf, int count, off_t * pos)
 {
 	return -EIO;
 }
 
+// 内核虚拟内存数据读写
 static int rw_kmem(int rw,char * buf, int count, off_t * pos)
 {
 	return -EIO;
