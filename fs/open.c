@@ -16,23 +16,38 @@
 #include <linux/kernel.h>
 #include <asm/segment.h>
 
+//// 取文件系统信息。
+// 参数dev是含有已安装文件系统的设备号。ubuf是一个结构缓冲区指针，用户存放系统
+// 返回的文件系统信息。该系统调用用于返回已安装文件系统的统计信息。成功时返回
+// 0，并且ubuf指向的ustate结构被添入文件系统总空闲块数和空闲i节点数。ustat结构
+// 定义在types.h中。
 int sys_ustat(int dev, struct ustat * ubuf)
 {
 	return -ENOSYS;
 }
 
+//// 设置文件访问和修改时间
+// 参数filename是文件名，times是访问和修改时间结构指针。
+// 如果times指针不为NULL，则取utimebuf结构中的时间信息来设置文件的访问和修改时
+// 间。如果times指针是NULL,则取系统当前时间来设置指定文件的访问和修改时间域。
 int sys_utime(char * filename, struct utimbuf * times)
 {
 	struct m_inode * inode;
 	long actime,modtime;
 
+    // 文件的时间信息保存在其i节点中。因此我们首先根据文件名取得对应的i节点。
+    // 如果没有找到，则返回出错码。
 	if (!(inode=namei(filename)))
 		return -ENOENT;
+    // 如果提供的访问和修改时间结构指针times不为NULL，则从结构中读取用户设置的
+    // 时间值。否则就用系统当前时间来设置文件的访问和修改时间。
 	if (times) {
 		actime = get_fs_long((unsigned long *) &times->actime);
 		modtime = get_fs_long((unsigned long *) &times->modtime);
 	} else
 		actime = modtime = CURRENT_TIME;
+    // 然后修改i节点中的访问时间字段和修改时间字段。再设置i节点已修改标志，放回
+    // 该i节点并返回0.
 	inode->i_atime = actime;
 	inode->i_mtime = modtime;
 	inode->i_dirt = 1;
