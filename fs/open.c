@@ -59,20 +59,35 @@ int sys_utime(char * filename, struct utimbuf * times)
  * XXX should we use the real or effective uid?  BSD uses the real uid,
  * so as to make this call useful to setuid programs.
  */
+//// 检查文件的访问权限。
+// 参数filename是文件名，mode是检查的访问属性，它有3个有效bit位组成：R_OK(值4)、
+// W_OK(2)、X_OK(1)和F_OK(0)组成，分别表示检测文件是否可读、可写、可执行和文件
+// 是否存在。如果访问允许的话，则返回0，否则返回出错码。
 int sys_access(const char * filename,int mode)
 {
 	struct m_inode * inode;
 	int res, i_mode;
 
+    // 文件的访问权限信息也同样保存在文件的i节点结构中，因此我们要先取得对应文
+    // 件名的i节点。检测的访问属性mode由低3位组成，因此需要与上八进制007来清除
+    // 所有高bit位。如果文件名对应的i节点不存在，则返回没有许可权限出错码。若i
+    // 节点存在，则取i节点中文件属性码，并放回该i节点。
 	mode &= 0007;
 	if (!(inode=namei(filename)))
 		return -EACCES;
 	i_mode = res = inode->i_mode & 0777;
-	iput(inode);
+	iput(inode);  // 这句应该房子下面else if之后。
+    // 如果当前进程用户是该文件的宿主，则取文件宿主属性。否则如果当前进程用户与
+    // 该文件宿主同属一组，则取文件组属性。否则，此时res最低3 bit是其他人访问
+    // 的许可属性。
+    // [[?? 这里应 res >> 3 ??]]
 	if (current->uid == inode->i_uid)
 		res >>= 6;
 	else if (current->gid == inode->i_gid)
 		res >>= 6;
+    // 此时res的最低3 bit是根据当前进程用户与文件的关系选择出来的访问属性位。
+    // 现在我们来判断这3 bit.如果文件属性具有参数所查询的属性位mode，则访问许
+    // 可，返回0.
 	if ((res & 0007 & mode) == mode)
 		return 0;
 	/*
@@ -81,22 +96,31 @@ int sys_access(const char * filename,int mode)
 	 * and then calling suser() routine.  If we do call the
 	 * suser() routine, it needs to be called last. 
 	 */
+    // 如果当前用户ID为0(超级用户)并且屏蔽码执行位是0或者文件可以被任何人执行、
+    // 搜索，则返回0，否则返回出错码。
 	if ((!current->uid) &&
 	    (!(mode & 1) || (i_mode & 0111)))
 		return 0;
 	return -EACCES;
 }
 
+//// 改变当前工作目录系统调用
+// 参数filename是目录名
+// 操作成功则返回0，否则返回出错码
 int sys_chdir(const char * filename)
 {
 	struct m_inode * inode;
 
+    // 改变当前工作目录就是要求把 进程任务结构的当前工作目录字段指向给定目录名
+    // 的i节点。因此我们首先取目录名的i节点。如果目录名对应的i节点不存在，则返
+    // 回出错码。如果该i节点不是一个目录i节点，则放回该i节点，并返回出错码。
 	if (!(inode = namei(filename)))
 		return -ENOENT;
 	if (!S_ISDIR(inode->i_mode)) {
 		iput(inode);
 		return -ENOTDIR;
 	}
+    // 然后释放进程原工作目录i节点，并使其指向新设置的工作目录i节点，返回0.
 	iput(current->pwd);
 	current->pwd = inode;
 	return (0);
