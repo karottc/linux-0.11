@@ -211,24 +211,49 @@ int sys_open(const char * filename,int flag,int mode)
 	struct file * f;
 	int i,fd;
 
+    // 首先对参数进行处理。将用户设置的文件模式和屏蔽码相与，产生许可的文件模式。
+    // 为了为打开文件建立一个文件句柄，需要搜索进程结构中文件结构指针数组，以查
+    // 找一个空闲项。空闲项的索引号fd即是文件句柄值。若已经没有空闲项，则返回出错码。
 	mode &= 0777 & ~current->umask;
 	for(fd=0 ; fd<NR_OPEN ; fd++)
 		if (!current->filp[fd])
 			break;
 	if (fd>=NR_OPEN)
 		return -EINVAL;
+    // 然后我们设置当前进程的执行时关闭文件句柄(close_on_exec)位图，复位对应的
+    // bit位。close_on_exec是一个进程所有文件句柄的bit标志。每个bit位代表一个打
+    // 开着的文件描述符，用于确定在调用系统调用execve()时需要关闭的文件句柄。当
+    // 程序使用fork()函数创建了一个子进程时，通常会在该子进程中调用execve()函数
+    // 加载执行另一个新程序。此时子进程中开始执行新程序。若一个文件句柄在close_on_exec
+    // 中的对应bit位被置位，那么在执行execve()时应对应文件句柄将被关闭，否则该
+    // 文件句柄将始终处于打开状态。当打开一个文件时，默认情况下文件句柄在子进程
+    // 中也处于打开状态。因此这里要复位对应bit位。
 	current->close_on_exec &= ~(1<<fd);
+    // 然后为打开文件在文件表中寻找一个空闲结构项。我们令f指向文件表数组开始处。
+    // 搜索空闲文件结构项(引用计数为0的项)，若已经没有空闲文件表结构项，则返回
+    // 出错码。
 	f=0+file_table;
 	for (i=0 ; i<NR_FILE ; i++,f++)
 		if (!f->f_count) break;
 	if (i>=NR_FILE)
 		return -EINVAL;
+    // 此时我们让进程对应文件句柄fd的文件结构指针指向搜索到的文件结构，并令文件
+    // 引用计数递增1。然后调用函数open_namei()执行打开操作，若返回值小于0，则说
+    // 明出错，于是释放刚申请到的文件结构，返回出错码i。若文件打开操作成功，则
+    // inode是已打开文件的i节点指针。
 	(current->filp[fd]=f)->f_count++;
 	if ((i=open_namei(filename,flag,mode,&inode))<0) {
 		current->filp[fd]=NULL;
 		f->f_count=0;
 		return i;
 	}
+    // 根据已打开文件的i节点的属性字段，我们可以知道文件的具体类型。对于不同类
+    // 型的文件，我们需要操作一些特别的处理。如果打开的是字符设备文件，那么对于
+    // 主设备号是4的字符文件(例如/dev/tty0)，如果当前进程是组首领并且当前进程的
+    // tty字段小于0(没有终端)，则设置当前进程的tty号为该i节点的子设备号，并设置
+    // 当前进程tty对应的tty表项的父进程组号等于当前进程的进程组号。表示为该进程
+    // 组（会话期）分配控制终端。对于主设备号是5的字符文件(/dev/tty)，若当前进
+    // 程没有tty，则说明出错，于是放回i节点和申请到的文件结构，返回出错码(无许可)。
 /* ttys are somewhat special (ttyxx major==4, tty major==5) */
 	if (S_ISCHR(inode->i_mode)) {
 		if (MAJOR(inode->i_zone[0])==4) {
@@ -245,8 +270,13 @@ int sys_open(const char * filename,int flag,int mode)
 			}
 	}
 /* Likewise with block-devices: check for floppy_change */
+    // 如果打开的是块设备文件，则检查盘片是否更换过。若更换过则需要让高速缓冲区
+    // 中该设备的所有缓冲块失败。
 	if (S_ISBLK(inode->i_mode))
 		check_disk_change(inode->i_zone[0]);
+    // 现在我们初始化打开文件的文件结构。设置文件结构属性和标志，置句柄引用计数
+    // 为1，并设置i节点字段为打开文件的i节点，初始化文件读写指针为0.最后返回文
+    // 件句柄号。
 	f->f_mode = inode->i_mode;
 	f->f_flags = flag;
 	f->f_count = 1;
@@ -255,20 +285,34 @@ int sys_open(const char * filename,int flag,int mode)
 	return (fd);
 }
 
+//// 创建文件系统调用
+// 参数pathname是路径名，mode与上面的sys_open()函数相同。
+// 成功则返回文件句柄，否则返回出错码。
 int sys_creat(const char * pathname, int mode)
 {
 	return sys_open(pathname, O_CREAT | O_TRUNC, mode);
 }
 
+//// 关闭文件系统调用
+// 参数fd是文件句柄。
+// 成功则返回0，否则返回出错码。
 int sys_close(unsigned int fd)
 {	
 	struct file * filp;
 
+    // 首先检查参数有效性。若给出的文件句柄值大于程序同时能打开的文件数NR_OPEN，
+    // 则返回出错码。然后复位进程的执行关闭文件句柄位图对应位。若该文件句柄对应
+    // 的文件结构指针是NULL，则返回出错码。
 	if (fd >= NR_OPEN)
 		return -EINVAL;
 	current->close_on_exec &= ~(1<<fd);
 	if (!(filp = current->filp[fd]))
 		return -EINVAL;
+    // 现在置该文件句柄的文件结构指针为NULL。若在关闭文件之前，对应文件结构中的
+    // 句柄引用计数已经为0，则说明内核出错，停机。否则将对应的文件结构引用计数
+    // 减1.此时如果它还不为0，则说明有其他进程正在使用该文件，于是返回0（成功）。
+    // 如果引用计数等于0，说明该文件已经没有进程引用，该文件结构已变为空闲。则
+    // 释放该文件i节点，返回0.
 	current->filp[fd] = NULL;
 	if (filp->f_count == 0)
 		panic("Close: file count is 0");
