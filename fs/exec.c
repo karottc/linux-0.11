@@ -43,11 +43,22 @@ extern int sys_close(int fd);
  * memory and creates the pointer tables from them, and puts their
  * addresses on the "stack", returning the new stack pointer value.
  */
+//// 在新任务栈中创建参数和环境变量指针表。
+// 参数：p - 数据段中参数和环境信息偏移指针；argc - 参数个数；envc - 环境变量
+// 个数。
+// 返回：栈指针值。
 static unsigned long * create_tables(char * p,int argc,int envc)
 {
 	unsigned long *argv,*envp;
 	unsigned long * sp;
 
+    // 栈指针是以4 byte为边界进行寻址的，因此这里需让sp为4的整数倍值。此时sp位
+    // 于参数环境表的末端。然后我们先把sp向下(低地址方向)移动，在栈中空出环境变
+    // 量指针占用空间，并让环境变量指针envp指向该处。多空出的一个位置用于在最后
+    // 存放一个NULL值。下面指针加1，sp将递增指针宽度字节值(4字节)。再把sp向下移
+    // 动，空出命令行参数指针占用的空间，并让argv指针指向该处。同样，多空出的一
+    // 个位置用于存放一个NULL值。此时sp指向参数指针块的起始处，我们将环境参数块
+    // 指针envp和命令行参数块指针以及命令行参数个数值分别压入栈中。
 	sp = (unsigned long *) (0xfffffffc & (unsigned long) p);
 	sp -= envc+1;
 	envp = sp;
@@ -56,6 +67,8 @@ static unsigned long * create_tables(char * p,int argc,int envc)
 	put_fs_long((unsigned long)envp,--sp);
 	put_fs_long((unsigned long)argv,--sp);
 	put_fs_long((unsigned long)argc,--sp);
+    // 再将命令行各参数指针和环境变量各指针分别放入前面空出来的相应地方，最后分
+    // 别放置一个NULL指针。
 	while (argc-->0) {
 		put_fs_long((unsigned long) p,argv++);
 		while (get_fs_byte(p++)) /* nothing */ ;
