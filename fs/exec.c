@@ -85,6 +85,9 @@ static unsigned long * create_tables(char * p,int argc,int envc)
 /*
  * count() counts the number of arguments/envelopes
  */
+//// 计算参数个数
+// 参数：argv - 参数指针数组，最后一个指针项是NULL
+// 统计参数指针数组中指针的个数。关于函数参数传递指针的指针的作用，在sched.c中。
 static int count(char ** argv)
 {
 	int i=0;
@@ -114,6 +117,15 @@ static int count(char ** argv)
  * it is expensive to load a segment register, we try to avoid calling
  * set_fs() unless we absolutely have to.
  */
+//// 复制指定个数的参数字符串到参数和环境空间中。
+// 参数：argc - 欲添加参数个数; argv - 参数指针数组；page - 参数和环境空间页面
+// 指针数组。p - 参数表空间中偏移指针，始终指向已复制串的头部；from_kmem - 字符
+// 串来源标志。在 do_execve()函数中，p初始化为指向参数表(128kb)空间的最后一个长
+// 字处，参数字符串是以堆栈操作方式逆向往其中复制存放的。因此p指针会随着复制信
+// 息的增加而逐渐减小，并始终指向参数字符串的头部。字符串来源标志from_kmem应该
+// 是TYT为了给execve()增添执行脚本文件的功能而新加的参数。当没有运行脚本文件的
+// 功能时，所有参数字符串都在用户数据空间中。
+// 返回：参数和环境空间当前头部指针。若出错则返回0.
 static unsigned long copy_strings(int argc,char ** argv,unsigned long *page,
 		unsigned long p, int from_kmem)
 {
@@ -121,6 +133,9 @@ static unsigned long copy_strings(int argc,char ** argv,unsigned long *page,
 	int len, offset = 0;
 	unsigned long old_fs, new_fs;
 
+    // 首先取当前段寄存器ds（指向内核数据段）和fs值，分别保存到变量new_fs和
+    // old_fs中。如果字符串和字符串数组(指针)来字内核空间，则设置fs段寄存器指向
+    // 内核数据段。
 	if (!p)
 		return 0;	/* bullet-proofing */
 	new_fs = get_ds();
@@ -128,12 +143,20 @@ static unsigned long copy_strings(int argc,char ** argv,unsigned long *page,
 	if (from_kmem==2)
 		set_fs(new_fs);
 	while (argc-- > 0) {
+        // 首先取需要复制的当前字符串指针。如果字符串在用户空间而字符串数组（字
+        // 符串指针）在内核空间，则设置fs段寄存器指向内核数据段(ds).并在内核数
+        // 据空间中取了字符串指针tmp之后就立刻回复fs段寄存器原值(fs再指回用户空
+        // 间)。否则不用修改fs值而直接从用户空间取字符串指针到tmp.
 		if (from_kmem == 1)
 			set_fs(new_fs);
 		if (!(tmp = (char *)get_fs_long(((unsigned long *)argv)+argc)))
 			panic("argc is wrong");
 		if (from_kmem == 1)
 			set_fs(old_fs);
+        // 然后从用户空间取该字符串，并计算该参数字符串长度len.此后tmp指向该字
+        // 符串末端。如果该字段字符串长度超过此时参数和环境空间中还剩余的空闲长
+        // 度，则空间不够了。于是回复fs段寄存器值(如果被改变的话)并返回0.不过因
+        // 为参数和环境空间留有128KB，所以通常不可能发生这种情况。
 		len=0;		/* remember zero-padding */
 		do {
 			len++;
@@ -142,23 +165,39 @@ static unsigned long copy_strings(int argc,char ** argv,unsigned long *page,
 			set_fs(old_fs);
 			return 0;
 		}
+        // 接着我们逆向逐个字符地把字符串复制到参数和环境空间末端处。在循环复制
+        // 字符串的字符过程中，我们首先要判断参数和环境空间相应位置是否已经有内
+        // 存页面。如果还没有就先为其申请1页内存页面。偏移量offset被用作为在一
+        // 个页面中的当前指针偏移量。因为刚开始执行本函数时，偏移量offset被初始
+        // 化为0，所以(offset-1<0)肯定成立而使得offset重新被设置为当前p指针在页
+        // 面返回内的偏移值。
 		while (len) {
 			--p; --tmp; --len;
 			if (--offset < 0) {
 				offset = p % PAGE_SIZE;
+                // 如果字符串和字符串数组都在内核空间中，那么为了从内核数据空间
+                // 复制字符串内容，下面会把fs设置为指向内核数据段。
 				if (from_kmem==2)
 					set_fs(old_fs);
+                // 如果当前偏移量p所在的串空间页面指针数组项page[p/PAGE_SIZE]==
+                // 0,表示此时p指针所处的空间内存页面还不存在，则需申请一空闲内
+                // 存页，并将该页面指针填入指针数组，同时也使页面指针pag 指向该
+                // 新页面，若申请不到空闲页面则返回0.
 				if (!(pag = (char *) page[p/PAGE_SIZE]) &&
 				    !(pag = (char *) page[p/PAGE_SIZE] =
 				      (unsigned long *) get_free_page())) 
 					return 0;
+                // 如果字符串在内核空间，则设置fs段寄存器指向内核数据段(ds)。
 				if (from_kmem==2)
 					set_fs(new_fs);
 
 			}
+            // 然后从fs段中复制字符串的1字节到参数和环境空间内存页面pag的offset出。
 			*(pag + offset) = get_fs_byte(tmp);
 		}
 	}
+    // 如果字符串和字符串数组在内核空间，则恢复fs段寄存器原值。最后，返回参数和
+    // 环境空间已复制参数的头部偏移值。
 	if (from_kmem==2)
 		set_fs(old_fs);
 	return p;
